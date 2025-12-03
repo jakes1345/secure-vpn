@@ -94,3 +94,7 @@ test_*.py
 *.exe
 *.dmg
 *.pkg
+
+# Documentation files (not needed on GitHub)
+*.md
+!README.md
