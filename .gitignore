@@ -85,3 +85,12 @@ id_rsa*
 # Test files
 test_*.py
 *_test.py
+
+# Large binary files
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+*.exe
+*.dmg
+*.pkg
