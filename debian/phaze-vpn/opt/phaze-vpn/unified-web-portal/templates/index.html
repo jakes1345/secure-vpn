@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - PhazeVPN Platform{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="dashboard-header">
+        <h1>Welcome to PhazeVPN Platform</h1>
+        <p class="subtitle">Secure VPN • Private Email • Productivity Suite</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <!-- Email Stats -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">📧</span>
+                <h3>Email</h3>
+            </div>
+            <div class="card-content">
+                <div class="stat">
+                    <div class="stat-value">5</div>
+                    <div class="stat-label">New Messages</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">Total Unread</div>
+                </div>
+            </div>
+            <a href="/email" class="card-action">View Inbox →</a>
+        </div>
+
+        <!-- Files Stats -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">📁</span>
+                <h3>Files</h3>
+            </div>
+            <div class="card-content">
+                <div class="stat">
+                    <div class="stat-value">2.4 GB</div>
+                    <div class="stat-label">Storage Used</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">127</div>
+                    <div class="stat-label">Total Files</div>
+                </div>
+            </div>
+            <a href="/files" class="card-action">View Files →</a>
+        </div>
+
+        <!-- Productivity Stats -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">📝</span>
+                <h3>Productivity</h3>
+            </div>
+            <div class="card-content">
+                <div class="stat">
+                    <div class="stat-value">8</div>
+                    <div class="stat-label">Documents</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Shared</div>
+                </div>
+            </div>
+            <a href="/productivity" class="card-action">View Docs →</a>
+        </div>
+
+        <!-- Calendar Stats -->
+        <div class="dashboard-card">
+            <div class="card-header">
+                <span class="card-icon">📅</span>
+                <h3>Calendar</h3>
+            </div>
+            <div class="card-content">
+                <div class="stat">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Today's Events</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">12</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+            </div>
+            <a href="/calendar" class="card-action">View Calendar →</a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <div class="actions-grid">
+            <button class="action-btn" onclick="window.location.href='/email'">
+                <span class="action-icon">✉️</span>
+                <span class="action-label">Compose Email</span>
+            </button>
+            <button class="action-btn" onclick="window.location.href='/files'">
+                <span class="action-icon">📤</span>
+                <span class="action-label">Upload File</span>
+            </button>
+            <button class="action-btn" onclick="window.location.href='/productivity'">
+                <span class="action-icon">📄</span>
+                <span class="action-label">New Document</span>
+            </button>
+            <button class="action-btn" onclick="window.location.href='/calendar'">
+                <span class="action-icon">➕</span>
+                <span class="action-label">New Event</span>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+# ============================================
+# RESTART SERVICES AFTER UPDATE
+# Run this on the VPS
+# ============================================
+
+echo "=========================================="
+echo "🔄 RESTARTING SERVICES AFTER UPDATE"
+echo "=========================================="
+echo ""
+
+echo "1️⃣ Checking OpenVPN..."
+OPENVPN_PID=$(pgrep -x openvpn)
+if [ -n "$OPENVPN_PID" ]; then
+    echo "   OpenVPN is running (PID: $OPENVPN_PID)"
+    echo "   Restarting OpenVPN to load new config..."
+    pkill -x openvpn
+    sleep 2
+    cd /opt/secure-vpn
+    nohup openvpn --config config/server.conf --log logs/server.log --daemon > /dev/null 2>&1
+    sleep 2
+    if pgrep -x openvpn > /dev/null; then
+        echo "   ✅ OpenVPN restarted successfully"
+    else
+        echo "   ❌ OpenVPN failed to restart - check logs"
+    fi
+else
+    echo "   ⚠️  OpenVPN not running - starting it..."
+    cd /opt/secure-vpn
+    nohup openvpn --config config/server.conf --log logs/server.log --daemon > /dev/null 2>&1
+    sleep 2
+    if pgrep -x openvpn > /dev/null; then
+        echo "   ✅ OpenVPN started"
+    else
+        echo "   ❌ OpenVPN failed to start - check config"
+    fi
+fi
+echo ""
+
+echo "2️⃣ Checking Web Portal..."
+WEB_PORTAL_PID=$(pgrep -f 'app.py')
+if [ -n "$WEB_PORTAL_PID" ]; then
+    echo "   Web portal is running (PID: $WEB_PORTAL_PID)"
+    echo "   Restarting web portal..."
+    pkill -f 'app.py'
+    sleep 2
+    cd /opt/secure-vpn/web-portal
+    nohup python3 app.py > /dev/null 2>&1 &
+    sleep 2
+    if pgrep -f 'app.py' > /dev/null; then
+        echo "   ✅ Web portal restarted successfully"
+    else
+        echo "   ❌ Web portal failed to restart"
+    fi
+else
+    echo "   ⚠️  Web portal not running - starting it..."
+    cd /opt/secure-vpn/web-portal
+    nohup python3 app.py > /dev/null 2>&1 &
+    sleep 2
+    if pgrep -f 'app.py' > /dev/null; then
+        echo "   ✅ Web portal started"
+    else
+        echo "   ❌ Web portal failed to start"
+    fi
+fi
+echo ""
+
+echo "3️⃣ Verifying Services..."
+echo "   OpenVPN: $(pgrep -x openvpn >/dev/null && echo '✅ Running' || echo '❌ Not running')"
+echo "   Web Portal: $(pgrep -f 'app.py' >/dev/null && echo '✅ Running' || echo '❌ Not running')"
+echo "   OpenVPN Port: $(ss -ulnp 2>/dev/null | grep -q 1194 && echo '✅ Listening' || echo '❌ Not listening')"
+echo "   Web Portal Port: $(ss -tlnp 2>/dev/null | grep -q 8081 && echo '✅ Listening' || echo '❌ Not listening')"
+echo ""
+
+echo "=========================================="
+echo "✅ SERVICES RESTARTED"
+echo "=========================================="
+echo ""
+

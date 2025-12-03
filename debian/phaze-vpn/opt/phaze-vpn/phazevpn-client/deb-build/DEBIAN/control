@@ -1,0 +1,13 @@
+Package: phazevpn-client
+Version: 2.0.0
+Architecture: amd64
+Maintainer: PhazeVPN <support@phazevpn.duckdns.org>
+Description: PhazeVPN Unified Client & Dashboard
+ All-in-one VPN client with integrated dashboard, Tor support,
+ and all VPN modes (Normal, Semi Ghost, Full Ghost, Tor Ghost).
+ Modern UI matching website design. Automatic updates via APT.
+Depends: python3 (>= 3.8), python3-requests, python3-tk
+Recommends: tor, network-manager-openvpn
+Priority: optional
+Section: net
+Homepage: https://phazevpn.duckdns.org

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Login - PhazeVPN{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="max-width: 450px; margin: 4rem auto; padding: 2rem;">
+        <div class="card">
+            <div class="card-header" style="text-align: center; background: linear-gradient(135deg, #4a9eff 0%, #10b981 100%); padding: 2rem;">
+                <img src="{{ url_for('static', filename='images/logo-optimized.png') }}?v={{ range(10000, 99999) | random }}" alt="PhazeVPN" style="height: 80px; margin-bottom: 1rem; filter: brightness(0) invert(1);" onerror="this.style.display='none';">
+                <h1 style="color: white; margin: 0;">PhazeVPN</h1>
+                <p style="color: rgba(255,255,255,0.9); margin-top: 0.5rem; font-size: 0.9rem;">
+                    "Just Phaze Right On By - Nothing Will Notice You At All"
+                </p>
+            </div>
+            
+            <div class="card-body">
+                {% if error %}
+                <div style="background: rgba(244, 67, 54, 0.2); border: 1px solid #f44336; color: #ff6b6b; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    ⚠️ {{ error }}
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="username" style="display: block; margin-bottom: 0.5rem; color: #aaa; font-weight: 500;">Username</label>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            name="username" 
+                            required 
+                            autofocus
+                            style="width: 100%; padding: 0.875rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 1rem; transition: all 0.3s;"
+                            onfocus="this.style.borderColor='#4a9eff'; this.style.background='rgba(74, 158, 255, 0.1)'"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)'"
+                        >
+                    </div>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <label for="password" style="display: block; margin-bottom: 0.5rem; color: #aaa; font-weight: 500;">Password</label>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            required
+                            style="width: 100%; padding: 0.875rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 1rem; transition: all 0.3s;"
+                            onfocus="this.style.borderColor='#4a9eff'; this.style.background='rgba(74, 158, 255, 0.1)'"
+                            onblur="this.style.borderColor='rgba(255,255,255,0.1)'; this.style.background='rgba(255,255,255,0.05)'"
+                        >
+                    </div>
+                    
+                    <button 
+                        type="submit" 
+                        class="btn btn-primary" 
+                        style="width: 100%; padding: 1rem; font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;"
+                    >
+                        🔐 Login to PhazeVPN
+                    </button>
+                </form>
+                
+                <div style="text-align: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <p style="color: #aaa; margin-bottom: 0.75rem;">
+                        Don't have an account?
+                    </p>
+                    <a href="{{ url_for('signup') }}" class="btn btn-secondary" style="width: 100%; margin-bottom: 0.75rem;">
+                        ✨ Sign Up Free
+                    </a>
+                    
+                    <a href="{{ url_for('forgot_password') }}" style="color: #4a9eff; text-decoration: none; font-size: 0.9rem;">
+                        Forgot password? →
+                    </a>
+                    
+                    <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <p style="color: #aaa; font-size: 0.85rem; margin-bottom: 0.5rem;">Need to resend verification email?</p>
+                        <form method="POST" action="{{ url_for('resend_verification') }}" style="display: flex; gap: 0.5rem;">
+                            <input type="text" name="username" placeholder="Username" required style="flex: 1; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; font-size: 0.9rem;">
+                            <input type="email" name="email" placeholder="Email" required style="flex: 1; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; color: #fff; font-size: 0.9rem;">
+                            <button type="submit" style="padding: 0.5rem 1rem; background: #4a9eff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Resend</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('guide') }}" style="color: #aaa; text-decoration: none; font-size: 0.9rem;">
+                📖 Need help? View setup guide →
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

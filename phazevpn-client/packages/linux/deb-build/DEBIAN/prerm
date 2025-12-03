@@ -1,0 +1,3 @@
+#!/bin/bash
+# Cleanup before removal
+exit 0

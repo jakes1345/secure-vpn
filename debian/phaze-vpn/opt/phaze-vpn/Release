@@ -1,0 +1,7 @@
+Origin: PhazeVPN Local Repository
+Label: PhazeVPN
+Suite: stable
+Codename: phazevpn
+Architectures: all
+Components: main
+Description: PhazeVPN Local Repository

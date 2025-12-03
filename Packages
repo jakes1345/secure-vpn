@@ -1,0 +1,44 @@
+Package: phaze-vpn
+Version: 1.0.0
+Architecture: all
+Maintainer: PhazeVPN Team <admin@phazevpn.local>
+Installed-Size: 13091
+Depends: openvpn, openssl, python3, python3-tk, python3-pip, python3-requests, python3-urllib3
+Recommends: python3-bcrypt
+Filename: ./dist/phaze-vpn_1.0.0_all.deb
+Size: 6468010
+MD5sum: bd5f5a08b4c44e31cededb2b9d257a6c
+SHA1: deb0980108714adac358733942bc4793f32effc4
+SHA256: 4fc911fec43f47c1781eb773abf0f20b0c94490201636e99f5cfddc91bb0e2f6
+Section: net
+Priority: optional
+Description: Professional VPN Server with Web Dashboard
+ PhazeVPN is a complete VPN solution with:
+  - OpenVPN server with maximum security encryption
+  - Desktop GUI management dashboard
+  - Client download web server
+  - Full client management capabilities
+  - Real-time monitoring and statistics
+ .
+ Features:
+  - ChaCha20-Poly1305 encryption (beyond AES-256)
+  - 4096-bit RSA certificates
+  - TLS 1.3 minimum
+  - Complete client management
+  - Web-based config downloads
+  - Systemd integration
+
+Package: phazevpn-client
+Version: 1.0.0
+Architecture: amd64
+Maintainer: PhazeVPN
+Depends: python3, python3-requests, openvpn
+Filename: ./debian/phaze-vpn/opt/phaze-vpn/phazevpn-client/installers/phazevpn-client_1.0.0_amd64.deb
+Size: 4004
+MD5sum: 22a3a8d260e80c6caeacbe8be9e92700
+SHA1: c10a8cc405752ea7989bcbaedbef40f54ec4afa7
+SHA256: e4da27e128aa9a930c1157328f5387c5aae218fcf56cbf79560273ab112c461d
+Section: net
+Priority: optional
+Description: PhazeVPN Secure VPN Client
+

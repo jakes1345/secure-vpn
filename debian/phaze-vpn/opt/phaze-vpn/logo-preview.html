@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PhazeVPN - Logo Style Options</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .option-card {
+            background: #2b2b2b;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border: 3px solid #667eea;
+            transition: all 0.3s;
+        }
+        .option-card:hover {
+            border-color: #4caf50;
+            transform: scale(1.05);
+        }
+        .option-card img {
+            max-width: 200px;
+            height: 200px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .option-title {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .option-desc {
+            color: #aaa;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 PhazeVPN Logo Style Options</h1>
+        <p style="text-align: center; color: #aaa; font-size: 18px;">
+            Pick your favorite style! Tell me which number (1-5) you like.
+        </p>
+        <div class="options-grid">
+
+            <div class="option-card">
+                <img src="data:image/png;base64,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" alt="Style 1: Geometric">
+                <div class="option-title">Style 1: Geometric</div>
+                <div class="option-desc">Abstract tunnel effect - modern & clean</div>
+            </div>
+            
+            <div class="option-card">
+                <img src="data:image/png;base64,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" alt="Style 2: Gradient Circle">
+                <div class="option-title">Style 2: Gradient Circle</div>
+                <div class="option-desc">Simple circle with accent dot</div>
+            </div>
+            
+            <div class="option-card">
+                <img src="data:image/png;base64,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" alt="Style 3: Rounded Square">
+                <div class="option-title">Style 3: Rounded Square</div>
+                <div class="option-desc">Tech feel with diagonal accent</div>
+            </div>
+            
+            <div class="option-card">
+                <img src="data:image/png;base64,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" alt="Style 4: Ultra Minimal">
+                <div class="option-title">Style 4: Ultra Minimal</div>
+                <div class="option-desc">Just a dot with ring - super clean</div>
+            </div>
+            
+            <div class="option-card">
+                <img src="data:image/png;base64,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" alt="Style 5: Hexagon">
+                <div class="option-title">Style 5: Hexagon</div>
+                <div class="option-desc">Tech/VPN feel - geometric shape</div>
+            </div>
+            
+        </div>
+        <div style="text-align: center; margin-top: 40px; padding: 30px; background: #2b2b2b; border-radius: 12px;">
+            <h2 style="color: #4caf50;">How to Choose:</h2>
+            <p style="color: #aaa; font-size: 16px;">
+                Look at all 5 options above. Tell me which number you like (1, 2, 3, 4, or 5)<br>
+                and I'll generate that style in ALL sizes for your app!
+            </p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Calendar - PhazeVPN Platform{% endblock %}
+
+{% block content %}
+<div class="calendar-interface">
+    <div class="calendar-header">
+        <h1>Calendar</h1>
+        <button class="btn-primary" id="newEventBtn">➕ New Event</button>
+    </div>
+
+    <div class="calendar-view">
+        <div class="calendar-sidebar">
+            <div class="calendar-nav">
+                <button class="nav-btn active">Today</button>
+                <button class="nav-btn">Week</button>
+                <button class="nav-btn">Month</button>
+            </div>
+            
+            <div class="upcoming-events">
+                <h3>Upcoming</h3>
+                <div class="event-item">
+                    <div class="event-time">10:00 AM</div>
+                    <div class="event-title">Team Meeting</div>
+                </div>
+                <div class="event-item">
+                    <div class="event-time">2:00 PM</div>
+                    <div class="event-title">Project Review</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="calendar-main">
+            <div class="calendar-grid" id="calendarGrid">
+                <!-- Calendar will be rendered here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-interface {
+    padding: 2rem;
+    height: 100%;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.calendar-view {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+}
+
+.calendar-sidebar {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.calendar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.nav-btn {
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+}
+
+.nav-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.upcoming-events h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.event-item {
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.event-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.event-title {
+    font-weight: 500;
+}
+
+.calendar-main {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.5rem;
+}
+</style>
+{% endblock %}

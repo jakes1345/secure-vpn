@@ -1,0 +1,85 @@
+# ============================================
+# COMPLETE FIX - RUN ALL OF THIS IN CHROOT
+# ============================================
+
+# Step 1: Set PATH
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Step 2: Disable UFW PERMANENTLY (config file level)
+echo 'ENABLED=no' > /etc/ufw/ufw.conf
+echo 'ENABLED=no' > /etc/default/ufw
+
+# Step 3: Reset iptables completely
+/sbin/iptables -F
+/sbin/iptables -X
+/sbin/iptables -t nat -F
+/sbin/iptables -t nat -X
+/sbin/iptables -t mangle -F
+/sbin/iptables -t mangle -X
+
+# Step 4: Set policies to ACCEPT first
+/sbin/iptables -P INPUT ACCEPT
+/sbin/iptables -P FORWARD ACCEPT
+/sbin/iptables -P OUTPUT ACCEPT
+
+# Step 5: Add firewall rules (SSH FIRST!)
+/sbin/iptables -A INPUT -i lo -j ACCEPT
+/sbin/iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+/sbin/iptables -A INPUT -p udp --dport 53 -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+/sbin/iptables -A INPUT -p udp --dport 1194 -j ACCEPT
+/sbin/iptables -A INPUT -p icmp -j ACCEPT
+
+# Step 6: Set DROP policy LAST (after all ACCEPT rules)
+/sbin/iptables -P INPUT DROP
+/sbin/iptables -P FORWARD DROP
+
+# Step 7: Fix DNS permanently
+rm -f /etc/resolv.conf
+echo "nameserver 8.8.8.8" > /etc/resolv.conf
+echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+echo "nameserver 1.1.1.1" >> /etc/resolv.conf
+chattr +i /etc/resolv.conf 2>/dev/null || true
+
+# Step 8: Save firewall rules
+mkdir -p /etc/iptables
+/sbin/iptables-save > /etc/iptables/rules.v4
+
+# Step 9: Install iptables-persistent (if not installed)
+apt-get update -qq
+DEBIAN_FRONTEND=noninteractive apt-get install -y iptables-persistent -qq
+
+# Step 10: Create network script to load rules on boot
+echo '#!/bin/sh' > /etc/network/if-pre-up.d/iptables
+echo '/sbin/iptables-restore < /etc/iptables/rules.v4' >> /etc/network/if-pre-up.d/iptables
+chmod +x /etc/network/if-pre-up.d/iptables
+
+# Step 11: Create rc.local as backup (ensures SSH rule on boot)
+cat > /etc/rc.local << 'EOF'
+#!/bin/bash
+/sbin/iptables -I INPUT -p tcp --dport 22 -j ACCEPT 2>/dev/null
+/sbin/iptables-save > /etc/iptables/rules.v4 2>/dev/null
+exit 0
+EOF
+chmod +x /etc/rc.local
+
+# Step 12: Verify SSH rule exists
+echo ""
+echo "=== VERIFICATION ==="
+/sbin/iptables -L INPUT -n | grep "tcp dpt:22" && echo "✅ SSH rule exists" || echo "❌ SSH rule missing!"
+
+# Step 13: Verify UFW is disabled
+grep -q "ENABLED=no" /etc/ufw/ufw.conf && echo "✅ UFW disabled in config" || echo "❌ UFW still enabled!"
+
+# Step 14: Verify DNS
+cat /etc/resolv.conf && echo "✅ DNS configured"
+
+echo ""
+echo "=== DONE! ==="
+echo "Exit chroot and reboot:"
+echo "  exit"
+echo "  reboot -f"
+

@@ -1,0 +1,81 @@
+============================================
+RESCUE MODE FIX - COPY/PASTE COMMANDS
+============================================
+
+STEP 1: Find your disk
+--------------------------------------------
+lsblk
+
+(You'll see something like sda1, sda2, vda1, vda2, etc.
+ Your root partition is usually the largest one, often sda2 or vda2)
+
+
+STEP 2: Mount your disk (REPLACE /dev/sda2 with YOUR disk from step 1)
+--------------------------------------------
+mkdir -p /mnt/recovery
+mount /dev/sda2 /mnt/recovery
+
+(If that doesn't work, try: mount /dev/vda2 /mnt/recovery)
+
+
+STEP 3: Bind directories
+--------------------------------------------
+mount --bind /dev /mnt/recovery/dev
+mount --bind /proc /mnt/recovery/proc
+mount --bind /sys /mnt/recovery/sys
+
+
+STEP 4: Chroot into your system
+--------------------------------------------
+chroot /mnt/recovery
+
+
+STEP 5: Fix firewall (COPY ALL OF THIS BLOCK)
+--------------------------------------------
+systemctl stop ufw
+systemctl disable ufw
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p udp --dport 1194 -j ACCEPT
+iptables -A INPUT -p icmp -j ACCEPT
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+mkdir -p /etc/iptables
+apt-get update -qq
+apt-get install -y iptables-persistent -qq
+iptables-save > /etc/iptables/rules.v4
+systemctl restart sshd
+systemctl enable sshd
+
+
+STEP 6: Exit chroot
+--------------------------------------------
+exit
+
+
+STEP 7: Reboot
+--------------------------------------------
+reboot
+
+
+============================================
+AFTER REBOOT (wait 2-3 minutes):
+============================================
+Test SSH from your PC:
+ssh root@15.204.11.19
+
+If SSH works, run from your PC:
+python3 deploy-complete-setup.py
+

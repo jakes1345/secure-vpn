@@ -1,0 +1,60 @@
+# ============================================
+# COPY/PASTE THESE COMMANDS IN ORDER
+# ============================================
+
+# Step 1: Find your disk
+lsblk
+
+# Step 2: Mount your root partition (usually /dev/sda2 or /dev/vda2)
+# Replace /dev/sda2 with your actual root partition from lsblk output
+mkdir -p /mnt/recovery
+mount /dev/sda2 /mnt/recovery
+
+# Step 3: Bind necessary directories
+mount --bind /dev /mnt/recovery/dev
+mount --bind /proc /mnt/recovery/proc
+mount --bind /sys /mnt/recovery/sys
+
+# Step 4: Chroot into your system
+chroot /mnt/recovery
+
+# Step 5: Fix firewall (COPY ALL OF THIS AT ONCE)
+systemctl stop ufw
+systemctl disable ufw
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+iptables -A INPUT -p udp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+iptables -A INPUT -p udp --dport 1194 -j ACCEPT
+iptables -A INPUT -p icmp -j ACCEPT
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+mkdir -p /etc/iptables
+apt-get update -qq
+apt-get install -y iptables-persistent -qq
+iptables-save > /etc/iptables/rules.v4
+systemctl restart sshd
+systemctl enable sshd
+
+# Step 6: Exit chroot
+exit
+
+# Step 7: Reboot back to normal mode
+reboot
+
+# ============================================
+# AFTER REBOOT (wait 2-3 minutes):
+# ============================================
+# Test SSH from your PC:
+# ssh root@15.204.11.19
+

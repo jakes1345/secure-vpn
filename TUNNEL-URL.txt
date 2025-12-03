@@ -1,0 +1,44 @@
+==========================================
+PhazeVPN Download Server - Public URL
+==========================================
+
+Your tunnel is running!
+
+Public URL:
+https://casual-volumes-assume-opening.trycloudflare.com
+
+==========================================
+How to Share with Clients
+==========================================
+
+For OpenVPN Connect App, share this URL format:
+
+https://casual-volumes-assume-opening.trycloudflare.com/download?name=CLIENT_NAME
+
+Examples:
+- For 'sode': https://casual-volumes-assume-opening.trycloudflare.com/download?name=sode
+- For 'jake': https://casual-volumes-assume-opening.trycloudflare.com/download?name=jake
+
+Client Instructions:
+1. Open the URL in their phone browser
+2. The .ovpn file will download automatically
+3. Open the file with OpenVPN Connect app
+4. Tap "Connect"
+
+==========================================
+Other Endpoints
+==========================================
+
+List all clients:
+https://casual-volumes-assume-opening.trycloudflare.com/list
+
+Main page:
+https://casual-volumes-assume-opening.trycloudflare.com
+
+==========================================
+Note
+==========================================
+
+This is a temporary tunnel URL. It will change if you restart the tunnel.
+For a permanent URL, set up a named Cloudflare tunnel with an account.
+

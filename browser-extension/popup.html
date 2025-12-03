@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            width: 320px;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 5px;
+        }
+        .subtitle {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .status {
+            background: #f3f4f6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            font-size: 14px;
+        }
+        .status-label {
+            color: #6b7280;
+        }
+        .status-value {
+            font-weight: 600;
+        }
+        .status-value.protected {
+            color: #10b981;
+        }
+        .status-value.unprotected {
+            color: #ef4444;
+        }
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .toggle-label {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: #d1d5db;
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .toggle.active {
+            background: #10b981;
+        }
+        .toggle-slider {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        .toggle.active .toggle-slider {
+            transform: translateX(24px);
+        }
+        .features {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 15px;
+        }
+        .feature-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .check {
+            color: #10b981;
+            margin-right: 8px;
+        }
+        .test-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .test-link:hover {
+            background: #1d4ed8;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">🔒 SecureVPN</div>
+        <div class="subtitle">Privacy Protector</div>
+    </div>
+    
+    <div class="status">
+        <div class="status-item">
+            <span class="status-label">WebRTC Block:</span>
+            <span class="status-value protected" id="webrtc-status">Active</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Canvas Protection:</span>
+            <span class="status-value protected" id="canvas-status">Active</span>
+        </div>
+        <div class="status-item">
+            <span class="status-label">Fingerprinting:</span>
+            <span class="status-value protected" id="fingerprint-status">Blocked</span>
+        </div>
+    </div>
+    
+    <div class="toggle-container">
+        <span class="toggle-label">Protection Enabled</span>
+        <div class="toggle active" id="toggle">
+            <div class="toggle-slider"></div>
+        </div>
+    </div>
+    
+    <div class="features">
+        <div class="feature-item">
+            <span class="check">✓</span> Blocks WebRTC IP leaks
+        </div>
+        <div class="feature-item">
+            <span class="check">✓</span> Prevents canvas fingerprinting
+        </div>
+        <div class="feature-item">
+            <span class="check">✓</span> Blocks WebGL tracking
+        </div>
+        <div class="feature-item">
+            <span class="check">✓</span> Randomizes browser signature
+        </div>
+    </div>
+    
+    <a href="https://browserleaks.com/webrtc" target="_blank" class="test-link">
+        Test Privacy Protection
+    </a>
+    
+    <script src="popup.js"></script>
+</body>
+</html>
+

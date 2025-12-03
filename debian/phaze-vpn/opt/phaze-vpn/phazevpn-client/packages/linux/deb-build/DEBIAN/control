@@ -1,0 +1,13 @@
+Package: phazevpn-client
+Version: 1.0.0
+Architecture: amd64
+Maintainer: PhazeVPN <support@phazevpn.duckdns.org>
+Description: PhazeVPN Secure VPN Client
+ Professional VPN client with automatic configuration
+ and one-click connectivity. Integrates with system
+ package manager for easy updates.
+Depends: python3 (>= 3.6), python3-requests, openvpn
+Recommends: network-manager-openvpn
+Priority: optional
+Section: net
+Homepage: https://phazevpn.duckdns.org

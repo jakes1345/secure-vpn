@@ -1,0 +1,68 @@
+# ============================================
+# FINAL RESCUE MODE FIX - Ensures SSH Works on Boot
+# ============================================
+
+# Step 1: Find disk
+lsblk
+
+# Step 2: Mount (use /dev/sda1 from lsblk)
+mkdir -p /mnt/recovery
+mount /dev/sda1 /mnt/recovery
+mount --bind /dev /mnt/recovery/dev
+mount --bind /proc /mnt/recovery/proc
+mount --bind /sys /mnt/recovery/sys
+
+# Step 3: Chroot
+chroot /mnt/recovery
+
+# Step 4: Set PATH
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Step 5: Fix firewall AND ensure SSH starts on boot
+/sbin/iptables -F
+/sbin/iptables -X
+/sbin/iptables -t nat -F
+/sbin/iptables -t nat -X
+/sbin/iptables -P INPUT ACCEPT
+/sbin/iptables -P FORWARD ACCEPT
+/sbin/iptables -P OUTPUT ACCEPT
+/sbin/iptables -A INPUT -i lo -j ACCEPT
+/sbin/iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+/sbin/iptables -A INPUT -p udp --dport 53 -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 53 -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+/sbin/iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+/sbin/iptables -A INPUT -p udp --dport 1194 -j ACCEPT
+/sbin/iptables -A INPUT -p icmp -j ACCEPT
+/sbin/iptables -P INPUT DROP
+/sbin/iptables -P FORWARD DROP
+
+# Step 6: Save rules in multiple places to ensure they load
+mkdir -p /etc/iptables
+/sbin/iptables-save > /etc/iptables/rules.v4
+/sbin/iptables-save > /etc/iptables/rules.v4.backup
+
+# Step 7: Ensure netfilter-persistent loads rules on boot
+echo '#!/bin/sh' > /etc/network/if-pre-up.d/iptables
+echo '/sbin/iptables-restore < /etc/iptables/rules.v4' >> /etc/network/if-pre-up.d/iptables
+chmod +x /etc/network/if-pre-up.d/iptables
+
+# Step 8: Ensure SSH starts on boot (create systemd service override)
+mkdir -p /etc/systemd/system/ssh.service.d
+echo '[Service]' > /etc/systemd/system/ssh.service.d/override.conf
+echo 'ExecStartPre=/bin/sleep 5' >> /etc/systemd/system/ssh.service.d/override.conf
+
+# Step 9: Create startup script to ensure SSH rule is added
+cat > /etc/rc.local << 'EOF'
+#!/bin/bash
+/sbin/iptables -I INPUT -p tcp --dport 22 -j ACCEPT
+/sbin/iptables-save > /etc/iptables/rules.v4
+exit 0
+EOF
+chmod +x /etc/rc.local
+
+# Step 10: Exit and reboot
+exit
+reboot -f
+

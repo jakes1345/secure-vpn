@@ -1,0 +1,36 @@
+#!/bin/bash
+# Post-installation script for PhazeVPN
+# Runs after package installation/upgrade
+
+set -e
+
+# Check if this is an upgrade
+if [ "$1" = "upgrade" ] || [ "$1" = "configure" ]; then
+    # Reload systemd if upgrading
+    if command -v systemctl &> /dev/null; then
+        systemctl daemon-reload || true
+    fi
+    
+    # Restart services if they were running
+    if systemctl is-active --quiet phazevpn-web 2>/dev/null; then
+        systemctl restart phazevpn-web || true
+    fi
+    
+    if systemctl is-active --quiet secure-vpn 2>/dev/null; then
+        systemctl restart secure-vpn || true
+    fi
+fi
+
+# Enable automatic updates if not already configured
+if [ ! -f /etc/phazevpn/auto-upgrade ] && [ -f /usr/local/bin/phazevpn-check-updates.sh ]; then
+    mkdir -p /etc/phazevpn
+    touch /etc/phazevpn/auto-upgrade
+fi
+
+# Update desktop database
+if command -v update-desktop-database &> /dev/null; then
+    update-desktop-database /usr/share/applications/ >/dev/null 2>&1 || true
+fi
+
+# Exit successfully
+exit 0

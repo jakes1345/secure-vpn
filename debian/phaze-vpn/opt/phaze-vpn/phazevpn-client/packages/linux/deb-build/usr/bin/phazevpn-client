@@ -1,0 +1,2 @@
+#!/bin/bash
+python3 /usr/share/phazevpn-client/phazevpn-client.py "$@"

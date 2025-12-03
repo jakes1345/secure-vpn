@@ -1,0 +1,15 @@
+#!/bin/bash
+# Pre-removal script for secure-vpn package
+
+set -e
+
+echo "Stopping SecureVPN services..."
+
+# Stop services
+systemctl stop secure-vpn 2>/dev/null || true
+systemctl stop secure-vpn-download 2>/dev/null || true
+systemctl disable secure-vpn 2>/dev/null || true
+systemctl disable secure-vpn-download 2>/dev/null || true
+
+exit 0
+

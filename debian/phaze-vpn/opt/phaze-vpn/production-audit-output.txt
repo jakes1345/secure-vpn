@@ -1,0 +1,154 @@
+================================================================================
+🔍 PRODUCTION-GRADE COMPLETE SYSTEM AUDIT
+================================================================================
+   ✅ Connected!
+
+================================================================================
+1️⃣  AUDITING ALL PORTS
+================================================================================
+   Port 22: sshd
+   Port 25: master
+   Port 80: nginx
+   Port 110: dovecot
+   Port 143: dovecot
+   Port 5000: gunicorn
+   Port 443: nginx
+   Port 465: master
+   Port 587: master
+   Port 628: master
+   Port 41626: anydesk
+   Port 995: dovecot
+   Port 993: dovecot
+   Port 6379: redis-server
+   Port 10024: /usr/sbin/amavi
+   Port 5900: x11vnc
+   Port 783: spamd child
+   Port 465: master
+   Port 5003: python3
+   Port 5002: python3
+   Port 5001: python3
+   Port 5005: python3
+   Port 5004: python3
+   Port 33060: mysqld
+   Port 3306: mysqld
+   Port 8082: docker-proxy
+   Port 8081: python3
+   Port 8080: gunicorn
+   Port 43851: containerd
+   Port 7070: anydesk
+   Port 10024: /usr/sbin/amavi
+   Port 22: sshd
+   Port 80: nginx
+   Port 783: spamd child
+   Port 443: nginx
+   Port 41626: anydesk
+   Port 3389: xrdp
+   Port 3350: xrdp-sesman
+   Port 5900: x11vnc
+   Port 8082: docker-proxy
+   Port 6379: redis-server
+   Port 7070: anydesk
+
+   📊 Port Assignment Check:
+   ✅ web_portal: Port 5000 (correct)
+   ✅ nginx_http: Port 80 (correct)
+   ✅ nginx_https: Port 443 (correct)
+   ⚠️  openvpn: Port 1194 (not listening)
+   ✅ smtp: Port 25 (correct)
+   ✅ smtp_submission: Port 587 (correct)
+   ✅ imap: Port 143 (correct)
+   ✅ imaps: Port 993 (correct)
+   ✅ ssh: Port 22 (correct)
+   ✅ mysql: Port 3306 (correct)
+
+================================================================================
+2️⃣  AUDITING ALL SERVICES
+================================================================================
+   ✅ phazevpn-portal: active
+   ✅ nginx: active
+   ✅ mysql: active
+   ✅ openvpn@server: active
+   ✅ postfix: active
+   ✅ dovecot: active
+   ❌ fail2ban: failed
+
+================================================================================
+3️⃣  AUDITING CONFIGURATION FILES
+================================================================================
+   ✅ web_portal: /opt/phaze-vpn/web-portal/app.py
+   ✅ nginx: /etc/nginx/sites-available/phazevpn
+   ✅ nginx_enabled: /etc/nginx/sites-enabled/phazevpn
+   ✅ openvpn: /opt/secure-vpn/config/server.conf
+   ✅ openvpn_systemd: /etc/openvpn/server.conf
+   ✅ mysql: /etc/mysql/mysql.conf.d/mysqld.cnf
+   ✅ postfix: /etc/postfix/main.cf
+   ✅ dovecot: /etc/dovecot/dovecot.conf
+   ✅ users: /opt/phaze-vpn/web-portal/users.json
+   ✅ portal_service: /etc/systemd/system/phazevpn-portal.service
+
+================================================================================
+4️⃣  CHECKING PORT 5000 (CRITICAL)
+================================================================================
+   ✅ Port 5000 is localhost only (SECURE)
+   ✅ Service configured for localhost binding
+
+================================================================================
+5️⃣  CHECKING NGINX PROXY
+================================================================================
+   ✅ Nginx proxies to localhost:5000
+
+================================================================================
+6️⃣  CHECKING FIREWALL
+================================================================================
+   ✅ Port 5000 not in firewall (good - internal only)
+   ⚠️  Port 80 may not be allowed
+   ⚠️  Port 443 may not be allowed
+   ⚠️  Port 1194 may not be allowed
+   ⚠️  Port 22 may not be allowed
+
+================================================================================
+7️⃣  CREATING PRODUCTION CONFIGURATION
+================================================================================
+
+================================================================================
+8️⃣  FIXING FIREWALL
+================================================================================
+
+🔧 Removing port 5000 rule 29
+   ✅ Deleting:
+ allow 5000/tcp comment 'REST API'
+Proceed with operation (y|n)? Rule deleted (v6)
+
+================================================================================
+9️⃣  RESTARTING AND VERIFYING
+================================================================================
+
+🔧 Reloading systemd
+
+🔧 Restarting portal
+   ✅ Port 5000 is now localhost only
+
+================================================================================
+🔟 CREATING PRODUCTION DOCUMENTATION
+================================================================================
+   ✅ Production documentation created
+
+================================================================================
+✅ AUDIT COMPLETE
+================================================================================
+
+📊 Summary:
+   Ports checked: 31
+   Services checked: 7
+   Configs checked: 10
+   Issues found: 2
+   Fixes applied: 1
+
+⚠️  Issues:
+   - openvpn not on port 1194
+   - fail2ban is failed
+
+✅ Fixes:
+   - Removed port 5000 from firewall
+
+📄 Full report: /opt/phaze-vpn/PRODUCTION-PORT-ASSIGNMENT.md

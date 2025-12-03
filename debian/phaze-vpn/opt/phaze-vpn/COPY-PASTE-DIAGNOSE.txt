@@ -1,0 +1,74 @@
+# ============================================
+# COPY-PASTE THIS IN RESCUE MODE (CHROOT)
+# Shows you EXACTLY what's wrong
+# ============================================
+
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+echo "=========================================="
+echo "🔍 DIAGNOSING VPS ISSUES"
+echo "=========================================="
+echo ""
+
+echo "1️⃣ CURRENT IPTABLES RULES:"
+/sbin/iptables -L INPUT -n -v --line-numbers 2>/dev/null || echo "   ❌ Cannot list rules"
+echo ""
+echo "   SSH Rule Check:"
+/sbin/iptables -L INPUT -n | grep -E "22|ssh" && echo "   ✅ SSH rule EXISTS" || echo "   ❌ SSH rule MISSING!"
+echo ""
+
+echo "2️⃣ UFW STATUS:"
+if [ -f /etc/ufw/ufw.conf ]; then
+    cat /etc/ufw/ufw.conf
+    grep -q "ENABLED=no" /etc/ufw/ufw.conf && echo "   ✅ UFW DISABLED" || echo "   ❌ UFW ENABLED (BAD!)"
+else
+    echo "   ⚠️  UFW config not found"
+fi
+echo ""
+
+echo "3️⃣ SSH SERVICE:"
+if [ -f /etc/ssh/sshd_config ]; then
+    echo "   ✅ SSH config exists"
+    grep -E "^Port|^PermitRootLogin|^PasswordAuthentication" /etc/ssh/sshd_config || echo "   Using defaults"
+else
+    echo "   ❌ SSH config MISSING!"
+fi
+if [ -L /etc/systemd/system/multi-user.target.wants/ssh.service ] || [ -L /etc/systemd/system/multi-user.target.wants/sshd.service ]; then
+    echo "   ✅ SSH service ENABLED"
+else
+    echo "   ❌ SSH service NOT ENABLED"
+fi
+echo ""
+
+echo "4️⃣ DNS CONFIG:"
+cat /etc/resolv.conf 2>/dev/null || echo "   ❌ resolv.conf missing"
+echo ""
+
+echo "5️⃣ BOOT SCRIPTS:"
+[ -f /etc/network/if-pre-up.d/iptables-load ] && echo "   ✅ Network script exists" || echo "   ❌ Network script missing"
+[ -f /etc/rc.local ] && echo "   ✅ rc.local exists" || echo "   ❌ rc.local missing"
+[ -f /etc/systemd/system/ssh-firewall-fix.service ] && echo "   ✅ Systemd service exists" || echo "   ❌ Systemd service missing"
+echo ""
+
+echo "6️⃣ RULES FILE:"
+if [ -f /etc/iptables/rules.v4 ]; then
+    echo "   ✅ Rules file exists"
+    grep -E "22|ssh" /etc/iptables/rules.v4 && echo "   ✅ SSH rule in file" || echo "   ❌ SSH rule NOT in file"
+else
+    echo "   ❌ Rules file MISSING (rules won't persist!)"
+fi
+echo ""
+
+echo "=========================================="
+echo "📋 SUMMARY"
+echo "=========================================="
+echo ""
+echo "Issues found:"
+/sbin/iptables -L INPUT -n | grep -q "22\|ssh" || echo "❌ SSH rule missing in iptables"
+[ -f /etc/ufw/ufw.conf ] && ! grep -q "ENABLED=no" /etc/ufw/ufw.conf && echo "❌ UFW is enabled (will conflict)"
+[ ! -f /etc/iptables/rules.v4 ] && echo "❌ Rules file missing"
+[ ! -L /etc/systemd/system/multi-user.target.wants/ssh.service ] && [ ! -L /etc/systemd/system/multi-user.target.wants/sshd.service ] && echo "❌ SSH service not enabled"
+echo ""
+echo "If issues found, run CHROOT-FINAL-FIX.txt to fix everything"
+echo ""
+

@@ -1,0 +1,76 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+
+# Sensitive files
+*.key
+*.pem
+*.crt
+*.ovpn
+*.conf
+config.json
+secrets.json
+.env
+.env.local
+
+# Browser data
+*.db
+*.sqlite
+*.sqlite3
+phazebrowser-data/
+.config/phazebrowser/
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
+
+# VPN configs (user-specific)
+*.ovpn
+wireguard-configs/
+openvpn-configs/
+
+# Deployment scripts (may contain credentials)
+deploy-*.py
+*.pem
+id_rsa*
+
+# Test files
+test_*.py
+*_test.py
