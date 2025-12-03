@@ -111,18 +111,17 @@ dist/
 *.tmp
 *.bak
 
-# Only exclude test/debug scripts in root, but keep everything in important directories
-/test*.py
-/fix*.py
-/check*.py
-/verify*.py
-/audit*.py
-/setup*.py
-/deploy*.py
-!deploy-phazebrowser-vps.py
-/complete*.py
-/status*.py
-/investigation*.py
+# Exclude junk scripts in root directory only (not in subdirectories)
+# Keep all files in important directories like web-portal/, phazevpn-client/, etc.
+/CHECK-*.py
+/COMPLETE-*.py
+/FINAL-*.py
+/FIX-*.py
+/PRODUCTION-*.py
+/RESET-*.py
+/SETUP-*.py
+/ULTIMATE-*.py
+/VERIFY-*.py
 /add-*.py
 /apply-*.py
 /assess-*.py
@@ -193,3 +192,23 @@ dist/
 /wait-*.py
 /website-*.py
 /working-*.py
+/CHECK-*.sh
+/COMPLETE-*.sh
+/DEPLOY-*.sh
+/DIAGNOSE-*.sh
+/FINAL-*.sh
+/FIX-*.sh
+/FORCE-*.sh
+/ONE-*.sh
+/QUICK-*.sh
+/RESCUE-*.sh
+/SETUP-*.sh
+/SIMPLE-*.sh
+/SSH-*.sh
+/SYNC-*.sh
+/VPS-*.sh
+/VERIFY-*.sh
+/*.txt
+/Packages
+/MainWindow.*
+/LICENSE
