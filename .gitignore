@@ -98,3 +98,34 @@ test_*.py
 # Documentation files (not needed on GitHub)
 *.md
 !README.md
+
+# Junk/deployment/test files
+*.bat
+debian/
+build/
+gui-build*/
+test-install/
+dist/
+*.log
+*.pid
+*.tmp
+*.bak
+
+# Duplicate/unused scripts
+*test*.py
+*fix*.py
+*check*.py
+*verify*.py
+*audit*.py
+*setup*.py
+*deploy*.py
+!deploy-phazebrowser-vps.py
+*complete*.py
+*status*.py
+*investigation*.py
+
+# Keep only essential directories
+!web-portal/
+!phazevpn-client/
+!phazevpn-protocol/
+!phazevpn-protocol-go/

@@ -1,3 +1,0 @@
-#!/bin/bash
-cd /opt/phaze-vpn
-exec python3 /opt/phaze-vpn/vpn-gui.py "$@"
