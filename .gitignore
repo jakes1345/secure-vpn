@@ -49,6 +49,17 @@ secrets.json
 .env
 .env.local
 
+# API Keys and secrets
+*API-KEY*.md
+*API-KEY*.txt
+*SETUP-COMPLETE.md
+payment-settings.json
+*_integrations.py
+*_config.py
+smtp_config.py
+outlook_oauth2_config.py
+secure-smtp-credentials.py
+
 # Browser data
 *.db
 *.sqlite
