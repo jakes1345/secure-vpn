@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard - SecureVPN{% endblock %}
+
+{% block content %}
+<h1>👤 User Dashboard</h1>
+<p>Welcome, <strong>{{ username }}</strong>!</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+    <div class="card">
+        <div class="card-header">🔌 Connection Status</div>
+        <div id="connection-status" style="margin-top: 1rem;">
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                <span class="status-badge status-inactive" id="connection-badge">🔴 Disconnected</span>
+                <button class="btn btn-primary" id="connect-btn" onclick="toggleConnection()" style="flex: 1;">Connect</button>
+            </div>
+            <div style="font-size: 0.9rem; color: #aaa;">
+                <div>📍 Server: <span id="current-server">Not Connected</span></div>
+                <div style="margin-top: 0.5rem;">🌐 IP: <span id="current-ip">-</span></div>
+                <div style="margin-top: 0.5rem;">⏱️ Uptime: <span id="connection-time">-</span></div>
+                <div style="margin-top: 0.5rem;">📊 Speed: <span id="connection-speed">-</span></div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">🌍 Server Selection</div>
+        <div style="margin-top: 1rem;">
+            <select id="server-select" class="btn" style="width: 100%; padding: 0.75rem; background: #3a3a3a; color: #fff; border: 1px solid #4a9eff; border-radius: 4px; margin-bottom: 1rem;">
+                <option value="15.204.11.19">🇺🇸 US Server (15.204.11.19)</option>
+            </select>
+            <button class="btn btn-success" onclick="quickConnect()" style="width: 100%;">⚡ Quick Connect</button>
+            <p style="color: #aaa; font-size: 0.85rem; margin-top: 1rem; text-align: center;">
+                Ping: <span id="server-ping">-</span>ms
+            </p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">📊 Data Usage</div>
+        <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #4a9eff;" id="data-used">0 GB</div>
+            <p style="color: #aaa; margin-top: 0.5rem;">
+                of <span id="data-limit">{{ subscription_limits.bandwidth_limit_gb if subscription_limits.bandwidth_limit_gb > 0 else '∞' }} GB</span> this month
+            </p>
+            <div style="background: #3a3a3a; height: 10px; border-radius: 5px; margin-top: 1rem; overflow: hidden;">
+                <div id="data-progress" style="background: linear-gradient(90deg, #4a9eff, #10b981); height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <p style="color: #aaa; font-size: 0.85rem; margin-top: 0.5rem; text-align: center;">
+                Resets: <span id="data-reset">End of month</span>
+            </p>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">Your Subscription</div>
+        <div style="margin-top: 1rem;">
+            <div style="font-size: 1.5rem; font-weight: bold; color: #4a9eff;">{{ subscription_limits.name }}</div>
+            <p style="color: #b0b0b0; margin-top: 0.5rem;">
+                {% if subscription_tier == 'free' %}
+                    Free Plan
+                {% elif subscription_tier == 'basic' %}
+                    $5/month
+                {% elif subscription_tier == 'pro' %}
+                    $10/month
+                {% elif subscription_tier == 'premium' %}
+                    $20/month
+                {% endif %}
+            </p>
+            <p style="color: #b0b0b0; font-size: 0.9rem; margin-top: 0.5rem;">
+                {{ clients_used }} / {{ subscription_limits.client_limit if subscription_limits.client_limit > 0 else '∞' }} devices
+            </p>
+            {% if subscription_tier == 'free' %}
+            <a href="/pricing" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">⬆️ Upgrade Plan</a>
+            {% else %}
+            <a href="/pricing" class="btn btn-secondary" style="margin-top: 1rem; width: 100%;">⚙️ Manage Subscription</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">Your Clients</div>
+        <div style="font-size: 2rem; font-weight: bold; color: #4a9eff;">{{ client_count }}</div>
+        <p style="color: #b0b0b0;">VPN clients configured</p>
+        {% if can_create_more %}
+        <button class="btn btn-primary" onclick="createClient()" style="margin-top: 1rem;">➕ Create New Client</button>
+        {% else %}
+        <div class="alert alert-info" style="margin-top: 1rem; padding: 1rem;">
+            <strong>Limit Reached!</strong><br>
+            Upgrade to create more devices.
+            <a href="/pricing" style="color: #4a9eff; text-decoration: underline;">Upgrade Now →</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Your VPN Clients</div>
+    {% if clients %}
+    <table>
+        <thead>
+            <tr>
+                <th>Client Name</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td><strong>{{ client.name }}</strong></td>
+                <td>{{ client.created[:10] }}</td>
+                <td>
+                    <a href="/download/{{ client.name }}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">⬇️ Download</a>
+                    <a href="/qr/{{ client.name }}" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;">📱 QR Code</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="text-align: center; color: #b0b0b0; padding: 2rem;">
+        <p style="margin-bottom: 1rem;">You don't have any VPN clients yet.</p>
+        <p style="margin-bottom: 1.5rem;">Click "Create New Client" above to get started!</p>
+        <div style="background: #1a3a5a; border: 1px solid #4a9eff; border-radius: 8px; padding: 1.5rem; margin-top: 1rem;">
+            <p style="color: #4a9eff; font-weight: bold; margin-bottom: 0.5rem;">📖 New to VPN?</p>
+            <p style="margin-bottom: 1rem; font-size: 0.9rem;">Learn how to download OpenVPN Connect and connect on any device!</p>
+            <a href="/guide" class="btn btn-primary" style="padding: 0.5rem 1.5rem;">View Setup Guide →</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function createClient() {
+    const name = prompt('Enter a name for your VPN client:');
+    if (!name || !name.trim()) {
+        showToast('Client name required', 'error');
+        return;
+    }
+    
+    const btn = event.target;
+    setLoading(btn, true);
+    
+    safeFetch('/api/my-clients', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: name.trim()})
+    })
+    .then(data => {
+        if (data.success) {
+            showToast(data.message || 'Client created successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        }
+    })
+    .catch(() => {})
+    .finally(() => setLoading(btn, false));
+}
+
+// Connection status and management
+let connectionState = {
+    connected: false,
+    server: null,
+    startTime: null,
+    dataUsed: 0
+};
+
+// Update connection status
+function updateConnectionStatus() {
+    fetch('/api/vpn/status')
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.getElementById('connection-badge');
+            const btn = document.getElementById('connect-btn');
+            const serverEl = document.getElementById('current-server');
+            const ipEl = document.getElementById('current-ip');
+            const timeEl = document.getElementById('connection-time');
+            
+            if (data.status === 'active') {
+                connectionState.connected = true;
+                badge.className = 'status-badge status-active';
+                badge.textContent = '🟢 Connected';
+                btn.textContent = 'Disconnect';
+                btn.className = 'btn btn-danger';
+                serverEl.textContent = data.server || '15.204.11.19';
+                ipEl.textContent = data.ip || 'Loading...';
+                
+                if (connectionState.startTime) {
+                    const uptime = Math.floor((Date.now() - connectionState.startTime) / 1000);
+                    const hours = Math.floor(uptime / 3600);
+                    const minutes = Math.floor((uptime % 3600) / 60);
+                    timeEl.textContent = `${hours}h ${minutes}m`;
+                }
+            } else {
+                connectionState.connected = false;
+                badge.className = 'status-badge status-inactive';
+                badge.textContent = '🔴 Disconnected';
+                btn.textContent = 'Connect';
+                btn.className = 'btn btn-primary';
+                serverEl.textContent = 'Not Connected';
+                ipEl.textContent = '-';
+                timeEl.textContent = '-';
+            }
+        })
+        .catch(() => {
+            document.getElementById('connection-badge').textContent = '⚠️ Status Unknown';
+        });
+}
+
+// Toggle connection
+function toggleConnection() {
+    if (connectionState.connected) {
+        // Disconnect
+        fetch('/api/vpn/stop', {method: 'POST'})
+            .then(() => {
+                connectionState.connected = false;
+                connectionState.startTime = null;
+                updateConnectionStatus();
+                showToast('Disconnected from VPN', 'info');
+            });
+    } else {
+        // Connect
+        const server = document.getElementById('server-select').value;
+        fetch('/api/vpn/start', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({server: server})
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                connectionState.connected = true;
+                connectionState.startTime = Date.now();
+                connectionState.server = server;
+                updateConnectionStatus();
+                showToast('Connected to VPN', 'success');
+            } else {
+                showToast(data.error || 'Failed to connect', 'error');
+            }
+        });
+    }
+}
+
+// Quick connect
+function quickConnect() {
+    if (!connectionState.connected) {
+        toggleConnection();
+    }
+}
+
+// Update data usage
+function updateDataUsage() {
+    fetch('/api/stats/bandwidth')
+        .then(res => res.json())
+        .then(data => {
+            const used = (data.used || 0) / (1024 * 1024 * 1024); // Convert to GB
+            const limit = {{ subscription_limits.bandwidth_limit_gb if subscription_limits.bandwidth_limit_gb > 0 else 999999 }};
+            const percent = limit > 0 ? Math.min((used / limit) * 100, 100) : 0;
+            
+            document.getElementById('data-used').textContent = used.toFixed(2) + ' GB';
+            document.getElementById('data-progress').style.width = percent + '%';
+            connectionState.dataUsed = used;
+        })
+        .catch(() => {});
+}
+
+// Ping server
+function pingServer() {
+    const start = Date.now();
+    fetch('/api/server/metrics')
+        .then(() => {
+            const ping = Date.now() - start;
+            document.getElementById('server-ping').textContent = ping;
+        })
+        .catch(() => {
+            document.getElementById('server-ping').textContent = 'N/A';
+        });
+}
+
+// Initialize
+updateConnectionStatus();
+updateDataUsage();
+pingServer();
+setInterval(updateConnectionStatus, 5000);
+setInterval(updateDataUsage, 30000);
+setInterval(pingServer, 10000);
+
+// Handle upgrade prompts
+function createClient() {
+    const name = prompt('Enter a name for your VPN client:');
+    if (!name || !name.trim()) {
+        showToast('Client name required', 'error');
+        return;
+    }
+    
+    const btn = event.target;
+    setLoading(btn, true);
+    
+    safeFetch('/api/my-clients', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: name.trim()})
+    })
+    .then(data => {
+        if (data.success) {
+            showToast(data.message || 'Client created successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else if (data.upgrade_required) {
+            // Show upgrade prompt
+            showToast(data.error || 'Upgrade required to create more clients', 'error');
+            if (confirm('Would you like to upgrade your plan?')) {
+                window.location.href = '/pricing';
+            }
+        }
+    })
+    .catch(() => {})
+    .finally(() => setLoading(btn, false));
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PhazeVPN Dashboard
+Comment=Manage your VPN server
+Exec=phazevpn-client
+Icon=/opt/secure-vpn/assets/icons/phazevpn-256x256.png
+Terminal=false
+Categories=Network;Security;
+Keywords=vpn;security;network;
+StartupNotify=true
+

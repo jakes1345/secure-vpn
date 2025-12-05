@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}VPN Setup Guide - SecureVPN{% endblock %}
+
+{% block content %}
+<h1>📖 VPN Setup Guide</h1>
+<p>Learn how to connect to SecureVPN on any device!</p>
+
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">🎥 Video Tutorials</div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">📱</div>
+            <h3 style="color: #4a9eff; margin-bottom: 0.5rem;">Mobile Setup</h3>
+            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">Watch how to set up PhazeVPN on iOS and Android</p>
+            <a href="#" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Watch Video →</a>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">💻</div>
+            <h3 style="color: #4a9eff; margin-bottom: 0.5rem;">Desktop Setup</h3>
+            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">Complete guide for Windows, Mac, and Linux</p>
+            <a href="#" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Watch Video →</a>
+        </div>
+        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); text-align: center;">
+            <div style="font-size: 3rem; margin-bottom: 0.5rem;">🔒</div>
+            <h3 style="color: #4a9eff; margin-bottom: 0.5rem;">Security Features</h3>
+            <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">Learn about kill switch and DNS protection</p>
+            <a href="#" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Watch Video →</a>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">🚀 Quick Start</div>
+    <ol style="margin-left: 1.5rem; line-height: 2;">
+        <li><strong>Create an account</strong> - Sign up for free at <a href="/signup" style="color: #4a9eff;">the signup page</a></li>
+        <li><strong>Login</strong> - Access your dashboard</li>
+        <li><strong>Create a VPN client</strong> - Click "Create New Client" in your dashboard</li>
+        <li><strong>Download OpenVPN Connect</strong> - See instructions below for your device</li>
+        <li><strong>Import your config</strong> - Download your .ovpn file or scan the QR code</li>
+        <li><strong>Connect!</strong> - Tap/click connect and you're protected!</li>
+    </ol>
+</div>
+
+<div class="card">
+    <div class="card-header">📱 iPhone / iPad Setup</div>
+    <div style="line-height: 1.8;">
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 1: Download OpenVPN Connect</h3>
+        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>Open the <strong>App Store</strong> on your iPhone/iPad</li>
+            <li>Search for <strong>"OpenVPN Connect"</strong></li>
+            <li>Install the app (it's free and official!)</li>
+        </ol>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 2: Get Your VPN Config</h3>
+        <p>After creating a client in your dashboard, you can:</p>
+        <ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li><strong>Option A:</strong> Click the <strong>📱 QR Code</strong> button and scan it with your camera</li>
+            <li><strong>Option B:</strong> Click <strong>⬇️ Download</strong>, then open the .ovpn file on your phone</li>
+        </ul>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 3: Connect</h3>
+        <ol style="margin-left: 1.5rem;">
+            <li>Open the <strong>OpenVPN Connect</strong> app</li>
+            <li>You should see your VPN profile listed</li>
+            <li>Tap the toggle switch to <strong>connect</strong></li>
+            <li>Allow VPN connection when prompted</li>
+            <li>✅ You're connected and protected!</li>
+        </ol>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">🤖 Android Setup</div>
+    <div style="line-height: 1.8;">
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 1: Download OpenVPN Connect</h3>
+        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>Open <strong>Google Play Store</strong></li>
+            <li>Search for <strong>"OpenVPN Connect"</strong></li>
+            <li>Install the official app (free!)</li>
+        </ol>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 2: Get Your VPN Config</h3>
+        <ul style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li><strong>QR Code:</strong> Click the 📱 QR Code button in your dashboard and scan it</li>
+            <li><strong>Download:</strong> Click ⬇️ Download, then open the .ovpn file on your Android device</li>
+        </ul>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 3: Connect</h3>
+        <ol style="margin-left: 1.5rem;">
+            <li>Open <strong>OpenVPN Connect</strong> app</li>
+            <li>Tap your VPN profile</li>
+            <li>Tap <strong>Connect</strong></li>
+            <li>Allow VPN connection when prompted</li>
+            <li>✅ Connected and secure!</li>
+        </ol>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">💻 Windows Setup</div>
+    <div style="line-height: 1.8;">
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 1: Download OpenVPN</h3>
+        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>Visit <a href="https://openvpn.net/community-downloads/" target="_blank" style="color: #4a9eff;">openvpn.net/community-downloads</a></li>
+            <li>Download <strong>OpenVPN for Windows</strong></li>
+            <li>Install it (keep default settings)</li>
+        </ol>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 2: Import Your Config</h3>
+        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>In your dashboard, click <strong>⬇️ Download</strong> for your client</li>
+            <li>Save the .ovpn file</li>
+            <li>Right-click the OpenVPN icon in your system tray (bottom right)</li>
+            <li>Click <strong>"Import file..."</strong></li>
+            <li>Select your downloaded .ovpn file</li>
+        </ol>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 3: Connect</h3>
+        <ol style="margin-left: 1.5rem;">
+            <li>Right-click the OpenVPN icon in system tray</li>
+            <li>Select your VPN profile</li>
+            <li>Click <strong>"Connect"</strong></li>
+            <li>✅ You're protected!</li>
+        </ol>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">🍎 macOS Setup</div>
+    <div style="line-height: 1.8;">
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 1: Download Tunnelblick</h3>
+        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>Visit <a href="https://tunnelblick.net/" target="_blank" style="color: #4a9eff;">tunnelblick.net</a></li>
+            <li>Download and install <strong>Tunnelblick</strong> (free, open-source)</li>
+            <li>Or use <strong>OpenVPN Connect</strong> from the Mac App Store</li>
+        </ol>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 2: Import Your Config</h3>
+        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>Download your .ovpn file from the dashboard</li>
+            <li>Double-click the .ovpn file</li>
+            <li>Tunnelblick/OpenVPN will automatically import it</li>
+        </ol>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Step 3: Connect</h3>
+        <ol style="margin-left: 1.5rem;">
+            <li>Click the Tunnelblick/OpenVPN icon in your menu bar (top right)</li>
+            <li>Select your VPN profile</li>
+            <li>Click <strong>"Connect"</strong></li>
+            <li>✅ Connected!</li>
+        </ol>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">🐧 Linux Setup</div>
+    <div style="line-height: 1.8;">
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Method 1: Command Line (Easiest)</h3>
+        <ol style="margin-left: 1.5rem; margin-bottom: 1rem;">
+            <li>Install OpenVPN: <code style="background: #1a1a1a; padding: 0.2rem 0.5rem; border-radius: 3px;">sudo apt install openvpn</code></li>
+            <li>Download your .ovpn file from the dashboard</li>
+            <li>Connect: <code style="background: #1a1a1a; padding: 0.2rem 0.5rem; border-radius: 3px;">sudo openvpn --config your-client.ovpn</code></li>
+        </ol>
+        
+        <h3 style="margin-top: 1rem; color: #4a9eff;">Method 2: Network Manager GUI</h3>
+        <ol style="margin-left: 1.5rem;">
+            <li>Install: <code style="background: #1a1a1a; padding: 0.2rem 0.5rem; border-radius: 3px;">sudo apt install network-manager-openvpn</code></li>
+            <li>Download your .ovpn file</li>
+            <li>Open <strong>Settings → Network</strong></li>
+            <li>Click <strong>"+"</strong> → <strong>"Import from file..."</strong></li>
+            <li>Select your .ovpn file</li>
+            <li>Toggle the VPN connection in network settings</li>
+        </ol>
+    </div>
+</div>
+
+<div class="card" style="background: #1a3a5a; border-color: #4a9eff;">
+    <div class="card-header" style="color: #4a9eff;">💡 Pro Tips</div>
+    <ul style="margin-left: 1.5rem; line-height: 2;">
+        <li>Each client can only connect once at a time - create multiple clients for multiple devices</li>
+        <li>QR codes make setup super easy on mobile - just scan and connect!</li>
+        <li>Keep your .ovpn files secure - they're like passwords</li>
+        <li>You can download and reconnect anytime from your dashboard</li>
+        <li>If you have issues, check that the VPN server is running (shown on dashboard)</li>
+    </ul>
+</div>
+
+<div style="text-align: center; margin: 2rem 0;">
+    <a href="/login" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">🔐 Go to Login</a>
+    {% if 'username' in session %}
+    <a href="/dashboard" class="btn btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem; margin-left: 1rem;">📊 Go to Dashboard</a>
+    {% else %}
+    <a href="/signup" class="btn btn-secondary" style="font-size: 1.1rem; padding: 1rem 2rem; margin-left: 1rem;">✨ Sign Up</a>
+    {% endif %}
+</div>
+{% endblock %}
+

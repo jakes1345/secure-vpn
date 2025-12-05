@@ -1,3 +1,9 @@
+# Environment variables - NEVER commit these!
+.env
+.env.local
+.env.production
+.env.*.local
+
 # Python
 __pycache__/
 *.py[cod]
@@ -22,8 +28,8 @@ wheels/
 
 # Virtual environments
 venv/
-env/
 ENV/
+env/
 .venv
 
 # IDE
@@ -33,182 +39,64 @@ ENV/
 *.swo
 *~
 
-# OS
-.DS_Store
-Thumbs.db
+# Logs
 *.log
+logs/
+*.log.*
 
-# Sensitive files
-*.key
-*.pem
-*.crt
-*.ovpn
-*.conf
-config.json
-secrets.json
-.env
-.env.local
-
-# API Keys and secrets
-*API-KEY*.md
-*API-KEY*.txt
-*SETUP-COMPLETE.md
-payment-settings.json
-*_integrations.py
-*_config.py
-smtp_config.py
-outlook_oauth2_config.py
-secure-smtp-credentials.py
-
-# Browser data
+# Database
 *.db
 *.sqlite
 *.sqlite3
-phazebrowser-data/
-.config/phazebrowser/
+
+# Secrets and keys
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+secrets/
+keys/
+
+# Payment settings (contains sensitive data)
+logs/payment-settings.json
+payment-settings.json
+
+# User data
+users.json
+subscriptions.json
+client-configs/
+certs/
+
+# Backups
+*.backup
+*.bak
+*.old
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
 
 # Temporary files
 *.tmp
-*.bak
-*.cache
+*.temp
+.cache/
 
-# VPN configs (user-specific)
-*.ovpn
-wireguard-configs/
-openvpn-configs/
-
-# Deployment scripts (may contain credentials)
-deploy-*.py
-*.pem
-id_rsa*
-
-# Test files
-test_*.py
-*_test.py
-
-# Large binary files
+# Build artifacts
 *.deb
 *.rpm
 *.tar.gz
 *.zip
-*.exe
-*.dmg
-*.pkg
-
-# Documentation files (not needed on GitHub)
-*.md
-!README.md
-
-# Junk/deployment/test files
-*.bat
-debian/
-build/
-gui-build*/
-test-install/
 dist/
-*.log
-*.pid
-*.tmp
-*.bak
+build/
 
-# Exclude junk scripts in root directory only (not in subdirectories)
-# Keep all files in important directories like web-portal/, phazevpn-client/, etc.
-/CHECK-*.py
-/COMPLETE-*.py
-/FINAL-*.py
-/FIX-*.py
-/PRODUCTION-*.py
-/RESET-*.py
-/SETUP-*.py
-/ULTIMATE-*.py
-/VERIFY-*.py
-/add-*.py
-/apply-*.py
-/assess-*.py
-/auto-*.py
-/bootstrap-*.py
-/cleanup-*.py
-/comprehensive-*.py
-/configure-*.py
-/connect-*.py
-/create-*.py
-/debug-*.py
-/deep-*.py
-/delete-*.py
-/diagnose-*.py
-/download-*.py
-/email-*.py
-/enable-*.py
-/expand-*.py
-/extend-*.py
-/final-*.py
-/find-*.py
-/finish-*.py
-/generate-*.py
-/get-*.py
-/give-*.py
-/improve-*.py
-/initialize-*.py
-/install-*.py
-/integrate-*.py
-/investigate-*.py
-/list-*.py
-/make-*.py
-/manage-*.py
-/monitor-*.py
-/multi-*.py
-/open-*.py
-/optimize-*.py
-/parse-*.py
-/preview-*.py
-/publish-*.py
-/query
-/quick-*.py
-/read-*.py
-/rebuild-*.py
-/regenerate-*.py
-/remove-*.py
-/reset-*.py
-/restore-*.py
-/restart-*.py
-/review-*.py
-/run-*.py
-/secure-*.py
-/setup-*.py
-/share-*.py
-/simple-*.py
-/ssh-*.py
-/start-*.py
-/subscription-*.py
-/switch-*.py
-/sync-*.py
-/transfer-*.py
-/uninstall.sh
-/update-*.py
-/upload-*.py
-/vpn-*.py
-/vps-*.py
-/view-*.py
-/wait-*.py
-/website-*.py
-/working-*.py
-/CHECK-*.sh
-/COMPLETE-*.sh
-/DEPLOY-*.sh
-/DIAGNOSE-*.sh
-/FINAL-*.sh
-/FIX-*.sh
-/FORCE-*.sh
-/ONE-*.sh
-/QUICK-*.sh
-/RESCUE-*.sh
-/SETUP-*.sh
-/SIMPLE-*.sh
-/SSH-*.sh
-/SYNC-*.sh
-/VPS-*.sh
-/VERIFY-*.sh
-/*.txt
-/Packages
-/MainWindow.*
-/LICENSE
+# Test coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node modules (if any)
+node_modules/
+npm-debug.log
+yarn-error.log

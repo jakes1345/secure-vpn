@@ -32,6 +32,9 @@
                 </div>
                 {% else %}
                 <form method="POST" action="{{ url_for('signup') }}">
+                    {% if CSRF_ENABLED %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    {% endif %}
                     <div style="margin-bottom: 1.5rem;">
                         <label for="username" style="display: block; margin-bottom: 0.5rem; color: #aaa; font-weight: 500;">Username</label>
                         <input 

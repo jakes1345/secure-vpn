@@ -1,0 +1,23 @@
+========================================
+VPN CONNECTION FIX - COPY & PASTE
+========================================
+
+STEP 1: SSH into VPS
+---------------------
+ssh root@15.204.11.19
+Password: Jakes1328!@
+
+
+STEP 2: Copy and paste this entire block
+-----------------------------------------
+cd /opt/secure-vpn && sudo systemctl start secure-vpn && sudo systemctl enable secure-vpn && sudo ufw allow 1194/udp && PUBLIC_IP=$(curl -s ifconfig.me) && DOMAIN_IP=$(dig +short phazevpn.duckdns.org | tail -1) && if [ "$DOMAIN_IP" = "$PUBLIC_IP" ]; then SERVER_ADDRESS="phazevpn.duckdns.org"; else SERVER_ADDRESS="$PUBLIC_IP"; fi && sed -i "s|'server_ip': '[^']*'|'server_ip': '$SERVER_ADDRESS'|g" vpn-manager.py && for config in client-configs/*.ovpn; do [ -f "$config" ] && sed -i "s|^remote .* 1194|remote $SERVER_ADDRESS 1194|g" "$config"; done && echo "✓ Fixed! Server: $SERVER_ADDRESS" && systemctl status secure-vpn --no-pager | head -3
+
+
+STEP 3: Create new client from web portal
+------------------------------------------
+Go to: https://phazevpn.duckdns.org
+Login → Create client → Download → Import to OpenVPN Connect
+
+
+========================================
+

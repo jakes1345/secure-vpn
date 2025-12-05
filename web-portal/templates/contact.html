@@ -28,6 +28,9 @@
             
             {% if session.username %}
             <form method="POST" action="/contact">
+                {% if CSRF_ENABLED %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                {% endif %}
                 <div style="margin-bottom: 1rem;">
                     <label for="subject" style="display: block; color: #fff; margin-bottom: 0.5rem;">Subject *</label>
                     <input type="text" id="subject" name="subject" required 

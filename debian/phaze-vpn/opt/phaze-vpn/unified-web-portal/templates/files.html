@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Files - PhazeVPN Platform{% endblock %}
+
+{% block content %}
+<div class="files-interface">
+    <div class="files-header">
+        <h1>Files</h1>
+        <div class="header-actions">
+            <button class="btn-secondary" id="newFolderBtn">📁 New Folder</button>
+            <button class="btn-primary" id="uploadBtn">📤 Upload</button>
+        </div>
+    </div>
+
+    <div class="files-toolbar">
+        <div class="breadcrumbs" id="breadcrumbs">
+            <span class="breadcrumb active">My Files</span>
+        </div>
+        <div class="view-options">
+            <button class="view-btn active" data-view="grid">⊞ Grid</button>
+            <button class="view-btn" data-view="list">☰ List</button>
+        </div>
+    </div>
+
+    <div class="files-grid" id="filesGrid">
+        <div class="file-item folder">
+            <div class="file-icon">📁</div>
+            <div class="file-name">Documents</div>
+            <div class="file-meta">12 items</div>
+        </div>
+        <div class="file-item">
+            <div class="file-icon">📄</div>
+            <div class="file-name">report.pdf</div>
+            <div class="file-meta">2.4 MB</div>
+        </div>
+        <div class="file-item">
+            <div class="file-icon">🖼️</div>
+            <div class="file-name">image.jpg</div>
+            <div class="file-meta">1.2 MB</div>
+        </div>
+    </div>
+</div>
+
+<style>
+.files-interface {
+    padding: 2rem;
+    height: 100%;
+}
+
+.files-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-secondary {
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+    background: var(--bg-secondary);
+    border-color: var(--primary);
+}
+
+.files-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.breadcrumbs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.breadcrumb {
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+}
+
+.breadcrumb.active {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.view-options {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.view-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.view-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.files-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1.5rem;
+}
+
+.file-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.file-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px var(--shadow);
+    border-color: var(--primary);
+}
+
+.file-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+}
+
+.file-name {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.file-meta {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+</style>
+{% endblock %}

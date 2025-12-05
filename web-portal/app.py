@@ -20,6 +20,7 @@ import base64
 import re
 import csv
 import secrets
+import shlex
 from collections import defaultdict
 
 # Add parent directory to path for imports
@@ -69,8 +70,74 @@ except ImportError:
     def save_payment_settings(*args, **kwargs): 
         pass
 
+# Import file locking utilities
+try:
+    sys.path.insert(0, str(Path(__file__).parent))
+    from file_locking import safe_json_read, safe_json_write, safe_json_update, FileLock
+except ImportError:
+    # Fallback if file_locking not available
+    def safe_json_read(file_path, default=None):
+        if file_path.exists():
+            try:
+                with open(file_path) as f:
+                    return json.load(f)
+            except:
+                return default if default is not None else {}
+        return default if default is not None else {}
+    
+    def safe_json_write(file_path, data, create_backup=True):
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(file_path, 'w') as f:
+            json.dump(data, f, indent=2)
+    
+    def safe_json_update(file_path, update_func, default=None):
+        current_data = safe_json_read(file_path, default)
+        updated_data = update_func(current_data)
+        safe_json_write(file_path, updated_data)
+        return updated_data
+    
+    class FileLock:
+        def __init__(self, file_path, timeout=10):
+            self.file_path = file_path
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            pass
+
+# Import MySQL database helper - REQUIRED, NO FALLBACK
+try:
+    sys.path.insert(0, str(Path(__file__).parent))
+    from mysql_db import (
+        get_user, create_user, update_user, list_users,
+        get_user_clients, create_client, delete_client,
+        create_payment, update_payment_status, get_user_payments,
+        log_connection, get_connection_history,
+        check_rate_limit as mysql_check_rate_limit, reset_rate_limit as mysql_reset_rate_limit,
+        init_database
+    )
+    # Verify MySQL is available - CRITICAL
+    if not init_database():
+        raise Exception("MySQL database connection failed. Check db_config.json and MySQL service.")
+except ImportError as e:
+    raise ImportError(f"MySQL database module (mysql_db.py) is required but not found: {e}")
+except Exception as e:
+    raise Exception(f"MySQL database is REQUIRED but connection failed: {e}. Please ensure MySQL is running and db_config.json is configured.")
+
 # Configure Flask - but we'll handle downloads manually to avoid static file serving
 app = Flask(__name__, static_folder='static', static_url_path='/static')
+
+# CSRF Protection (Flask-WTF)
+try:
+    from flask_wtf.csrf import CSRFProtect
+    csrf = CSRFProtect(app)
+    CSRF_ENABLED = True
+    # Make CSRF_ENABLED available to templates
+    app.jinja_env.globals['CSRF_ENABLED'] = True
+except ImportError:
+    # Fallback if Flask-WTF not installed
+    CSRF_ENABLED = False
+    app.jinja_env.globals['CSRF_ENABLED'] = False
+    print("WARNING: Flask-WTF not installed. CSRF protection disabled. Install with: pip install Flask-WTF")
 
 # Override Flask's send_static_file to block Python files
 @app.route('/static/<path:filename>')
@@ -185,13 +252,22 @@ SUBSCRIPTION_TIERS = {
 }
 
 def get_user_subscription(username):
-    """Get user's subscription tier"""
-    users, _ = load_users()
-    if username not in users:
-        return 'free'
-    subscription = users[username].get('subscription', {})
-    tier = subscription.get('tier', 'free')
-    return tier if tier in SUBSCRIPTION_TIERS else 'free'
+    """Get user's subscription tier from MySQL ONLY"""
+    # Check MySQL subscriptions table
+    from mysql_db import get_connection
+    with get_connection() as conn:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT tier FROM subscriptions s
+            JOIN users u ON s.user_id = u.id
+            WHERE u.username = %s AND s.status = 'active'
+            ORDER BY s.created_at DESC LIMIT 1
+        """, (username,))
+        result = cursor.fetchone()
+        if result:
+            return result['tier'] if result['tier'] in SUBSCRIPTION_TIERS else 'free'
+    # Default to free if no subscription found
+    return 'free'
 
 def get_subscription_limits(username):
     """Get subscription limits for user"""
@@ -199,9 +275,10 @@ def get_subscription_limits(username):
     return SUBSCRIPTION_TIERS[tier]
 
 def can_create_client(username):
-    """Check if user can create another client"""
-    users, _ = load_users()
-    if username not in users:
+    """Check if user can create another client - MySQL ONLY"""
+    # Check if user exists
+    user_db = get_user(username)
+    if not user_db:
         return False, 'User not found'
     
     tier = get_user_subscription(username)
@@ -212,9 +289,9 @@ def can_create_client(username):
     if client_limit == -1:
         return True, None
     
-    # Count user's current clients
-    user_clients = users[username].get('clients', [])
-    current_count = len([c for c in user_clients if (CLIENT_CONFIGS_DIR / f'{c}.ovpn').exists()])
+    # Count user's current clients from MySQL
+    clients = get_user_clients(username)
+    current_count = len(clients)
     
     if current_count >= client_limit:
         return False, f'You have reached your limit of {client_limit} device(s). Upgrade to create more!'
@@ -226,20 +303,12 @@ def can_create_client(username):
 # ============================================
 
 def load_tickets():
-    """Load tickets from file"""
-    if TICKETS_FILE.exists():
-        try:
-            with open(TICKETS_FILE) as f:
-                return json.load(f)
-        except:
-            pass
-    return {'tickets': {}}
+    """Load tickets from file with file locking"""
+    return safe_json_read(TICKETS_FILE, {'tickets': {}})
 
 def save_tickets(data):
-    """Save tickets to file"""
-    TICKETS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(TICKETS_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
+    """Save tickets to file with file locking"""
+    safe_json_write(TICKETS_FILE, data, create_backup=True)
 
 def create_ticket(username, subject, message, email=None):
     """Create a new support ticket"""
@@ -327,20 +396,12 @@ def update_ticket_status(ticket_id, status, username):
 # ============================================
 
 def load_payment_requests():
-    """Load payment requests from file"""
-    if PAYMENT_REQUESTS_FILE.exists():
-        try:
-            with open(PAYMENT_REQUESTS_FILE) as f:
-                return json.load(f)
-        except:
-            pass
-    return {'requests': {}, 'settings': {}}
+    """Load payment requests from file with file locking"""
+    return safe_json_read(PAYMENT_REQUESTS_FILE, {'requests': {}, 'settings': {}})
 
 def save_payment_requests(data):
-    """Save payment requests to file"""
-    PAYMENT_REQUESTS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with open(PAYMENT_REQUESTS_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
+    """Save payment requests to file with file locking"""
+    safe_json_write(PAYMENT_REQUESTS_FILE, data, create_backup=True)
 
 def create_payment_request(username, tier, amount):
     """Create a new payment request"""
@@ -452,6 +513,64 @@ def sanitize_input(text, max_length=1000):
     text = re.sub(r'<[^>]+>', '', text)
     return text.strip()
 
+def sanitize_filename(filename):
+    """Sanitize filename to prevent path traversal and command injection"""
+    if not isinstance(filename, str):
+        filename = str(filename)
+    # Remove path components
+    filename = os.path.basename(filename)
+    # Remove dangerous characters
+    filename = re.sub(r'[^a-zA-Z0-9._-]', '', filename)
+    # Limit length
+    filename = filename[:100]
+    return filename.strip()
+
+def safe_subprocess_run(command, *args, **kwargs):
+    """
+    Safely run subprocess with input validation
+    
+    SECURITY: Validates all arguments to prevent command injection.
+    Uses shell=False to prevent shell interpretation.
+    
+    Args:
+        command: List of command and arguments (preferred) or string
+        *args, **kwargs: Additional arguments for subprocess.run
+    
+    Returns:
+        subprocess.CompletedProcess result
+    """
+    # Convert string commands to list (safer)
+    if isinstance(command, str):
+        # Use shlex to safely parse command string
+        command = shlex.split(command)
+    
+    # Validate all arguments are strings and sanitize
+    safe_command = []
+    for arg in command:
+        if isinstance(arg, Path):
+            arg = str(arg)
+        elif not isinstance(arg, str):
+            arg = str(arg)
+        
+        # SECURITY: Validate argument doesn't contain dangerous shell characters
+        # Only allow alphanumeric, spaces, dashes, underscores, dots, slashes, colons, and equals
+        # This prevents command injection while allowing legitimate paths and arguments
+        # Note: We don't use shlex.quote here because subprocess.run with shell=False
+        # doesn't need quoting - it passes arguments directly to execve()
+        if not re.match(r'^[a-zA-Z0-9\s\-_./:=]+$', arg):
+            raise ValueError(f"Invalid character in command argument: {arg}")
+        
+        safe_command.append(arg)
+    
+    # SECURITY: Always use shell=False to prevent shell injection
+    kwargs['shell'] = False
+    
+    try:
+        return subprocess.run(safe_command, *args, **kwargs)
+    except Exception as e:
+        print(f"Subprocess error: {e}")
+        raise
+
 def validate_email(email):
     """Validate email format"""
     pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
@@ -496,28 +615,37 @@ def verify_password(password, password_hash):
             return False
 
 def load_users():
-    """Load users from file"""
-    if USERS_FILE.exists():
-        try:
-            with open(USERS_FILE) as f:
-                data = json.load(f)
-                return data.get('users', {}), data.get('roles', {})
-        except:
-            pass
+    """Load users from MySQL ONLY - no fallback"""
+    # Load from MySQL
+    mysql_users = list_users()
+    users = {}
+    for u in mysql_users:
+        # Get user details including password_hash
+        user_data = get_user(u['username'])
+        if user_data:
+            users[u['username']] = {
+                'password': user_data.get('password_hash', ''),
+                'role': user_data.get('role', 'user'),
+                'email': user_data.get('email', ''),
+                'email_verified': bool(user_data.get('email_verified', False)),
+                'created': user_data.get('created_at', datetime.now()).isoformat() if isinstance(user_data.get('created_at'), datetime) else str(user_data.get('created_at', datetime.now())),
+            }
     
-    # Default users
-    default_users = {
-        "admin": {"password": hash_password("admin123"), "role": "admin", "created": datetime.now().isoformat()},
-        "moderator": {"password": hash_password("mod123"), "role": "moderator", "created": datetime.now().isoformat()},
-        "user": {"password": hash_password("user123"), "role": "user", "created": datetime.now().isoformat()},
-    }
+    # If no users, create defaults
+    if not users:
+        default_users = {
+            "admin": {"password": hash_password("admin123"), "role": "admin", "created": datetime.now().isoformat()},
+            "moderator": {"password": hash_password("mod123"), "role": "moderator", "created": datetime.now().isoformat()},
+            "user": {"password": hash_password("user123"), "role": "user", "created": datetime.now().isoformat()},
+        }
+        for username, user_data in default_users.items():
+            create_user(username, user_data.get('email', ''), user_data['password'], user_data['role'])
+        default_roles = get_default_roles()
+        return default_users, default_roles
     
-    default_roles = get_default_roles()
-    
-    # Save defaults
-    save_users(default_users, default_roles)
-    
-    return default_users, default_roles
+    # Roles are static (not stored in DB)
+    roles = get_default_roles()
+    return users, roles
 
 def get_default_roles():
     """Get default role permissions"""
@@ -552,10 +680,26 @@ def get_default_roles():
     }
 
 def save_users(users, roles):
-    """Save users to file"""
-    data = {"users": users, "roles": roles}
-    with open(USERS_FILE, 'w') as f:
-        json.dump(data, f, indent=2)
+    """Save users to MySQL ONLY - no fallback"""
+    # Save to MySQL
+    for username, user_data in users.items():
+        user_db = get_user(username)
+        if user_db:
+            # Update existing user
+            update_user(username,
+                email=user_data.get('email', ''),
+                password_hash=user_data.get('password', ''),
+                role=user_data.get('role', 'user')
+            )
+        else:
+            # Create new user
+            create_user(
+                username,
+                user_data.get('email', ''),
+                user_data.get('password', ''),
+                user_data.get('role', 'user')
+            )
+    # Roles are static (not stored in DB)
 
 def get_permissions(role):
     """Get permissions for a role"""
@@ -652,30 +796,18 @@ def get_activity_logs(limit=100):
         return []
 
 def update_connection_history(connections):
-    """Update connection history"""
+    """Update connection history with file locking"""
     CONNECTION_HISTORY.parent.mkdir(parents=True, exist_ok=True)
     
-    # Load existing history
-    history = []
-    if CONNECTION_HISTORY.exists():
-        try:
-            with open(CONNECTION_HISTORY, 'r') as f:
-                history = json.load(f)
-        except:
-            history = []
+    # Load existing history with file locking
+    history = safe_json_read(CONNECTION_HISTORY, [])
     
     # Track current connections
     current_connections = {c.get('name', 'Unknown'): c for c in connections}
     
-    # Load previous state
+    # Load previous state with file locking
     last_state_file = VPN_DIR / 'logs' / 'last-connections.json'
-    previous_connections = {}
-    if last_state_file.exists():
-        try:
-            with open(last_state_file, 'r') as f:
-                previous_connections = json.load(f)
-        except:
-            pass
+    previous_connections = safe_json_read(last_state_file, {})
     
     # Detect new connections
     for name, conn in current_connections.items():
@@ -702,13 +834,11 @@ def update_connection_history(connections):
     # Keep last 1000 entries
     history = history[-1000:]
     
-    # Save history
-    with open(CONNECTION_HISTORY, 'w') as f:
-        json.dump(history, f, indent=2)
+    # Save history with file locking
+    safe_json_write(CONNECTION_HISTORY, history, create_backup=True)
     
-    # Save current state
-    with open(last_state_file, 'w') as f:
-        json.dump(current_connections, f, indent=2)
+    # Save current state with file locking
+    safe_json_write(last_state_file, current_connections, create_backup=False)
     
     return history
 
@@ -724,27 +854,53 @@ def index():
     return render_template('home.html')
 
 
-# Rate limiting storage (in-memory, simple)
-login_attempts = {}
-RATE_LIMIT_MAX = 5
-RATE_LIMIT_WINDOW = 900  # 15 minutes
-
-def check_rate_limit(ip):
-    """Check if IP is rate limited"""
-    import time
-    now = time.time()
+# Rate limiting - use persistent file-based storage
+try:
+    sys.path.insert(0, str(Path(__file__).parent))
+    from rate_limiting import check_rate_limit, get_rate_limit_status, reset_rate_limit
+    RATE_LIMIT_ENABLED = True
+except ImportError:
+    # Fallback to in-memory rate limiting
+    RATE_LIMIT_ENABLED = False
+    login_attempts = {}
+    RATE_LIMIT_MAX = 5
+    RATE_LIMIT_WINDOW = 900  # 15 minutes
     
-    if ip not in login_attempts:
-        login_attempts[ip] = []
+    def check_rate_limit(ip):
+        """Check if IP is rate limited (fallback in-memory version)"""
+        import time
+        now = time.time()
+        
+        if ip not in login_attempts:
+            login_attempts[ip] = []
+        
+        # Remove old attempts
+        login_attempts[ip] = [t for t in login_attempts[ip] if now - t < RATE_LIMIT_WINDOW]
+        
+        if len(login_attempts[ip]) >= RATE_LIMIT_MAX:
+            return False
+        
+        login_attempts[ip].append(now)
+        return True
     
-    # Remove old attempts
-    login_attempts[ip] = [t for t in login_attempts[ip] if now - t < RATE_LIMIT_WINDOW]
+    def get_rate_limit_status(ip):
+        """Get rate limit status (fallback)"""
+        import time
+        now = time.time()
+        if ip not in login_attempts:
+            return {'limited': False, 'attempts': 0, 'remaining': RATE_LIMIT_MAX, 'reset_in': 0}
+        attempts = [t for t in login_attempts[ip] if now - t < RATE_LIMIT_WINDOW]
+        return {
+            'limited': len(attempts) >= RATE_LIMIT_MAX,
+            'attempts': len(attempts),
+            'remaining': max(0, RATE_LIMIT_MAX - len(attempts)),
+            'reset_in': 0
+        }
     
-    if len(login_attempts[ip]) >= RATE_LIMIT_MAX:
-        return False
-    
-    login_attempts[ip].append(now)
-    return True
+    def reset_rate_limit(ip):
+        """Reset rate limit (fallback)"""
+        if ip in login_attempts:
+            del login_attempts[ip]
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -761,19 +917,25 @@ def login():
         if not validate_username(username):
             return render_template('login.html', error='Invalid username format. Use 3-30 alphanumeric characters, underscore, or dash.')
         
-        users, _ = load_users()
+        # Get user from MySQL ONLY
+        user_db = get_user(username)
+        if not user_db:
+            return render_template('login.html', error='Invalid username or password.')
         
-        if username in users:
-            user = users[username]
-            stored_password = user.get('password', '')
-            
-            # Verify password (supports both bcrypt and legacy SHA256)
-            if verify_password(password, stored_password):
-                # Migrate to bcrypt if still using old hash
-                if len(stored_password) == 64:  # Old SHA256 hash length
-                    users[username]['password'] = hash_password(password)
-                    _, roles = load_users()
-                    save_users(users, roles)
+        user = {
+            'password': user_db.get('password_hash', ''),
+            'role': user_db.get('role', 'user'),
+            'email': user_db.get('email', ''),
+            'email_verified': bool(user_db.get('email_verified', False)),
+        }
+        stored_password = user['password']
+        
+        # Verify password (supports both bcrypt and legacy SHA256)
+        if verify_password(password, stored_password):
+            # Migrate to bcrypt if still using old hash
+            if len(stored_password) == 64:  # Old SHA256 hash length
+                new_hash = hash_password(password)
+                update_user(username, password_hash=new_hash)
                 
                 # Email verification is recommended but not required for login
                 # Users can login even if email isn't verified (but we'll show a warning)
@@ -2008,8 +2170,10 @@ def download_config():
             try:
                 wg_add_client = BASE_DIR / 'wireguard' / 'add-client.sh'
                 if wg_add_client.exists():
-                    result = subprocess.run(
-                        ['bash', str(wg_add_client), client_name],
+                    # SECURITY: Sanitize client_name to prevent command injection
+                    safe_client_name = sanitize_filename(client_name)
+                    result = safe_subprocess_run(
+                        ['bash', str(wg_add_client), safe_client_name],
                         capture_output=True,
                         text=True,
                         timeout=10,
@@ -2124,8 +2288,11 @@ def download_client_config(client_name):
                     go_generator = BASE_DIR / 'phazevpn-protocol-go' / 'scripts' / 'generate-phazevpn-client-config.py'
                     if go_generator.exists():
                         try:
-                            result = subprocess.run(
-                                ['python3', str(go_generator), client_name, server_host, str(server_port)],
+                            # SECURITY: Sanitize inputs to prevent command injection
+                            safe_client_name = sanitize_filename(client_name)
+                            safe_server_host = sanitize_input(server_host, max_length=255)
+                            result = safe_subprocess_run(
+                                ['python3', str(go_generator), safe_client_name, safe_server_host, str(server_port)],
                                 capture_output=True,
                                 text=True,
                                 timeout=30,
@@ -2268,7 +2435,9 @@ def api_vpn_connect():
         
         # Check if already connected
         if protocol == 'openvpn':
-            result = subprocess.run(['pgrep', '-f', f'openvpn.*{safe_name}'], capture_output=True)
+            # SECURITY: Use safe subprocess with sanitized input
+            safe_pattern = sanitize_input(safe_name, max_length=100)
+            result = safe_subprocess_run(['pgrep', '-f', f'openvpn.*{safe_pattern}'], capture_output=True)
             if result.returncode == 0:
                 return jsonify({'success': False, 'error': 'Already connected'}), 400
         elif protocol == 'wireguard':
@@ -2315,9 +2484,10 @@ def api_vpn_disconnect():
             # Kill OpenVPN processes
             subprocess.run(['pkill', '-f', 'openvpn'], capture_output=True)
         elif protocol == 'wireguard':
-            # Disconnect WireGuard
-            subprocess.run(['wg-quick', 'down', 'wg0'], capture_output=True)
-            subprocess.run(['wg-quick', 'down', client_name], capture_output=True)
+            # Disconnect WireGuard - SECURITY: Use safe subprocess
+            safe_subprocess_run(['wg-quick', 'down', 'wg0'], capture_output=True)
+            safe_client_name = sanitize_filename(client_name) if client_name else 'wg0'
+            safe_subprocess_run(['wg-quick', 'down', safe_client_name], capture_output=True)
         
         # Clear session
         session.pop('vpn_connected', None)
@@ -3063,7 +3233,8 @@ def api_add_client():
         
         if go_generator.exists():
             print(f"[CLIENT] Using PhazeVPN generator: {go_generator}")
-            phazevpn_result = subprocess.run(
+            # SECURITY: Use safe subprocess with sanitized input
+            phazevpn_result = safe_subprocess_run(
                 ['bash', str(go_generator), safe_name],
                 cwd=str(VPN_DIR),
                 capture_output=True,
@@ -3127,7 +3298,8 @@ ClientIP = {client_ip}
         
         if generate_all_script.exists():
             try:
-                gen_result = subprocess.run(
+                # SECURITY: Use safe subprocess
+                gen_result = safe_subprocess_run(
                     ['python3', str(generate_all_script), safe_name],
                     cwd=str(VPN_DIR),
                     capture_output=True,
@@ -3266,7 +3438,8 @@ def api_generate_configs(client_name):
             
             if gui_generator.exists():
                 print(f"[API-GENERATE-CONFIGS] Using gui-config-generator.py")
-                result = subprocess.run(
+                # SECURITY: Use safe subprocess
+                result = safe_subprocess_run(
                     ['python3', str(gui_generator), safe_name, 'all'],
                     cwd=str(BASE_DIR),
                     capture_output=True,
@@ -3295,7 +3468,8 @@ def api_generate_configs(client_name):
                     })
         else:
             # Use generate_all_protocols.py
-            result = subprocess.run(
+            # SECURITY: Use safe subprocess
+            result = safe_subprocess_run(
                 ['python3', str(generate_script), safe_name],
                 cwd=str(VPN_DIR),
                 capture_output=True,
@@ -3327,7 +3501,8 @@ def api_generate_configs(client_name):
         try:
             vpn_manager = VPN_DIR / 'vpn-manager.py'
             if vpn_manager.exists():
-                ovpn_result = subprocess.run(
+                # SECURITY: Use safe subprocess
+                ovpn_result = safe_subprocess_run(
                     ['python3', str(vpn_manager), 'add-client', safe_name],
                     cwd=str(VPN_DIR),
                     capture_output=True,

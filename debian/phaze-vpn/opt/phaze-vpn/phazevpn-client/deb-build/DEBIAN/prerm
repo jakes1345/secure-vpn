@@ -1,0 +1,9 @@
+#!/bin/bash
+# Pre-removal script for PhazeVPN Client
+
+set -e
+
+echo "Removing PhazeVPN Client..."
+
+# Clean up if needed
+exit 0

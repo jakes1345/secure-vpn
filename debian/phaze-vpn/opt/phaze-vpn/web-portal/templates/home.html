@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}PhazeVPN - Secure VPN Protection{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero">
+        <h1 data-typing="Protect Your Privacy with PhazeVPN" data-typing-speed="50">Protect Your Privacy with PhazeVPN</h1>
+        <p style="font-size: 1.3rem; font-weight: 600; color: #4a9eff; margin: 1rem 0;">
+            "Just Phaze Right On By - Nothing Will Notice You At All"
+        </p>
+        <p>PhazeVPN - Secure VPN using audited protocols (OpenVPN & WireGuard). Your privacy is our priority.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem;">
+            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg glow-effect">Get Started Free</a>
+            <a href="{{ url_for('download_page') }}" class="btn btn-secondary btn-lg">Download Client</a>
+        </div>
+        <p class="text-muted" style="margin-top: 1.5rem; font-size: 0.9rem;">
+            ✅ 30-Day Money-Back Guarantee • ✅ No Credit Card Required for Free Plan
+        </p>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-grid animate-on-scroll">
+        <div class="stat-card">
+            <div class="stat-number" data-count="10000">0</div>
+            <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" data-count="50">0</div>
+            <div class="stat-label">Server Locations</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" data-count="99">0</div>
+            <div class="stat-label">Uptime %</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" data-count="24">0</div>
+            <div class="stat-label">Support Hours</div>
+        </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid grid-3" style="margin-bottom: 3rem;">
+        <div class="card animate-on-scroll">
+            <div class="card-header">
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">🛡️</h3>
+                <h3 class="card-title">Kill Switch</h3>
+            </div>
+            <div class="card-body">
+                <p>Network-level kill switch blocks all traffic if VPN disconnects. No leaks, ever.</p>
+            </div>
+        </div>
+
+        <div class="card animate-on-scroll">
+            <div class="card-header">
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">🔐</h3>
+                <h3 class="card-title">Strong Encryption</h3>
+            </div>
+            <div class="card-body">
+                <p>ChaCha20-Poly1305 encryption, stronger than AES-256. Your data is unbreakable.</p>
+            </div>
+        </div>
+
+        <div class="card animate-on-scroll">
+            <div class="card-header">
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">🌐</h3>
+                <h3 class="card-title">DNS Leak Protection</h3>
+            </div>
+            <div class="card-body">
+                <p>All DNS queries forced through VPN. No DNS leaks, guaranteed.</p>
+            </div>
+        </div>
+
+        <div class="card animate-on-scroll">
+            <div class="card-header">
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">🚫</h3>
+                <h3 class="card-title">No-Logs Policy</h3>
+            </div>
+            <div class="card-body">
+                <p>We don't log your activity. Your privacy is our priority.</p>
+            </div>
+        </div>
+
+        <div class="card animate-on-scroll">
+            <div class="card-header">
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</h3>
+                <h3 class="card-title">Lightning Fast</h3>
+            </div>
+            <div class="card-body">
+                <p>Optimized for speed. Stream, game, and browse without lag.</p>
+            </div>
+        </div>
+
+        <div class="card animate-on-scroll">
+            <div class="card-header">
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">📱</h3>
+                <h3 class="card-title">Cross-Platform</h3>
+            </div>
+            <div class="card-body">
+                <p>Windows, Linux, macOS, iOS, Android. One account, all devices.</p>
+            </div>
+        </div>
+        
+        <div class="card animate-on-scroll">
+            <div class="card-header">
+                <h3 style="font-size: 2rem; margin-bottom: 0.5rem;">🌐</h3>
+                <h3 class="card-title">Built-in Secure Browser</h3>
+            </div>
+            <div class="card-body">
+                <p>PhazeBrowser - VPN-native browser with built-in security. No extensions needed.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Why Choose PhazeVPN -->
+    <div class="card" style="margin-bottom: 3rem; text-align: center;">
+        <div class="card-header">
+            <h2 class="card-title">Why Choose PhazeVPN?</h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-2" style="margin-top: 2rem;">
+                <div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔒</div>
+                    <h3 style="margin-bottom: 0.5rem;">Zero-Logs Policy</h3>
+                    <p class="text-muted">We don't track, log, or store your online activity. Your privacy is guaranteed.</p>
+                </div>
+                <div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                    <h3 style="margin-bottom: 0.5rem;">30-Day Guarantee</h3>
+                    <p class="text-muted">Try PhazeVPN risk-free. Full refund if you're not satisfied.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Section -->
+    <div style="margin-bottom: 3rem;" class="animate-on-scroll">
+        <h2 class="text-center" style="margin-bottom: 2rem; font-size: 2.5rem;">Simple, Transparent Pricing</h2>
+        <div class="grid grid-3">
+            <div class="card pricing-card animate-on-scroll">
+                <div class="card-header text-center">
+                    <h3 class="card-title">Free</h3>
+                    <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin: 1rem 0;">$0</div>
+                    <p class="text-muted">Basic protection</p>
+                </div>
+                <div class="card-body">
+                    <ul style="list-style: none; text-align: left;">
+                        <li style="margin-bottom: 0.75rem;">✅ 1 Device</li>
+                        <li style="margin-bottom: 0.75rem;">✅ 10GB/month</li>
+                        <li style="margin-bottom: 0.75rem;">✅ Basic Speed</li>
+                    </ul>
+                    <a href="{{ url_for('signup') }}" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Get Started</a>
+                </div>
+            </div>
+
+            <div class="card pricing-card featured animate-on-scroll">
+                <div class="card-header text-center">
+                    <span class="badge badge-primary" style="margin-bottom: 0.5rem;">Most Popular</span>
+                    <h3 class="card-title">Pro</h3>
+                    <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin: 1rem 0;">$10</div>
+                    <p class="text-muted">per month</p>
+                </div>
+                <div class="card-body">
+                    <ul style="list-style: none; text-align: left;">
+                        <li style="margin-bottom: 0.75rem;">✅ 5 Devices</li>
+                        <li style="margin-bottom: 0.75rem;">✅ Unlimited Data</li>
+                        <li style="margin-bottom: 0.75rem;">✅ Maximum Speed</li>
+                        <li style="margin-bottom: 0.75rem;">✅ Priority Support</li>
+                    </ul>
+                    <a href="{{ url_for('signup') }}" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Get Started</a>
+                </div>
+            </div>
+
+            <div class="card pricing-card animate-on-scroll">
+                <div class="card-header text-center">
+                    <h3 class="card-title">Premium</h3>
+                    <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin: 1rem 0;">$20</div>
+                    <p class="text-muted">per month</p>
+                </div>
+                <div class="card-body">
+                    <ul style="list-style: none; text-align: left;">
+                        <li style="margin-bottom: 0.75rem;">✅ Unlimited Devices</li>
+                        <li style="margin-bottom: 0.75rem;">✅ Unlimited Data</li>
+                        <li style="margin-bottom: 0.75rem;">✅ Maximum Speed</li>
+                        <li style="margin-bottom: 0.75rem;">✅ 24/7 Support</li>
+                        <li style="margin-bottom: 0.75rem;">✅ Dedicated IP</li>
+                    </ul>
+                    <a href="{{ url_for('signup') }}" class="btn btn-secondary" style="width: 100%; margin-top: 1rem;">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%); text-align: center; border: 1px solid var(--primary);">
+        <div class="card-body">
+            <h2 style="margin-bottom: 1rem; font-size: 2rem;">Ready to Protect Your Privacy?</h2>
+            <p class="text-muted" style="margin-bottom: 2rem; font-size: 1.1rem;">Join thousands of users who trust PhazeVPN for their online security.</p>
+            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg">Start Free Trial</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

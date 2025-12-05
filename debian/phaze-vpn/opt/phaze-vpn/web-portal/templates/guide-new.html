@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}PhazeVPN Setup Guide - PhazeVPN Protocol{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>📖 PhazeVPN Setup Guide</h1>
+    <p>Learn how to connect to PhazeVPN Protocol - The most secure VPN with built-in browsing!</p>
+
+    <!-- Main VPN: PhazeVPN Protocol -->
+    <div class="card" style="margin-top: 2rem; border: 2px solid #4a9eff;">
+        <div class="card-header" style="background: linear-gradient(135deg, #4a9eff 0%, #10b981 100%);">
+            <h2 style="color: white; margin: 0;">🔒 PhazeVPN Protocol - Desktop VPN (Main)</h2>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+                <strong>PhazeVPN</strong> uses audited, proven VPN protocols (OpenVPN & WireGuard):
+            </p>
+            <ul style="margin-left: 1.5rem; line-height: 2;">
+                <li>✅ <strong>Zero-Knowledge Architecture</strong> - No logging, no tracking</li>
+                <li>✅ <strong>RAM-Only Operations</strong> - Memory-only, no disk writes</li>
+                <li>✅ <strong>Built-in Web Browser</strong> - PhazeBrowser with VPN-native security</li>
+                <li>✅ <strong>Traffic Obfuscation</strong> - DPI-resistant, undetectable</li>
+                <li>✅ <strong>VPN Modes</strong> - Normal, Semi Ghost, Full Ghost</li>
+            </ul>
+            
+            <div style="background: rgba(74, 158, 255, 0.1); padding: 1.5rem; border-radius: 8px; margin-top: 1.5rem;">
+                <h3 style="color: #4a9eff; margin-bottom: 1rem;">🚀 Quick Start</h3>
+                <ol style="margin-left: 1.5rem; line-height: 2.5;">
+                    <li><strong>Create Account</strong> - <a href="/signup" style="color: #4a9eff;">Sign up here</a></li>
+                    <li><strong>Login</strong> - Access your dashboard</li>
+                    <li><strong>Download PhazeVPN Client</strong> - <a href="/download" style="color: #4a9eff;">Download for your OS</a></li>
+                    <li><strong>Connect</strong> - One-click connect, you're protected!</li>
+                    <li><strong>Browse</strong> - Use built-in PhazeBrowser for maximum security!</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Tutorials -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">💻 Desktop Setup - PhazeVPN Protocol</div>
+        <div class="card-body">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 1rem;">
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🪟</div>
+                    <h3 style="color: #4a9eff; margin-bottom: 0.5rem;">Windows Setup</h3>
+                    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">
+                        1. Download PhazeVPN client<br>
+                        2. Install and run<br>
+                        3. Login with your account<br>
+                        4. Connect to VPN<br>
+                        5. Use PhazeBrowser for browsing
+                    </p>
+                    <a href="/download/client/windows" class="btn btn-primary">Download for Windows</a>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🐧</div>
+                    <h3 style="color: #4a9eff; margin-bottom: 0.5rem;">Linux Setup</h3>
+                    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">
+                        1. Download .deb package<br>
+                        2. Install: sudo dpkg -i phazevpn-client.deb<br>
+                        3. Run: phazevpn-client<br>
+                        4. Login and connect<br>
+                        5. Browse with PhazeBrowser
+                    </p>
+                    <a href="/download/client/linux" class="btn btn-primary">Download for Linux</a>
+                </div>
+                
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🍎</div>
+                    <h3 style="color: #4a9eff; margin-bottom: 0.5rem;">macOS Setup</h3>
+                    <p style="color: #aaa; font-size: 0.9rem; margin-bottom: 1rem;">
+                        1. Download PhazeVPN.app<br>
+                        2. Install the app<br>
+                        3. Run and login<br>
+                        4. Connect to VPN<br>
+                        5. Use PhazeBrowser
+                    </p>
+                    <a href="/download/client/macos" class="btn btn-primary">Download for macOS</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PhazeBrowser Feature -->
+    <div class="card" style="margin-top: 2rem; background: linear-gradient(135deg, rgba(74, 158, 255, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);">
+        <div class="card-header">
+            <h2>🌐 PhazeBrowser - Built-in Secure Browser</h2>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 1.1rem; margin-bottom: 1rem;">
+                PhazeBrowser is built into PhazeVPN Protocol - a custom browser with VPN-native security!
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <div>
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🔒</div>
+                    <h4 style="color: #4a9eff;">VPN-Native Security</h4>
+                    <p style="color: #aaa; font-size: 0.9rem;">All traffic through VPN, WebRTC/IPv6 routing, kill switch</p>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">🛡️</div>
+                    <h4 style="color: #4a9eff;">Built-in Privacy</h4>
+                    <p style="color: #aaa; font-size: 0.9rem;">Ad blocking, tracking protection, fingerprinting protection</p>
+                </div>
+                <div>
+                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">⚡</div>
+                    <h4 style="color: #4a9eff;">Fast & Secure</h4>
+                    <p style="color: #aaa; font-size: 0.9rem;">Based on Chromium, optimized for privacy</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile VPN (Temporary) -->
+    <div class="card" style="margin-top: 2rem; border: 1px solid rgba(255,255,255,0.2);">
+        <div class="card-header">
+            <h2>📱 Mobile VPN (Temporary - Until App Ready)</h2>
+        </div>
+        <div class="card-body">
+            <p style="color: #aaa; margin-bottom: 1rem;">
+                <strong>Note:</strong> PhazeVPN mobile app coming soon! For now, use OpenVPN or WireGuard apps.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                <!-- iOS Setup -->
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px;">
+                    <h3 style="color: #4a9eff; margin-bottom: 1rem;">📱 iPhone/iPad</h3>
+                    <ol style="margin-left: 1.5rem; line-height: 2;">
+                        <li>Install <strong>OpenVPN Connect</strong> from App Store</li>
+                        <li>Download your .ovpn config from dashboard</li>
+                        <li>Import config into OpenVPN Connect</li>
+                        <li>Connect and you're protected!</li>
+                    </ol>
+                    <p style="margin-top: 1rem; color: #888; font-size: 0.85rem;">
+                        ⚠️ Temporary solution - PhazeVPN app coming soon!
+                    </p>
+                </div>
+                
+                <!-- Android Setup -->
+                <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 8px;">
+                    <h3 style="color: #4a9eff; margin-bottom: 1rem;">🤖 Android</h3>
+                    <ol style="margin-left: 1.5rem; line-height: 2;">
+                        <li>Install <strong>OpenVPN Connect</strong> or <strong>WireGuard</strong> from Play Store</li>
+                        <li>Download your config (.ovpn or .conf)</li>
+                        <li>Import into the app</li>
+                        <li>Connect and browse securely!</li>
+                    </ol>
+                    <p style="margin-top: 1rem; color: #888; font-size: 0.85rem;">
+                        ⚠️ Temporary solution - PhazeVPN app coming soon!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Tutorials Placeholder -->
+    <div class="card" style="margin-top: 2rem;">
+        <div class="card-header">🎥 Video Tutorials</div>
+        <div class="card-body">
+            <p style="color: #aaa; margin-bottom: 1rem;">
+                Video tutorials coming soon! For now, follow the written guides above.
+            </p>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 8px; text-align: center; border: 1px dashed rgba(255,255,255,0.2);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🎬</div>
+                    <h3 style="color: #4a9eff;">Desktop Setup Video</h3>
+                    <p style="color: #888; margin-top: 1rem;">Coming soon!</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 8px; text-align: center; border: 1px dashed rgba(255,255,255,0.2);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🌐</div>
+                    <h3 style="color: #4a9eff;">PhazeBrowser Guide</h3>
+                    <p style="color: #888; margin-top: 1rem;">Coming soon!</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 8px; text-align: center; border: 1px dashed rgba(255,255,255,0.2);">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">🔒</div>
+                    <h3 style="color: #4a9eff;">Security Features</h3>
+                    <p style="color: #888; margin-top: 1rem;">Coming soon!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

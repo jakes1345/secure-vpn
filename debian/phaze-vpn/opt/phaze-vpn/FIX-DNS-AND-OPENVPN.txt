@@ -1,0 +1,68 @@
+# ============================================
+# FIX DNS AND CHECK OPENVPN
+# Copy-paste this on the VPS
+# ============================================
+
+echo "=== FIXING DNS ==="
+# Remove immutable flag first
+chattr -i /etc/resolv.conf 2>/dev/null || true
+
+# Check if it's a symlink
+if [ -L /etc/resolv.conf ]; then
+    echo "resolv.conf is a symlink, removing it..."
+    rm -f /etc/resolv.conf
+fi
+
+# Create new resolv.conf
+cat > /etc/resolv.conf << 'EOF'
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+nameserver 1.1.1.1
+EOF
+
+# Make it immutable
+chattr +i /etc/resolv.conf 2>/dev/null || true
+
+# Verify
+echo "DNS configured:"
+cat /etc/resolv.conf
+echo "✅ DNS fixed"
+echo ""
+
+echo "=== CHECKING OPENVPN ==="
+# Check if OpenVPN config exists
+echo "Looking for OpenVPN configs:"
+ls -la /etc/openvpn/*.conf 2>/dev/null || echo "No configs in /etc/openvpn/"
+ls -la /opt/secure-vpn/config/*.conf 2>/dev/null | head -5 || echo "No configs in /opt/secure-vpn/config/"
+echo ""
+
+# Check OpenVPN processes
+echo "OpenVPN processes:"
+ps aux | grep openvpn | grep -v grep || echo "No OpenVPN processes running"
+echo ""
+
+# Check what OpenVPN service files exist
+echo "OpenVPN service files:"
+systemctl list-unit-files | grep openvpn
+echo ""
+
+# Check if there's a server config
+if [ -f /etc/openvpn/server.conf ]; then
+    echo "Found /etc/openvpn/server.conf"
+    echo "Trying to start: systemctl start openvpn@server"
+    systemctl start openvpn@server
+    sleep 2
+    systemctl status openvpn@server | head -10
+elif [ -f /opt/secure-vpn/config/server.conf ]; then
+    echo "Found /opt/secure-vpn/config/server.conf"
+    echo "OpenVPN might need to be started manually or configured"
+else
+    echo "⚠️  No OpenVPN server config found"
+    echo "Need to set up OpenVPN server"
+fi
+echo ""
+
+echo "=== TESTING DNS ==="
+nslookup google.com 2>/dev/null | head -5 || echo "DNS test failed"
+echo ""
+

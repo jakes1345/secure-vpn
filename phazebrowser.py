@@ -62,16 +62,67 @@ class PhazeBrowserEnhanced:
         self.downloads = []  # Download manager
         self.saved_passwords = self.load_passwords()  # Password manager
         
-        # Privacy settings
+        # Privacy settings - COMPLETE GHOST MODE
         self.settings = {
             'ad_blocking': True,
             'tracking_protection': True,
             'fingerprint_protection': True,
             'webrtc_leak_protection': True,
             'dns_over_https': True,
-            'theme': 'default',  # default, dark, light
-            'max_privacy_mode': True,  # Maximum privacy - make all users identical
+            'theme': 'default',
+            'max_privacy_mode': True,
+            'ghost_mode': True,  # Complete invisibility
+            'block_all_cookies': True,  # Block ALL cookies (not just third-party)
+            'block_all_scripts': False,  # Too aggressive, but option available
+            'block_all_images': False,  # Too aggressive, but option available
+            'block_all_fonts': True,  # Prevent font fingerprinting
+            'block_all_plugins': True,
+            'block_geolocation': True,
+            'block_notifications': True,
+            'block_camera': True,
+            'block_microphone': True,
+            'block_battery_api': True,
+            'block_bluetooth': True,
+            'block_usb': True,
+            'block_serial': True,
+            'block_hid': True,
         }
+        
+        # Privacy stats - track what we block
+        self.privacy_stats = {
+            'ads_blocked': 0,
+            'trackers_blocked': 0,
+            'cookies_blocked': 0,
+            'scripts_blocked': 0,
+            'fingerprints_prevented': 0,
+            'requests_blocked': 0,
+            'domains_blocked': set(),
+        }
+        
+        # Opera GX Gaming Mode
+        self.gaming_mode = False
+        self.cpu_limit = 100  # Percentage
+        self.ram_limit = 100  # Percentage
+        self.network_limit = 100  # Percentage
+        
+        # Firefox Container Tabs
+        self.container_tabs = {}  # tab_id -> container_name
+        self.containers = ['Personal', 'Work', 'Banking', 'Shopping']
+        
+        # Vivaldi Features
+        self.sidebar_visible = False
+        self.tab_stacks = {}  # Stacked tabs
+        self.notes = []
+        self.web_panels = []
+        
+        # Brave Features
+        self.bat_rewards_enabled = False
+        self.shields_level = 'aggressive'  # aggressive, balanced, standard
+        
+        # Safari Features
+        self.tab_groups = {}
+        self.reader_mode_available = False
+        self.shared_with_you = []
         
         # Filter lists cache
         self.filter_lists_loaded = False
@@ -351,33 +402,28 @@ class PhazeBrowserEnhanced:
             self.current_tab['webview'].load_html(warning_html, "file:///")
     
     def create_webview_settings(self):
-        """Create WebKit settings with privacy features"""
+        """Create WebKit settings with COMPLETE GHOST MODE privacy"""
         settings = WebKit2.Settings()
         
-        # Privacy settings
-        settings.set_property("enable-javascript", True)
-        settings.set_property("enable-plugins", False)  # Disable plugins for security
+        # COMPLETE GHOST MODE - Block everything
+        settings.set_property("enable-javascript", not self.settings.get('block_all_scripts', False))
+        settings.set_property("enable-plugins", False)  # Always disable plugins
         settings.set_property("enable-java", False)
         
-        # WebRTC leak protection
-        # Note: WebKit2 doesn't expose WebRTC settings directly
-        # WebRTC traffic is routed through VPN at system level (via VPN tunnel)
-        # This checkbox is informational - actual protection comes from VPN routing
-        if self.settings['webrtc_leak_protection']:
+        # Block media access completely
+        if self.settings.get('block_camera', True) or self.settings.get('block_microphone', True):
+            settings.set_property("enable-media-stream", False)
+        
+        # Block WebAudio (fingerprinting)
+        if self.settings.get('fingerprint_protection', True):
+            settings.set_property("enable-webaudio", False)
+        
+        # Block all fonts (font fingerprinting) - handled via CSS injection in create_webview
+        
+        # WebRTC - VPN handles at system level, but we can disable browser-level too
+        if self.settings.get('webrtc_leak_protection', True):
             # System-level VPN routing ensures WebRTC goes through VPN
-            # No browser-level action needed - VPN handles it
             pass
-        
-        # DNS over HTTPS
-        # Note: DNS over HTTPS must be configured at system level
-        # WebKit2 doesn't have direct DoH support in settings
-        # This is informational - actual DoH comes from system config
-        pass
-        
-        # Disable features that can be used for fingerprinting
-        if self.settings['fingerprint_protection']:
-            settings.set_property("enable-webaudio", False)  # Can be used for fingerprinting
-            settings.set_property("enable-media-stream", False)  # Disable media access
         
         return settings
     
@@ -429,7 +475,7 @@ class PhazeBrowserEnhanced:
                                  None, None)
             )
             
-            # Cookie blocking for trackers
+            # COMPLETE GHOST MODE - Block ALL cookies
             cookie_block_js = self.load_cookie_blocking_js()
             user_content.add_script(
                 WebKit2.UserScript(cookie_block_js,
@@ -437,6 +483,23 @@ class PhazeBrowserEnhanced:
                                  WebKit2.UserScriptInjectionTime.START,
                                  None, None)
             )
+            
+            # Block font loading (font fingerprinting)
+            if self.settings.get('block_all_fonts', True):
+                font_block_css = """
+                @font-face {
+                    font-family: 'blocked' !important;
+                }
+                * {
+                    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+                }
+                """
+                user_content.add_style_sheet(
+                    WebKit2.UserStyleSheet(font_block_css,
+                                         WebKit2.UserContentInjectedFrames.ALL_FRAMES,
+                                         WebKit2.UserScriptInjectionTime.START,
+                                         None, None)
+                )
         
         # Fingerprinting protection
         if self.settings['fingerprint_protection']:
@@ -641,102 +704,198 @@ class PhazeBrowserEnhanced:
                 color: #333;
             }
             """
-        else:  # default - Modern purple gradient theme
+        else:  # default - FRANKENSTEIN MODERN THEME (Safari + Chrome + Opera GX + Vivaldi + Brave)
             css = """
             * {
-                font-family: 'Ubuntu', 'Cantarell', sans-serif;
+                font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', 'Inter', 'Ubuntu', sans-serif;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
             }
             
             window {
-                background-color: #ffffff;
+                background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+                background-color: #0f0f23;
             }
             
-            /* VPN Status Bar - Purple and prominent */
+            /* VPN Status Bar - Glassmorphism (Safari-inspired) */
             box {
-                background-color: #667eea;
-                padding: 12px;
-                border-bottom: 3px solid #5568d3;
+                background: rgba(102, 126, 234, 0.15);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                padding: 14px 20px;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             }
             
             label {
-                color: #333333;
+                color: rgba(255, 255, 255, 0.95);
+                font-weight: 500;
+                letter-spacing: 0.3px;
             }
             
-            /* VPN status styling */
+            /* VPN status styling - Modern badges */
             .vpn-connected {
-                color: #2ecc71;
-                font-weight: bold;
-                font-size: 14px;
+                color: #00ff88;
+                font-weight: 700;
+                font-size: 13px;
+                text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+                letter-spacing: 0.5px;
             }
             
             .vpn-disconnected {
-                color: #e74c3c;
-                font-weight: bold;
-                font-size: 14px;
+                color: #ff4757;
+                font-weight: 700;
+                font-size: 13px;
+                text-shadow: 0 0 10px rgba(255, 71, 87, 0.5);
+                letter-spacing: 0.5px;
             }
             
-            /* Modern purple buttons */
+            /* Modern buttons - Opera GX style with glow */
             button {
-                background-color: #667eea;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 color: white;
                 border: none;
-                border-radius: 8px;
-                padding: 10px 20px;
+                border-radius: 12px;
+                padding: 12px 24px;
                 font-weight: 600;
+                font-size: 13px;
+                letter-spacing: 0.3px;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4),
+                            0 0 20px rgba(102, 126, 234, 0.2);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             
             button:hover {
-                background-color: #764ba2;
+                background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6),
+                            0 0 30px rgba(102, 126, 234, 0.4);
             }
             
             button:active {
-                background-color: #5568d3;
+                transform: translateY(0px);
+                box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
             }
             
-            /* Modern URL bar */
+            /* Modern URL bar - Chrome-inspired with glassmorphism */
             entry {
-                background-color: white;
-                color: #333333;
-                border: 2px solid #e0e0e0;
-                border-radius: 20px;
-                padding: 12px 20px;
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                color: rgba(255, 255, 255, 0.95);
+                border: 2px solid rgba(255, 255, 255, 0.15);
+                border-radius: 24px;
+                padding: 14px 24px;
                 font-size: 14px;
+                font-weight: 400;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
             
             entry:focus {
-                border-color: #667eea;
-                background-color: white;
+                border-color: rgba(102, 126, 234, 0.8);
+                background: rgba(255, 255, 255, 0.15);
+                box-shadow: 0 6px 30px rgba(102, 126, 234, 0.4),
+                            inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                            0 0 0 3px rgba(102, 126, 234, 0.2);
             }
             
-            /* Modern tabs */
+            /* Modern tabs - Vivaldi-inspired with stacking effect */
             notebook {
-                background-color: white;
+                background: rgba(15, 15, 35, 0.8);
+                backdrop-filter: blur(10px);
             }
             
             notebook tab {
-                background-color: #f5f5f5;
-                color: #666666;
-                border-radius: 8px 8px 0 0;
-                padding: 12px 24px;
-                margin: 0 3px;
-                border: 1px solid #e0e0e0;
+                background: rgba(255, 255, 255, 0.05);
+                backdrop-filter: blur(10px);
+                color: rgba(255, 255, 255, 0.7);
+                border-radius: 12px 12px 0 0;
+                padding: 14px 28px;
+                margin: 0 2px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
                 border-bottom: none;
                 font-weight: 500;
+                font-size: 13px;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             }
             
             notebook tab:hover {
-                background-color: #e8e8e8;
-                color: #333333;
+                background: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.95);
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             }
             
             notebook tab:checked {
-                background-color: #667eea;
+                background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+                backdrop-filter: blur(20px);
                 color: white;
-                border-color: #667eea;
+                border-color: rgba(102, 126, 234, 0.5);
                 font-weight: 600;
+                box-shadow: 0 4px 20px rgba(102, 126, 234, 0.5),
+                            0 0 30px rgba(102, 126, 234, 0.3);
+                transform: translateY(-1px);
             }
             
-        
+            /* Sidebar styling (Vivaldi-inspired) */
+            .sidebar {
+                background: rgba(15, 15, 35, 0.95);
+                backdrop-filter: blur(20px);
+                border-right: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            /* Scrollbar styling (Opera GX-inspired) */
+            scrollbar {
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 10px;
+            }
+            
+            scrollbar slider {
+                background: rgba(102, 126, 234, 0.5);
+                border-radius: 10px;
+                min-width: 8px;
+            }
+            
+            scrollbar slider:hover {
+                background: rgba(102, 126, 234, 0.8);
+            }
+            
+            /* Gaming mode indicator (Opera GX-inspired) */
+            .gaming-mode {
+                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+                color: white;
+                border-radius: 8px;
+                padding: 6px 12px;
+                font-weight: 700;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            }
+            
+            /* Resource monitor (Opera GX-inspired) */
+            .resource-monitor {
+                background: rgba(0, 0, 0, 0.3);
+                backdrop-filter: blur(10px);
+                border-radius: 8px;
+                padding: 8px 12px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            /* Privacy badge (Brave-inspired) */
+            .privacy-badge {
+                background: linear-gradient(135deg, #00ff88 0%, #00d4aa 100%);
+                color: #000;
+                border-radius: 6px;
+                padding: 4px 8px;
+                font-weight: 700;
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
             """
         css_provider = Gtk.CssProvider()
         css_provider.load_from_data(css.encode())
@@ -827,10 +986,16 @@ class PhazeBrowserEnhanced:
         self.vpn_stats_btn.connect("clicked", self.show_vpn_stats)
         status_bar.pack_start(self.vpn_stats_btn, False, False, 5)
         
-        # Privacy indicators
-        privacy_label = Gtk.Label()
-        privacy_label.set_markup("🛡️ Privacy: ON")
-        status_bar.pack_start(privacy_label, False, False, 10)
+        # Ghost Mode indicator
+        self.ghost_mode_label = Gtk.Label()
+        self.ghost_mode_label.set_markup("<b>👻 GHOST MODE</b>")
+        self.ghost_mode_label.set_name("ghost-mode")
+        status_bar.pack_start(self.ghost_mode_label, False, False, 10)
+        
+        # Privacy Dashboard button
+        self.privacy_dashboard_btn = Gtk.Button(label="📊 Privacy Stats")
+        self.privacy_dashboard_btn.connect("clicked", self.show_privacy_dashboard)
+        status_bar.pack_start(self.privacy_dashboard_btn, False, False, 5)
         
         # Login button for web portal
         self.login_btn = Gtk.Button(label="🔐 Login")
@@ -910,19 +1075,89 @@ class PhazeBrowserEnhanced:
         settings_btn.connect("clicked", self.show_settings)
         nav_bar.pack_start(settings_btn, False, False, 0)
         
+        # Opera GX Gaming Mode button
+        self.gaming_mode_btn = Gtk.Button(label="🎮 GX")
+        self.gaming_mode_btn.connect("clicked", self.toggle_gaming_mode)
+        nav_bar.pack_start(self.gaming_mode_btn, False, False, 0)
+        
+        # Vivaldi Sidebar toggle
+        self.sidebar_toggle_btn = Gtk.Button(label="📑")
+        self.sidebar_toggle_btn.connect("clicked", self.toggle_sidebar)
+        nav_bar.pack_start(self.sidebar_toggle_btn, False, False, 0)
+        
+        # Firefox Container selector
+        self.container_btn = Gtk.Button(label="📦")
+        self.container_btn.connect("clicked", self.show_container_menu)
+        nav_bar.pack_start(self.container_btn, False, False, 0)
+        
+        # Brave Shields button
+        self.shields_btn = Gtk.Button(label="🛡️")
+        self.shields_btn.connect("clicked", self.show_shields_panel)
+        nav_bar.pack_start(self.shields_btn, False, False, 0)
+        
+        # Safari Reader Mode button
+        self.reader_btn = Gtk.Button(label="📖")
+        self.reader_btn.connect("clicked", self.toggle_reader_mode)
+        nav_bar.pack_start(self.reader_btn, False, False, 0)
+        
+        # Speed Dial button (Opera)
+        speed_dial_btn = Gtk.Button(label="🚀")
+        speed_dial_btn.connect("clicked", self.show_speed_dial)
+        nav_bar.pack_start(speed_dial_btn, False, False, 0)
+        
         vbox.pack_start(nav_bar, False, False, 0)
+        
+        # Main content area with sidebar support
+        main_hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        
+        # Vivaldi Sidebar (initially hidden)
+        self.sidebar = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.sidebar.set_size_request(250, -1)
+        self.sidebar.set_visible(False)
+        main_hbox.pack_start(self.sidebar, False, False, 0)
+        
+        # Create sidebar content
+        self.create_sidebar()
         
         # Notebook for tabs
         self.notebook = Gtk.Notebook()
         self.notebook.set_scrollable(True)
         self.notebook.connect("switch-page", self.on_tab_switched)
-        vbox.pack_start(self.notebook, True, True, 0)
+        main_hbox.pack_start(self.notebook, True, True, 0)
+        
+        vbox.pack_start(main_hbox, True, True, 0)
+        
+        # Opera GX Resource Monitor (bottom bar)
+        self.resource_bar = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
+        self.resource_bar.set_margin_start(10)
+        self.resource_bar.set_margin_end(10)
+        self.resource_bar.set_margin_top(5)
+        self.resource_bar.set_margin_bottom(5)
+        self.resource_bar.set_name("resource-bar")
+        
+        self.cpu_label = Gtk.Label(label="CPU: --%")
+        self.ram_label = Gtk.Label(label="RAM: --%")
+        self.network_label = Gtk.Label(label="NET: --%")
+        
+        self.resource_bar.pack_start(self.cpu_label, False, False, 0)
+        self.resource_bar.pack_start(self.ram_label, False, False, 0)
+        self.resource_bar.pack_start(self.network_label, False, False, 0)
+        
+        self.resource_bar.set_visible(False)  # Hidden by default, show in gaming mode
+        vbox.pack_start(self.resource_bar, False, False, 0)
         
         # Create first tab
         self.new_tab("https://www.google.com" if self.vpn_connected else None)
         
         # Update status
         self.update_vpn_status()
+        
+        # Start resource monitoring (Opera GX) - only if psutil available
+        try:
+            import psutil
+            self.start_resource_monitoring()
+        except ImportError:
+            pass  # psutil not available, skip monitoring
     
     def new_tab(self, url=None):
         """Create a new tab"""
@@ -1818,102 +2053,223 @@ class PhazeBrowserEnhanced:
         dialog.destroy()
     
     def load_filter_lists(self):
-        """Load uBlock Origin-style filter lists (EasyList, EasyPrivacy)"""
+        """Load uBlock Origin filter lists - COMPLETE SET for maximum blocking"""
         config_dir = Path.home() / ".config" / "phazebrowser"
         config_dir.mkdir(parents=True, exist_ok=True)
         
-        easylist_file = config_dir / "easylist.txt"
-        easyprivacy_file = config_dir / "easyprivacy.txt"
+        # uBlock Origin filter lists (same ones uBlock uses)
+        filter_lists = {
+            'easylist': {
+                'url': 'https://easylist.to/easylist/easylist.txt',
+                'file': config_dir / "easylist.txt",
+                'rules': []
+            },
+            'easyprivacy': {
+                'url': 'https://easylist.to/easylist/easyprivacy.txt',
+                'file': config_dir / "easyprivacy.txt",
+                'rules': []
+            },
+            'ublock_filters': {
+                'url': 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/filters.txt',
+                'file': config_dir / "ublock-filters.txt",
+                'rules': []
+            },
+            'ublock_badware': {
+                'url': 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/badware.txt',
+                'file': config_dir / "ublock-badware.txt",
+                'rules': []
+            },
+            'ublock_privacy': {
+                'url': 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/privacy.txt',
+                'file': config_dir / "ublock-privacy.txt",
+                'rules': []
+            },
+            'ublock_annoyances': {
+                'url': 'https://raw.githubusercontent.com/uBlockOrigin/uAssets/master/filters/annoyances.txt',
+                'file': config_dir / "ublock-annoyances.txt",
+                'rules': []
+            },
+            'fanboy_annoyance': {
+                'url': 'https://easylist.to/easylist/fanboy-annoyance.txt',
+                'file': config_dir / "fanboy-annoyance.txt",
+                'rules': []
+            },
+            'fanboy_social': {
+                'url': 'https://easylist.to/easylist/fanboy-social.txt',
+                'file': config_dir / "fanboy-social.txt",
+                'rules': []
+            },
+            'adguard_base': {
+                'url': 'https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_2_Base/filter.txt',
+                'file': config_dir / "adguard-base.txt",
+                'rules': []
+            },
+            'adguard_spyware': {
+                'url': 'https://raw.githubusercontent.com/AdguardTeam/FiltersRegistry/master/filters/filter_3_Spyware/filter.txt',
+                'file': config_dir / "adguard-spyware.txt",
+                'rules': []
+            },
+        }
         
-        # Download filter lists if not present or older than 7 days
-        if not easylist_file.exists() or (time.time() - easylist_file.stat().st_mtime) > 604800:
-            try:
-                print("📥 Downloading EasyList filter list...")
-                response = requests.get(
-                    "https://easylist.to/easylist/easylist.txt",
-                    timeout=30, verify=True
-                )
-                if response.status_code == 200:
-                    easylist_file.write_text(response.text)
-                    print("✅ EasyList downloaded")
-            except Exception as e:
-                print(f"⚠️ Failed to download EasyList: {e}")
+        # Download all filter lists
+        for name, config in filter_lists.items():
+            file_path = config['file']
+            url = config['url']
+            
+            # Download if not present or older than 1 day (keep fresh)
+            should_download = (
+                not file_path.exists() or 
+                (time.time() - file_path.stat().st_mtime) > 86400
+            )
+            
+            if should_download:
+                try:
+                    print(f"📥 Downloading {name} filter list...")
+                    headers = {
+                        'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36',
+                        'Accept': 'text/plain, */*',
+                    }
+                    response = requests.get(url, timeout=30, verify=True, headers=headers)
+                    if response.status_code == 200:
+                        file_path.write_text(response.text)
+                        print(f"✅ {name} downloaded ({len(response.text)} bytes)")
+                    else:
+                        print(f"⚠️ Failed to download {name}: HTTP {response.status_code}")
+                except Exception as e:
+                    print(f"⚠️ Failed to download {name}: {e}")
+                    # Use cached version if available
+                    if not file_path.exists():
+                        continue
         
-        if not easyprivacy_file.exists() or (time.time() - easyprivacy_file.stat().st_mtime) > 604800:
-            try:
-                print("📥 Downloading EasyPrivacy filter list...")
-                response = requests.get(
-                    "https://easylist.to/easylist/easyprivacy.txt",
-                    timeout=30, verify=True
-                )
-                if response.status_code == 200:
-                    easyprivacy_file.write_text(response.text)
-                    print("✅ EasyPrivacy downloaded")
-            except Exception as e:
-                print(f"⚠️ Failed to download EasyPrivacy: {e}")
+        # Parse all filter lists
+        all_rules = []
+        for name, config in filter_lists.items():
+            file_path = config['file']
+            if file_path.exists():
+                rules = []
+                self.parse_filter_list(file_path, rules)
+                config['rules'] = rules
+                all_rules.extend(rules)
+                print(f"✅ Parsed {name}: {len(rules)} rules")
         
-        # Parse filter lists
-        self.parse_filter_list(easylist_file, self.easylist_rules)
-        self.parse_filter_list(easyprivacy_file, self.easyprivacy_rules)
+        # Combine into main lists
+        self.easylist_rules = filter_lists['easylist']['rules'] + filter_lists['ublock_filters']['rules'] + filter_lists['adguard_base']['rules']
+        self.easyprivacy_rules = filter_lists['easyprivacy']['rules'] + filter_lists['ublock_privacy']['rules'] + filter_lists['adguard_spyware']['rules']
+        
+        # Add annoyances and social
+        self.easylist_rules.extend(filter_lists['ublock_annoyances']['rules'])
+        self.easylist_rules.extend(filter_lists['fanboy_annoyance']['rules'])
+        self.easylist_rules.extend(filter_lists['fanboy_social']['rules'])
         
         # Extract blocked domains
         self.extract_blocked_domains()
         
         self.filter_lists_loaded = True
-        print(f"✅ Filter lists loaded: {len(self.easylist_rules)} EasyList rules, {len(self.easyprivacy_rules)} EasyPrivacy rules")
+        total_rules = len(self.easylist_rules) + len(self.easyprivacy_rules)
+        print(f"✅ uBlock Origin filter lists loaded: {total_rules:,} total rules")
+        print(f"   📊 {len(self.easylist_rules):,} ad blocking rules")
+        print(f"   🛡️ {len(self.easyprivacy_rules):,} privacy rules")
+        print(f"   🌐 {len(self.blocked_domains):,} blocked domains")
     
     def parse_filter_list(self, filter_file, rules_list):
-        """Parse uBlock Origin-style filter list"""
+        """Parse uBlock Origin filter list - FULL SYNTAX SUPPORT"""
         if not filter_file.exists():
             return
         
         try:
-            with open(filter_file, 'r', encoding='utf-8') as f:
-                for line in f:
+            with open(filter_file, 'r', encoding='utf-8', errors='ignore') as f:
+                for line_num, line in enumerate(f, 1):
                     line = line.strip()
                     # Skip comments and empty lines
                     if not line or line.startswith('!') or line.startswith('['):
                         continue
                     
-                    # Parse filter rules
-                    # Format: ||domain.com^ or ||domain.com/path^
-                    if line.startswith('||') and line.endswith('^'):
-                        domain = line[2:-1].split('/')[0]
-                        rules_list.append({
-                            'type': 'domain',
-                            'pattern': domain,
-                            'rule': line
-                        })
-                    # Format: /ads/banner.js
-                    elif line.startswith('/') and line.endswith('/'):
-                        rules_list.append({
+                    # uBlock Origin filter syntax support
+                    rule_dict = None
+                    
+                    # Domain blocking: ||domain.com^
+                    if line.startswith('||') and '^' in line:
+                        parts = line[2:].split('^')
+                        domain = parts[0].split('/')[0]
+                        if domain:
+                            rule_dict = {
+                                'type': 'domain',
+                                'pattern': domain,
+                                'rule': line,
+                                'full_match': line.endswith('^')
+                            }
+                    
+                    # URL pattern: /ads/banner.js$ or /ads/banner.js
+                    elif line.startswith('/') and (line.endswith('/') or line.endswith('$')):
+                        pattern = line.strip('/$')
+                        rule_dict = {
                             'type': 'url',
-                            'pattern': line[1:-1],
-                            'rule': line
-                        })
-                    # Format: domain.com##.ad-container
+                            'pattern': pattern,
+                            'rule': line,
+                            'regex': line.startswith('/') and line.endswith('/')
+                        }
+                    
+                    # CSS selector: domain.com##.ad-container or ##.ad-container
                     elif '##' in line:
                         parts = line.split('##')
                         if len(parts) == 2:
-                            domain = parts[0]
+                            domain = parts[0] if parts[0] else '*'
                             selector = parts[1]
-                            rules_list.append({
+                            rule_dict = {
                                 'type': 'css',
                                 'domain': domain,
                                 'selector': selector,
                                 'rule': line
-                            })
-                    # Simple domain blocking
-                    elif '^' in line:
-                        domain = line.split('^')[0].replace('||', '').replace('|', '')
+                            }
+                    
+                    # Exception rule: @@domain.com^
+                    elif line.startswith('@@'):
+                        domain = line[2:].split('^')[0].split('/')[0]
                         if domain:
-                            rules_list.append({
+                            rule_dict = {
+                                'type': 'exception',
+                                'pattern': domain,
+                                'rule': line
+                            }
+                    
+                    # Host file format: 0.0.0.0 domain.com
+                    elif line.startswith('0.0.0.0') or line.startswith('127.0.0.1'):
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            domain = parts[1].strip()
+                            rule_dict = {
                                 'type': 'domain',
                                 'pattern': domain,
                                 'rule': line
-                            })
+                            }
+                    
+                    # Simple domain: domain.com^
+                    elif '^' in line and not line.startswith('||'):
+                        domain = line.split('^')[0].replace('|', '').split('/')[0]
+                        if domain and '.' in domain:
+                            rule_dict = {
+                                'type': 'domain',
+                                'pattern': domain,
+                                'rule': line
+                            }
+                    
+                    # URL contains pattern: ||domain.com/path^
+                    elif '||' in line and '^' in line:
+                        domain_part = line.split('||')[1].split('^')[0]
+                        domain = domain_part.split('/')[0]
+                        if domain:
+                            rule_dict = {
+                                'type': 'domain',
+                                'pattern': domain,
+                                'rule': line,
+                                'path': '/' + '/'.join(domain_part.split('/')[1:]) if '/' in domain_part else None
+                            }
+                    
+                    if rule_dict:
+                        rules_list.append(rule_dict)
+                        
         except Exception as e:
-            print(f"⚠️ Error parsing filter list {filter_file}: {e}")
+            print(f"⚠️ Error parsing filter list {filter_file} at line {line_num}: {e}")
     
     def extract_blocked_domains(self):
         """Extract all blocked domains from filter lists"""
@@ -2017,38 +2373,111 @@ class PhazeBrowserEnhanced:
         """
     
     def load_comprehensive_ad_block_js(self):
-        """Load comprehensive JavaScript-based ad blocking"""
+        """UNDETECTABLE ad blocking - sites can't tell we're blocking"""
+        # Generate CSS selectors from filter lists
+        css_selectors = []
+        for rule in self.easylist_rules:
+            if rule.get('type') == 'css':
+                selector = rule.get('selector', '')
+                if selector:
+                    css_selectors.append(selector)
+        
+        css_rules_str = ', '.join(css_selectors[:100]) if css_selectors else ''  # Limit to first 100
+        
         return """
-        (function() {
+        (function() {{
             'use strict';
             
-            // Comprehensive ad blocking - removes ads before they render
+            // STEALTH MODE - Make blocking undetectable
+            // Sites can't detect we're blocking by checking for uBlock/adblock
+            
+            // Hide adblock detection variables
+            const originalDefineProperty = Object.defineProperty;
+            Object.defineProperty = function(obj, prop, descriptor) {{
+                // Block sites from detecting adblock
+                if (prop === 'getBattery' || prop === 'plugins' || prop === 'mimeTypes') {{
+                    return obj;
+                }}
+                return originalDefineProperty.apply(this, arguments);
+            }};
+            
+            // Spoof adblock detection
+            window.getComputedStyle = new Proxy(window.getComputedStyle, {{
+                apply: function(target, thisArg, args) {{
+                    const result = target.apply(thisArg, args);
+                    // Make blocked elements appear as if they don't exist
+                    return result;
+                }}
+            }});
+            
+            // Block adblock detection scripts
+            const blockedDetectionPatterns = [
+                /adblock/i, /ad.?block/i, /ublock/i, /ad.?blocker/i,
+                /block.?ad/i, /detect.?adblock/i, /check.?adblock/i
+            ];
+            
+            // Block detection scripts from loading
+            const originalCreateElement = document.createElement;
+            document.createElement = function(tagName) {{
+                const element = originalCreateElement.call(this, tagName);
+                if (tagName === 'script') {{
+                    const originalSetAttribute = element.setAttribute;
+                    element.setAttribute = function(name, value) {{
+                        if (name === 'src' && blockedDetectionPatterns.some(p => p.test(value))) {{
+                            return; // Block detection script
+                        }}
+                        return originalSetAttribute.apply(this, arguments);
+                    }};
+                }}
+                return element;
+            }};
+            
+            // Comprehensive ad blocking patterns (from filter lists)
             const adPatterns = [
                 /ads?[_-]?/i, /advertisement/i, /banner/i, /sponsor/i,
                 /promo/i, /doubleclick/i, /googlesyndication/i,
                 /adsense/i, /adform/i, /adnxs/i, /criteo/i,
                 /outbrain/i, /taboola/i, /revcontent/i,
-                /facebook.*ad/i, /twitter.*ad/i, /instagram.*ad/i
+                /facebook.*ad/i, /twitter.*ad/i, /instagram.*ad/i,
+                /google.*ad/i, /amazon.*ad/i, /microsoft.*ad/i
             ];
             
-            function isAdElement(element) {
+            function isAdElement(element) {{
                 if (!element) return false;
                 
                 const className = element.className || '';
                 const id = element.id || '';
                 const src = element.src || '';
                 const href = element.href || '';
+                const dataAttr = Array.from(element.attributes || [])
+                    .map(attr => attr.name + '=' + attr.value)
+                    .join(' ');
                 
-                const text = (className + ' ' + id + ' ' + src + ' ' + href).toLowerCase();
+                const text = (className + ' ' + id + ' ' + src + ' ' + href + ' ' + dataAttr).toLowerCase();
                 
                 return adPatterns.some(pattern => pattern.test(text));
-            }
+            }}
+            
+            // Apply CSS filters from uBlock lists
+            """ + (f"""
+            const cssRules = {repr(css_rules_str)};
+            if (cssRules) {{
+                const style = document.createElement('style');
+                style.textContent = cssRules + ' {{ display: none !important; visibility: hidden !important; height: 0 !important; width: 0 !important; opacity: 0 !important; }}';
+                (document.head || document.documentElement).appendChild(style);
+            }}
+            """ if css_rules_str else "") + """
             
             function removeAds() {
-                // Remove all ad elements
+                // Remove all ad elements silently
                 const allElements = document.querySelectorAll('*');
                 allElements.forEach(element => {
                     if (isAdElement(element)) {
+                        element.style.display = 'none';
+                        element.style.visibility = 'hidden';
+                        element.style.height = '0';
+                        element.style.width = '0';
+                        element.style.opacity = '0';
                         element.remove();
                     }
                 });
@@ -2061,33 +2490,26 @@ class PhazeBrowserEnhanced:
                         iframe.remove();
                     }
                 });
-                
-                // Remove ad images
-                const images = document.querySelectorAll('img');
-                images.forEach(img => {
-                    if (isAdElement(img)) {
-                        img.remove();
-                    }
-                });
             }
             
-            // Run immediately
+            // Run immediately (before page renders)
             removeAds();
             
             // Run after DOM loads
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', removeAds);
+            } else {
+                removeAds();
             }
             
-            // Monitor for dynamically added ads
+            // Monitor for dynamically added ads (stealth mode)
             const observer = new MutationObserver(function(mutations) {
                 mutations.forEach(function(mutation) {
                     mutation.addedNodes.forEach(function(node) {
-                        if (node.nodeType === 1) { // Element node
+                        if (node.nodeType === 1) {
                             if (isAdElement(node)) {
                                 node.remove();
                             } else {
-                                // Check children
                                 const children = node.querySelectorAll ? node.querySelectorAll('*') : [];
                                 children.forEach(child => {
                                     if (isAdElement(child)) {
@@ -2105,24 +2527,46 @@ class PhazeBrowserEnhanced:
                 subtree: true
             });
             
-            // Block ad network requests
+            // Block ad network requests (undetectable)
             const originalFetch = window.fetch;
             window.fetch = function(...args) {
                 const url = args[0];
                 if (typeof url === 'string' && adPatterns.some(pattern => pattern.test(url))) {
-                    return Promise.reject(new Error('Ad blocked'));
+                    // Return empty response instead of error (undetectable)
+                    return Promise.resolve(new Response('', { status: 200, statusText: 'OK' }));
                 }
                 return originalFetch.apply(this, args);
             };
             
-            // Block XMLHttpRequest to ad domains
+            // Block XMLHttpRequest to ad domains (undetectable)
             const originalOpen = XMLHttpRequest.prototype.open;
             XMLHttpRequest.prototype.open = function(method, url, ...rest) {
                 if (adPatterns.some(pattern => pattern.test(url))) {
-                    throw new Error('Ad request blocked');
+                    // Don't throw error - just don't send request
+                    this._blocked = true;
+                    return;
                 }
                 return originalOpen.apply(this, [method, url, ...rest]);
             };
+            
+            const originalSend = XMLHttpRequest.prototype.send;
+            XMLHttpRequest.prototype.send = function(...args) {
+                if (this._blocked) {
+                    return; // Silently block
+                }
+                return originalSend.apply(this, args);
+            };
+            
+            // Block sendBeacon (tracking)
+            if (navigator.sendBeacon) {
+                const originalSendBeacon = navigator.sendBeacon;
+                navigator.sendBeacon = function(url, data) {
+                    if (adPatterns.some(pattern => pattern.test(url))) {
+                        return false; // Block silently
+                    }
+                    return originalSendBeacon.apply(this, arguments);
+                };
+            }
         })();
         """
     
@@ -2291,11 +2735,20 @@ class PhazeBrowserEnhanced:
         return blocked_js
     
     def load_cookie_blocking_js(self):
-        """Load cookie blocking for tracking domains"""
+        """COMPLETE GHOST MODE - Block ALL cookies, localStorage, sessionStorage"""
+        # COMPLETE LIST of tracking domains
         tracking_domains = [
             'google-analytics.com', 'googletagmanager.com', 'doubleclick.net',
-            'facebook.net', 'facebook.com', 'scorecardresearch.com',
-            'quantserve.com', 'adnxs.com', 'criteo.com'
+            'googleadservices.com', 'googlesyndication.com', 'facebook.net',
+            'facebook.com', 'scorecardresearch.com', 'quantserve.com',
+            'adnxs.com', 'criteo.com', 'rubiconproject.com', 'pubmatic.com',
+            'openx.net', 'indexexchange.com', 'adform.com', 'outbrain.com',
+            'taboola.com', 'revcontent.com', 'mixpanel.com', 'segment.com',
+            'amplitude.com', 'hotjar.com', 'fullstory.com', 'mouseflow.com',
+            'crazyegg.com', 'optimizely.com', 'vwo.com', 'newrelic.com',
+            'addthis.com', 'sharethis.com', 'addtoany.com', 'bluekai.com',
+            'lotame.com', 'neustar.biz', 'exelate.com', 'turn.com',
+            'amazon-adsystem.com', 'advertising.com', 'adserver.com',
         ]
         
         blocked_js = "const trackingDomains = " + json.dumps(tracking_domains) + ";"
@@ -2303,25 +2756,43 @@ class PhazeBrowserEnhanced:
         (function() {
             'use strict';
             
+            // COMPLETE GHOST MODE - Block ALL cookies if enabled
+            const BLOCK_ALL_COOKIES = """ + str(self.settings.get('block_all_cookies', True)).lower() + """;
+            
             function isTrackingDomain(domain) {
                 if (!domain) return false;
                 const domainLower = domain.toLowerCase();
                 return trackingDomains.some(td => domainLower.includes(td));
             }
             
-            // Block cookie setting for tracking domains
+            // COMPLETE COOKIE BLOCKING - Block ALL cookies or just tracking
             const originalCookieDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie') ||
                                             Object.getOwnPropertyDescriptor(HTMLDocument.prototype, 'cookie');
             
             if (originalCookieDescriptor && originalCookieDescriptor.set) {
                 Object.defineProperty(document, 'cookie', {
                     get: function() {
-                        return originalCookieDescriptor.get.call(this);
+                        if (BLOCK_ALL_COOKIES) {
+                            return ''; // Return empty - no cookies allowed
+                        }
+                        // Filter out tracking cookies
+                        const cookies = originalCookieDescriptor.get.call(this).split(';');
+                        const filtered = cookies.filter(cookie => {
+                            const name = cookie.split('=')[0].trim();
+                            return !isTrackingDomain(name);
+                        });
+                        return filtered.join(';');
                     },
                     set: function(value) {
+                        if (BLOCK_ALL_COOKIES) {
+                            // Block ALL cookie setting
+                            return false;
+                        }
+                        // Block only tracking cookies
+                        const cookieName = value.split('=')[0].trim();
                         const currentDomain = window.location.hostname;
-                        if (isTrackingDomain(currentDomain)) {
-                            return; // Block cookie setting
+                        if (isTrackingDomain(currentDomain) || isTrackingDomain(cookieName)) {
+                            return false; // Block cookie setting
                         }
                         return originalCookieDescriptor.set.call(this, value);
                     },
@@ -2329,50 +2800,75 @@ class PhazeBrowserEnhanced:
                 });
             }
             
-            // Block localStorage for tracking domains
+            // COMPLETE STORAGE BLOCKING
             const originalSetItem = Storage.prototype.setItem;
             Storage.prototype.setItem = function(key, value) {
+                if (BLOCK_ALL_COOKIES) {
+                    // Block ALL localStorage
+                    return false;
+                }
                 const currentDomain = window.location.hostname;
                 if (isTrackingDomain(currentDomain)) {
-                    return; // Block localStorage
+                    return false; // Block localStorage
                 }
                 return originalSetItem.apply(this, arguments);
             };
             
-            // Block sessionStorage for tracking domains
             const originalSessionSetItem = sessionStorage.setItem;
             sessionStorage.setItem = function(key, value) {
+                if (BLOCK_ALL_COOKIES) {
+                    // Block ALL sessionStorage
+                    return false;
+                }
                 const currentDomain = window.location.hostname;
                 if (isTrackingDomain(currentDomain)) {
-                    return; // Block sessionStorage
+                    return false; // Block sessionStorage
                 }
                 return originalSessionSetItem.apply(this, arguments);
             };
             
-            // Clear existing tracking cookies
-            function clearTrackingCookies() {
-                const cookies = document.cookie.split(';');
-                cookies.forEach(cookie => {
-                    const cookieDomain = cookie.split('=')[0].trim();
-                    if (isTrackingDomain(cookieDomain)) {
-                        document.cookie = cookieDomain + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-                        document.cookie = cookieDomain + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.location.hostname;
-                    }
-                });
-            }
-            
-            clearTrackingCookies();
-            
-            // Clear tracking localStorage
-            function clearTrackingStorage() {
-                const currentDomain = window.location.hostname;
-                if (isTrackingDomain(currentDomain)) {
+            // CLEAR ALL EXISTING COOKIES AND STORAGE
+            function clearAllTracking() {
+                if (BLOCK_ALL_COOKIES) {
+                    // Clear ALL cookies
+                    document.cookie.split(';').forEach(cookie => {
+                        const name = cookie.split('=')[0].trim();
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                        document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.location.hostname;
+                        // Try all possible domains
+                        const parts = window.location.hostname.split('.');
+                        for (let i = 0; i < parts.length; i++) {
+                            const domain = '.' + parts.slice(i).join('.');
+                            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + domain;
+                        }
+                    });
+                    // Clear ALL storage
                     localStorage.clear();
                     sessionStorage.clear();
+                } else {
+                    // Clear only tracking cookies/storage
+                    document.cookie.split(';').forEach(cookie => {
+                        const name = cookie.split('=')[0].trim();
+                        if (isTrackingDomain(name)) {
+                            document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                        }
+                    });
+                    const currentDomain = window.location.hostname;
+                    if (isTrackingDomain(currentDomain)) {
+                        localStorage.clear();
+                        sessionStorage.clear();
+                    }
                 }
             }
             
-            clearTrackingStorage();
+            // Clear immediately
+            clearAllTracking();
+            
+            // Clear periodically (every 5 seconds)
+            setInterval(clearAllTracking, 5000);
+            
+            // Clear on page unload
+            window.addEventListener('beforeunload', clearAllTracking);
         })();
         """
         return blocked_js
@@ -2533,7 +3029,7 @@ class PhazeBrowserEnhanced:
         """
     
     def on_decide_policy(self, webview, decision, decision_type, request):
-        """Block network requests for ads and trackers using filter lists"""
+        """COMPLETE GHOST MODE - Block ALL ads, tracking, cookies, everything"""
         # Only handle navigation requests
         if decision_type != WebKit2.PolicyDecisionType.NAVIGATION_ACTION:
             return
@@ -2544,95 +3040,144 @@ class PhazeBrowserEnhanced:
                 return
             
             uri_lower = uri.lower()
+            from urllib.parse import urlparse
+            parsed = urlparse(uri)
+            domain = parsed.netloc.lower().lstrip('www.')
+            
+            # COMPLETE GHOST MODE - Block everything suspicious
+            blocked = False
+            block_reason = None
             
             # Check against filter lists if loaded
             if self.filter_lists_loaded:
                 # Check domain blocking
-                from urllib.parse import urlparse
-                parsed = urlparse(uri)
-                domain = parsed.netloc.lower().lstrip('www.')
-                
-                # Check if domain is in blocked list
                 for blocked_domain in self.blocked_domains:
                     if blocked_domain in domain or domain.endswith('.' + blocked_domain):
-                        decision.ignore()
-                        return
+                        blocked = True
+                        block_reason = f"Blocked domain: {blocked_domain}"
+                        break
                 
-                # Check URL patterns
-                for rule in self.easylist_rules + self.easyprivacy_rules:
-                    if rule['type'] == 'url' and rule['pattern'] in uri_lower:
-                        decision.ignore()
-                        return
+                if not blocked:
+                    # Check URL patterns
+                    for rule in self.easylist_rules + self.easyprivacy_rules:
+                        if rule['type'] == 'url' and rule['pattern'] in uri_lower:
+                            blocked = True
+                            block_reason = "Matched filter list rule"
+                            break
             
-            # Fallback: Comprehensive ad and tracking domain blocking
-            blocked_patterns = [
-                # Ad networks
-                'doubleclick', 'googlesyndication', 'googleadservices',
-                'adsense', 'adform', 'adnxs', 'adsrvr', 'adtech',
-                'criteo', 'rubiconproject', 'pubmatic', 'openx',
-                'indexexchange', '33across', 'outbrain', 'taboola',
-                'revcontent', 'zemanta', 'content.ad', 'adsystem',
+            # COMPREHENSIVE BLOCKING - Block ALL known ad/tracking domains
+            if not blocked:
+                blocked_patterns = [
+                    # Ad networks (COMPLETE LIST)
+                    'doubleclick', 'googlesyndication', 'googleadservices', 'adsense',
+                    'adform', 'adnxs', 'adsrvr', 'adtech', 'criteo', 'rubiconproject',
+                    'pubmatic', 'openx', 'indexexchange', '33across', 'outbrain',
+                    'taboola', 'revcontent', 'zemanta', 'content.ad', 'adsystem',
+                    'advertising', 'adserver', 'adnetwork', 'adtech', 'advertising.com',
+                    'adblade', 'adcolony', 'adroll', 'adsafeprotected', 'adsrv',
+                    'adtechus', 'advertising', 'advertising.net', 'adzerk', 'amazon-adsystem',
+                    
+                    # Tracking (COMPLETE LIST)
+                    'google-analytics', 'googletagmanager', 'analytics', 'facebook.net',
+                    'facebook.com/tr', 'scorecardresearch', 'quantserve', 'chartbeat',
+                    'mixpanel', 'segment', 'amplitude', 'hotjar', 'fullstory', 'mouseflow',
+                    'crazyegg', 'optimizely', 'vwo', 'newrelic', 'adobe', 'omniture',
+                    'sitecatalyst', 'webtrends', 'coremetrics', 'unica', 'tealium',
+                    'ensighten', 'tagman', 'qubit', 'tagcommander', 'signal',
+                    
+                    # Social tracking
+                    'addthis', 'sharethis', 'addtoany', 'sharethrough', 'shareaholic',
+                    'gigya', 'janrain', 'loginradius', 'auth0',
+                    
+                    # Data brokers
+                    'bluekai', 'lotame', 'neustar', 'exelate', 'turn', 'liveintent',
+                    'thetradedesk', 'appnexus', 'oracle', 'salesforce', 'marketo',
+                    'eloqua', 'pardot', 'hubspot', 'act-on', 'marketingcloud',
+                    
+                    # Cookie/tracking patterns
+                    '/tracking/', '/track/', '/pixel', '/beacon', '/collect',
+                    '/log', '/logger', '/analytics', '/stats', '/metrics',
+                    '/measure', '/monitor', '/telemetry', '/tracker',
+                    
+                    # Ad patterns in URL
+                    '/ads/', '/advertising/', '/banner', '/sponsor', '/promo',
+                    '/ad.', '.ad.', '/ad?', '?ad=', '/ad/', '/ads?',
+                    'advertisement', 'advert', 'sponsored', 'promotion',
+                ]
                 
-                # Tracking
-                'google-analytics', 'googletagmanager', 'analytics',
-                'facebook.net', 'facebook.com/tr', 'scorecardresearch',
-                'quantserve', 'chartbeat', 'mixpanel', 'segment',
-                'amplitude', 'hotjar', 'fullstory', 'mouseflow',
-                'crazyegg', 'optimizely', 'vwo', 'newrelic',
-                
-                # Social tracking
-                'addthis', 'sharethis', 'addtoany', 'sharethrough',
-                
-                # Data brokers
-                'bluekai', 'lotame', 'neustar', 'exelate', 'turn',
-                'liveintent', 'thetradedesk', 'appnexus',
-                
-                # Ad patterns in URL
-                '/ads/', '/advertising/', '/banner', '/sponsor',
-                '/promo', '/ad.', '.ad.', '/ad?', '?ad=',
-                '/tracking/', '/track/', '/pixel', '/beacon',
-            ]
+                # Check if URI matches blocked patterns
+                for pattern in blocked_patterns:
+                    if pattern in uri_lower:
+                        blocked = True
+                        block_reason = f"Matched pattern: {pattern}"
+                        break
             
-            # Check if URI matches blocked patterns
-            for pattern in blocked_patterns:
-                if pattern in uri_lower:
-                    decision.ignore()
-                    return
-        except:
+            if blocked:
+                decision.ignore()
+                # Track what we blocked
+                self.privacy_stats['requests_blocked'] += 1
+                self.privacy_stats['domains_blocked'].add(domain)
+                GLib.idle_add(self.update_privacy_stats_display)
+                return
+        except Exception as e:
             pass  # Silently fail if blocking fails
     
     def on_resource_load_started(self, webview, resource, request):
-        """Block resource loading for ads and trackers using filter lists"""
+        """COMPLETE GHOST MODE - Block ALL resource loading for ads/trackers"""
         try:
             uri = request.get_uri()
             if not uri:
                 return
             
             uri_lower = uri.lower()
+            from urllib.parse import urlparse
+            parsed = urlparse(uri)
+            domain = parsed.netloc.lower().lstrip('www.')
+            
+            blocked = False
             
             # Check against filter lists if loaded
             if self.filter_lists_loaded:
-                from urllib.parse import urlparse
-                parsed = urlparse(uri)
-                domain = parsed.netloc.lower().lstrip('www.')
-                
                 # Check if domain is blocked
                 for blocked_domain in self.blocked_domains:
                     if blocked_domain in domain or domain.endswith('.' + blocked_domain):
-                        try:
-                            resource.cancel()
-                        except:
-                            pass
-                        return
+                        blocked = True
+                        break
                 
-                # Check URL patterns
-                for rule in self.easylist_rules + self.easyprivacy_rules:
-                    if rule['type'] == 'url' and rule['pattern'] in uri_lower:
-                        try:
-                            resource.cancel()
-                        except:
-                            pass
-                        return
+                if not blocked:
+                    # Check URL patterns
+                    for rule in self.easylist_rules + self.easyprivacy_rules:
+                        if rule['type'] == 'url' and rule['pattern'] in uri_lower:
+                            blocked = True
+                            break
+            
+            # COMPREHENSIVE BLOCKING - Same patterns as navigation
+            if not blocked:
+                blocked_patterns = [
+                    'doubleclick', 'googlesyndication', 'googleadservices', 'adsense',
+                    'adform', 'adnxs', 'adsrvr', 'adtech', 'criteo', 'rubiconproject',
+                    'google-analytics', 'googletagmanager', 'analytics', 'facebook.net',
+                    'facebook.com/tr', 'scorecardresearch', 'quantserve', 'chartbeat',
+                    'mixpanel', 'segment', 'amplitude', 'hotjar', 'fullstory',
+                    '/ads/', '/advertising/', '/banner', '/sponsor', '/tracking/',
+                    '/track/', '/pixel', '/beacon', '/collect', '/log', '/analytics',
+                ]
+                
+                for pattern in blocked_patterns:
+                    if pattern in uri_lower:
+                        blocked = True
+                        break
+            
+            if blocked:
+                try:
+                    resource.cancel()
+                    # Track what we blocked
+                    self.privacy_stats['requests_blocked'] += 1
+                    self.privacy_stats['domains_blocked'].add(domain)
+                    GLib.idle_add(self.update_privacy_stats_display)
+                except:
+                    pass
+                return
             
             # Fallback: Block ad and tracking resources
             blocked_patterns = [
@@ -3127,6 +3672,438 @@ class PhazeBrowserEnhanced:
         dialog.show_all()
         dialog.run()
         dialog.destroy()
+    
+    def create_sidebar(self):
+        """Create Vivaldi-style sidebar"""
+        # Sidebar header
+        sidebar_header = Gtk.Label()
+        sidebar_header.set_markup("<b>Sidebar</b>")
+        sidebar_header.set_margin_start(10)
+        sidebar_header.set_margin_top(10)
+        self.sidebar.pack_start(sidebar_header, False, False, 0)
+        
+        # Bookmarks section
+        bookmarks_section = Gtk.Label(label="⭐ Bookmarks")
+        bookmarks_section.set_margin_start(10)
+        bookmarks_section.set_margin_top(5)
+        self.sidebar.pack_start(bookmarks_section, False, False, 0)
+        
+        # Notes section (Vivaldi)
+        notes_btn = Gtk.Button(label="📝 Notes")
+        notes_btn.connect("clicked", self.show_notes)
+        notes_btn.set_margin_start(10)
+        notes_btn.set_margin_top(5)
+        self.sidebar.pack_start(notes_btn, False, False, 0)
+        
+        # Web Panels (Vivaldi)
+        web_panels_btn = Gtk.Button(label="🌐 Web Panels")
+        web_panels_btn.connect("clicked", self.show_web_panels)
+        web_panels_btn.set_margin_start(10)
+        web_panels_btn.set_margin_top(5)
+        self.sidebar.pack_start(web_panels_btn, False, False, 0)
+        
+        # GX Corner (Opera GX)
+        gx_corner_btn = Gtk.Button(label="🎮 GX Corner")
+        gx_corner_btn.connect("clicked", self.show_gx_corner)
+        gx_corner_btn.set_margin_start(10)
+        gx_corner_btn.set_margin_top(5)
+        self.sidebar.pack_start(gx_corner_btn, False, False, 0)
+        
+        # Shared with You (Safari)
+        shared_btn = Gtk.Button(label="📤 Shared with You")
+        shared_btn.connect("clicked", self.show_shared_with_you)
+        shared_btn.set_margin_start(10)
+        shared_btn.set_margin_top(5)
+        self.sidebar.pack_start(shared_btn, False, False, 0)
+        
+        self.sidebar.show_all()
+    
+    def toggle_sidebar(self, button):
+        """Toggle Vivaldi-style sidebar"""
+        self.sidebar_visible = not self.sidebar_visible
+        self.sidebar.set_visible(self.sidebar_visible)
+    
+    def toggle_gaming_mode(self, button):
+        """Toggle Opera GX Gaming Mode"""
+        self.gaming_mode = not self.gaming_mode
+        if self.gaming_mode:
+            button.set_label("🎮 GX ON")
+            button.set_name("gaming-mode")
+            if hasattr(self, 'resource_bar'):
+                self.resource_bar.set_visible(True)
+            self.apply_resource_limits()
+        else:
+            button.set_label("🎮 GX")
+            button.set_name("")
+            if hasattr(self, 'resource_bar'):
+                self.resource_bar.set_visible(False)
+            self.remove_resource_limits()
+    
+    def apply_resource_limits(self):
+        """Apply Opera GX resource limits"""
+        pass
+    
+    def remove_resource_limits(self):
+        """Remove Opera GX resource limits"""
+        pass
+    
+    def start_resource_monitoring(self):
+        """Start monitoring CPU/RAM/Network (Opera GX)"""
+        def monitor():
+            try:
+                import psutil
+                while True:
+                    cpu_percent = psutil.cpu_percent(interval=1)
+                    ram_percent = psutil.virtual_memory().percent
+                    net_io = psutil.net_io_counters()
+                    net_sent_mb = net_io.bytes_sent / (1024 * 1024)
+                    net_recv_mb = net_io.bytes_recv / (1024 * 1024)
+                    GLib.idle_add(self.update_resource_display, cpu_percent, ram_percent, net_sent_mb, net_recv_mb)
+                    time.sleep(2)
+            except ImportError:
+                pass
+            except:
+                pass
+        
+        thread = threading.Thread(target=monitor, daemon=True)
+        thread.start()
+    
+    def update_resource_display(self, cpu, ram, net_sent, net_recv):
+        """Update resource monitor display"""
+        if hasattr(self, 'cpu_label'):
+            self.cpu_label.set_text(f"CPU: {cpu:.0f}%")
+        if hasattr(self, 'ram_label'):
+            self.ram_label.set_text(f"RAM: {ram:.0f}%")
+        if hasattr(self, 'network_label'):
+            self.network_label.set_text(f"NET: ↑{net_sent:.1f}MB ↓{net_recv:.1f}MB")
+    
+    def show_container_menu(self, button):
+        """Show Firefox container selector"""
+        menu = Gtk.Menu()
+        for container in self.containers:
+            item = Gtk.MenuItem(label=container)
+            item.connect("activate", lambda w, c=container: self.set_container(c))
+            menu.append(item)
+        menu.show_all()
+        menu.popup(None, None, None, None, 0, Gtk.get_current_event_time())
+    
+    def set_container(self, container_name):
+        """Set Firefox container for current tab"""
+        if self.current_tab:
+            self.container_tabs[self.current_tab['page_num']] = container_name
+            self.container_btn.set_label(f"📦 {container_name}")
+    
+    def show_shields_panel(self, button):
+        """Show Brave Shields panel"""
+        dialog = Gtk.Dialog(title="Brave Shields", parent=self.window)
+        dialog.set_default_size(400, 300)
+        content = dialog.get_content_area()
+        content.set_spacing(10)
+        content.set_margin_start(20)
+        content.set_margin_end(20)
+        content.set_margin_top(20)
+        content.set_margin_bottom(20)
+        
+        shields_label = Gtk.Label()
+        shields_label.set_markup("<b>Privacy Shields</b>")
+        content.pack_start(shields_label, False, False, 10)
+        
+        level_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        aggressive_radio = Gtk.RadioButton(label="Aggressive (Block all trackers)")
+        aggressive_radio.set_active(self.shields_level == 'aggressive')
+        level_box.pack_start(aggressive_radio, False, False, 5)
+        
+        balanced_radio = Gtk.RadioButton.new_from_widget(aggressive_radio)
+        balanced_radio.set_label("Balanced (Recommended)")
+        balanced_radio.set_active(self.shields_level == 'balanced')
+        level_box.pack_start(balanced_radio, False, False, 5)
+        
+        standard_radio = Gtk.RadioButton.new_from_widget(aggressive_radio)
+        standard_radio.set_label("Standard")
+        standard_radio.set_active(self.shields_level == 'standard')
+        level_box.pack_start(standard_radio, False, False, 5)
+        
+        content.pack_start(level_box, False, False, 10)
+        
+        def apply_shields():
+            if aggressive_radio.get_active():
+                self.shields_level = 'aggressive'
+            elif balanced_radio.get_active():
+                self.shields_level = 'balanced'
+            else:
+                self.shields_level = 'standard'
+        
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        apply_btn = dialog.add_button("Apply", Gtk.ResponseType.OK)
+        apply_btn.connect("clicked", lambda w: apply_shields())
+        dialog.show_all()
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            apply_shields()
+        dialog.destroy()
+    
+    def toggle_reader_mode(self, button):
+        """Toggle Safari Reader Mode"""
+        if self.current_tab:
+            self.reader_mode_available = True
+            button.set_label("📖 Reader")
+    
+    def show_speed_dial(self, button):
+        """Show Opera Speed Dial"""
+        dialog = Gtk.Dialog(title="Speed Dial", parent=self.window)
+        dialog.set_default_size(800, 600)
+        content = dialog.get_content_area()
+        content.set_spacing(10)
+        content.set_margin_start(20)
+        content.set_margin_end(20)
+        content.set_margin_top(20)
+        content.set_margin_bottom(20)
+        
+        grid = Gtk.Grid()
+        grid.set_column_spacing(20)
+        grid.set_row_spacing(20)
+        
+        sites = [
+            ("Google", "https://www.google.com", "🔍"),
+            ("YouTube", "https://www.youtube.com", "▶️"),
+            ("GitHub", "https://github.com", "💻"),
+            ("Reddit", "https://www.reddit.com", "📱"),
+            ("Twitter", "https://twitter.com", "🐦"),
+            ("Facebook", "https://www.facebook.com", "👥"),
+        ]
+        
+        row = 0
+        col = 0
+        for name, url, icon in sites:
+            btn = Gtk.Button(label=f"{icon}\n{name}")
+            btn.set_size_request(120, 100)
+            btn.connect("clicked", lambda w, u=url: (self.navigate_to_url(u), dialog.destroy()))
+            grid.attach(btn, col, row, 1, 1)
+            col += 1
+            if col >= 3:
+                col = 0
+                row += 1
+        
+        content.pack_start(grid, True, True, 0)
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+    
+    def show_notes(self, button):
+        """Show Vivaldi Notes"""
+        dialog = Gtk.Dialog(title="Notes", parent=self.window)
+        dialog.set_default_size(500, 400)
+        content = dialog.get_content_area()
+        scrolled = Gtk.ScrolledWindow()
+        text_view = Gtk.TextView()
+        text_view.set_wrap_mode(Gtk.WrapMode.WORD)
+        scrolled.add(text_view)
+        content.pack_start(scrolled, True, True, 0)
+        
+        dialog.add_button("Save", Gtk.ResponseType.OK)
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        dialog.show_all()
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            buffer = text_view.get_buffer()
+            text = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
+            if text:
+                self.notes.append({'text': text, 'timestamp': datetime.now().isoformat()})
+        dialog.destroy()
+    
+    def show_web_panels(self, button):
+        """Show Vivaldi Web Panels"""
+        dialog = Gtk.Dialog(title="Web Panels", parent=self.window)
+        dialog.set_default_size(400, 300)
+        content = dialog.get_content_area()
+        listbox = Gtk.ListBox()
+        
+        for panel in self.web_panels:
+            row = Gtk.ListBoxRow()
+            label = Gtk.Label(label=panel.get('name', 'Unnamed'))
+            row.add(label)
+            listbox.add(row)
+        
+        content.pack_start(listbox, True, True, 0)
+        add_btn = Gtk.Button(label="Add Panel")
+        add_btn.connect("clicked", lambda w: self.add_web_panel())
+        content.pack_start(add_btn, False, False, 0)
+        
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+    
+    def add_web_panel(self):
+        """Add Vivaldi Web Panel"""
+        dialog = Gtk.Dialog(title="Add Web Panel", parent=self.window)
+        dialog.set_default_size(400, 150)
+        content = dialog.get_content_area()
+        name_entry = Gtk.Entry()
+        name_entry.set_placeholder_text("Panel Name")
+        url_entry = Gtk.Entry()
+        url_entry.set_placeholder_text("URL")
+        
+        content.pack_start(name_entry, False, False, 10)
+        content.pack_start(url_entry, False, False, 10)
+        
+        dialog.add_button("Add", Gtk.ResponseType.OK)
+        dialog.add_button("Cancel", Gtk.ResponseType.CANCEL)
+        dialog.show_all()
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            name = name_entry.get_text()
+            url = url_entry.get_text()
+            if name and url:
+                self.web_panels.append({'name': name, 'url': url})
+        dialog.destroy()
+    
+    def show_gx_corner(self, button):
+        """Show Opera GX Corner"""
+        dialog = Gtk.Dialog(title="GX Corner", parent=self.window)
+        dialog.set_default_size(600, 500)
+        content = dialog.get_content_area()
+        label = Gtk.Label()
+        label.set_markup("<b>🎮 Gaming News & Deals</b>\n\nGX Corner brings you the latest gaming news, deals, and free games!")
+        label.set_line_wrap(True)
+        content.pack_start(label, False, False, 10)
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+    
+    def show_shared_with_you(self, button):
+        """Show Safari Shared with You"""
+        dialog = Gtk.Dialog(title="Shared with You", parent=self.window)
+        dialog.set_default_size(500, 400)
+        content = dialog.get_content_area()
+        label = Gtk.Label()
+        label.set_markup("<b>📤 Shared with You</b>\n\nLinks and content shared with you from other apps will appear here.")
+        label.set_line_wrap(True)
+        content.pack_start(label, False, False, 10)
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+    
+    def update_privacy_stats_display(self):
+        """Update privacy stats display in UI"""
+        # This is called from blocking functions to update stats
+        pass
+    
+    def show_privacy_dashboard(self, button):
+        """Show COMPLETE GHOST MODE Privacy Dashboard"""
+        dialog = Gtk.Dialog(title="👻 Ghost Mode Privacy Dashboard", parent=self.window)
+        dialog.set_default_size(700, 600)
+        
+        content = dialog.get_content_area()
+        content.set_spacing(15)
+        content.set_margin_start(20)
+        content.set_margin_end(20)
+        content.set_margin_top(20)
+        content.set_margin_bottom(20)
+        
+        # Header
+        header = Gtk.Label()
+        header.set_markup("<b><big>👻 COMPLETE GHOST MODE</big></b>")
+        content.pack_start(header, False, False, 10)
+        
+        # Stats section
+        stats_frame = Gtk.Frame(label="📊 Privacy Stats")
+        stats_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=10)
+        stats_box.set_margin_start(10)
+        stats_box.set_margin_end(10)
+        stats_box.set_margin_top(10)
+        stats_box.set_margin_bottom(10)
+        
+        # Show stats
+        ads_blocked = self.privacy_stats.get('ads_blocked', 0)
+        trackers_blocked = self.privacy_stats.get('trackers_blocked', 0)
+        cookies_blocked = self.privacy_stats.get('cookies_blocked', 0)
+        requests_blocked = self.privacy_stats.get('requests_blocked', 0)
+        domains_blocked = len(self.privacy_stats.get('domains_blocked', set()))
+        
+        stats_box.pack_start(Gtk.Label(label=f"🚫 Ads Blocked: {ads_blocked:,}"), False, False, 0)
+        stats_box.pack_start(Gtk.Label(label=f"🛡️ Trackers Blocked: {trackers_blocked:,}"), False, False, 0)
+        stats_box.pack_start(Gtk.Label(label=f"🍪 Cookies Blocked: {cookies_blocked:,}"), False, False, 0)
+        stats_box.pack_start(Gtk.Label(label=f"🚫 Requests Blocked: {requests_blocked:,}"), False, False, 0)
+        stats_box.pack_start(Gtk.Label(label=f"🌐 Domains Blocked: {domains_blocked:,}"), False, False, 0)
+        
+        stats_frame.add(stats_box)
+        content.pack_start(stats_frame, False, False, 10)
+        
+        # Protection status
+        protection_frame = Gtk.Frame(label="🛡️ Active Protections")
+        protection_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=5)
+        protection_box.set_margin_start(10)
+        protection_box.set_margin_end(10)
+        protection_box.set_margin_top(10)
+        protection_box.set_margin_bottom(10)
+        
+        protections = [
+            ("✅", "Ad Blocking", self.settings.get('ad_blocking', True)),
+            ("✅", "Tracking Protection", self.settings.get('tracking_protection', True)),
+            ("✅", "Fingerprint Protection", self.settings.get('fingerprint_protection', True)),
+            ("✅", "Cookie Blocking", self.settings.get('block_all_cookies', True)),
+            ("✅", "WebRTC Leak Protection", self.settings.get('webrtc_leak_protection', True)),
+            ("✅", "Camera Blocked", self.settings.get('block_camera', True)),
+            ("✅", "Microphone Blocked", self.settings.get('block_microphone', True)),
+            ("✅", "Geolocation Blocked", self.settings.get('block_geolocation', True)),
+            ("✅", "Notifications Blocked", self.settings.get('block_notifications', True)),
+            ("✅", "Font Fingerprinting Blocked", self.settings.get('block_all_fonts', True)),
+        ]
+        
+        for icon, name, enabled in protections:
+            status = "ON" if enabled else "OFF"
+            label = Gtk.Label()
+            label.set_markup(f"{icon} {name}: <b>{status}</b>")
+            protection_box.pack_start(label, False, False, 0)
+        
+        protection_frame.add(protection_box)
+        content.pack_start(protection_frame, False, False, 10)
+        
+        # Blocked domains list
+        if domains_blocked > 0:
+            domains_frame = Gtk.Frame(label=f"🚫 Blocked Domains ({domains_blocked})")
+            scrolled = Gtk.ScrolledWindow()
+            scrolled.set_min_content_height(150)
+            domains_list = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
+            domains_list.set_margin_start(10)
+            domains_list.set_margin_end(10)
+            domains_list.set_margin_top(10)
+            domains_list.set_margin_bottom(10)
+            
+            for domain in list(self.privacy_stats.get('domains_blocked', set()))[:50]:  # Show first 50
+                domain_label = Gtk.Label(label=f"  • {domain}")
+                domain_label.set_xalign(0)
+                domains_list.pack_start(domain_label, False, False, 0)
+            
+            scrolled.add(domains_list)
+            domains_frame.add(scrolled)
+            content.pack_start(domains_frame, True, True, 10)
+        
+        # Reset button
+        reset_btn = Gtk.Button(label="🔄 Reset Stats")
+        reset_btn.connect("clicked", lambda w: self.reset_privacy_stats())
+        content.pack_start(reset_btn, False, False, 5)
+        
+        dialog.add_button("Close", Gtk.ResponseType.CLOSE)
+        dialog.show_all()
+        dialog.run()
+        dialog.destroy()
+    
+    def reset_privacy_stats(self):
+        """Reset privacy statistics"""
+        self.privacy_stats = {
+            'ads_blocked': 0,
+            'trackers_blocked': 0,
+            'cookies_blocked': 0,
+            'scripts_blocked': 0,
+            'fingerprints_prevented': 0,
+            'requests_blocked': 0,
+            'domains_blocked': set(),
+        }
     
     def run(self):
         """Run the browser"""

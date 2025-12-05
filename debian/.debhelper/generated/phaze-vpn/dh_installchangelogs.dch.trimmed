@@ -1,0 +1,41 @@
+phaze-vpn (1.0.4) unstable; urgency=medium
+
+  * Major GUI update with immersive animated splash screen
+  * Network phasing animation on login and signup screens
+  * Fixed client creation with proper name sanitization
+  * Improved error handling in vpn-manager.py
+  * Fixed client listing and download flow
+  * Updated certificate generation to use modern Ed25519
+  * Dynamic version detection for client downloads
+  * Better directory creation and permissions handling
+  * Updated logo integration throughout GUI
+
+ -- PhazeVPN Team <admin@phazevpn.com>  Mon, 02 Dec 2024 12:00:00 -0600
+
+phaze-vpn (1.0.3) unstable; urgency=medium
+
+  * Update: 2025-11-30
+
+ -- PhazeVPN Team <admin@phazevpn.com>  Sun, 30 Nov 2025 21:09:28 -0600
+
+
+phaze-vpn (1.0.2) unstable; urgency=medium
+
+  * Removed all browser-related components (PhazeBrowser)
+  * Fixed GUI to use phazevpn.com instead of old IP
+  * Updated all config generation to use correct server settings
+  * Added support for all 3 config types (OpenVPN, PhazeVPN, WireGuard)
+  * Fixed client download authentication
+  * Improved web portal config downloads
+  * Updated package versioning for automatic updates
+
+ -- PhazeVPN Team <admin@phazevpn.com>  Mon, 20 Nov 2024 12:00:00 +0000
+
+phaze-vpn (1.0.1) unstable; urgency=low
+
+  * Initial release with GUI and web portal
+  * OpenVPN server with ChaCha20-Poly1305 encryption
+  * Client management system
+  * Web-based config downloads
+
+ -- PhazeVPN Team <admin@phazevpn.com>  Mon, 19 Nov 2024 12:00:00 +0000
