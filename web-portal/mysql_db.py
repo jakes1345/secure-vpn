@@ -29,23 +29,30 @@ try:
     if config_file.exists():
         with open(config_file) as f:
             file_config = json.load(f)
-            if isinstance(file_config, dict) and 'database' in file_config:
-                db_info = file_config['database']
-                DB_CONFIG.update({
-                    'host': db_info.get('host', DB_CONFIG['host']),
-                    'database': db_info.get('database', DB_CONFIG['database']),
-                    'user': db_info.get('user', DB_CONFIG['user']),
-                    'password': db_info.get('password', DB_CONFIG['password']),
-                })
-            elif isinstance(file_config, dict):
-                # Config might be flat
-                DB_CONFIG.update({
-                    'host': file_config.get('host', DB_CONFIG['host']),
-                    'database': file_config.get('database', DB_CONFIG['database']),
-                    'user': file_config.get('user', DB_CONFIG['user']),
-                    'password': file_config.get('password', DB_CONFIG['password']),
-                })
-except Exception:
+            # Handle both nested and flat config structures
+            if isinstance(file_config, dict):
+                if 'database' in file_config and isinstance(file_config['database'], dict):
+                    # Nested structure: {"database": {"host": "...", ...}}
+                    db_info = file_config['database']
+                    DB_CONFIG.update({
+                        'host': db_info.get('host', DB_CONFIG['host']),
+                        'database': db_info.get('database', DB_CONFIG['database']),
+                        'user': db_info.get('user', DB_CONFIG['user']),
+                        'password': db_info.get('password', DB_CONFIG['password']),
+                    })
+                else:
+                    # Flat structure: {"host": "...", "database": "...", ...}
+                    DB_CONFIG.update({
+                        'host': file_config.get('host', DB_CONFIG['host']),
+                        'database': file_config.get('database', DB_CONFIG['database']),
+                        'user': file_config.get('user', DB_CONFIG['user']),
+                        'password': file_config.get('password', DB_CONFIG['password']),
+                    })
+                    # Also check for port if present
+                    if 'port' in file_config:
+                        DB_CONFIG['port'] = int(file_config['port'])
+except Exception as e:
+    print(f"⚠️  Warning: Could not load db_config.json: {e}")
     pass  # Use defaults
 
 # Connection pool (reuse connections)
