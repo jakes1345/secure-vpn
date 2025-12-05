@@ -1,82 +1,21 @@
 #!/usr/bin/env python3
 """
-Email API - Uses PhazeVPN's own email service first!
-Falls back to Mailjet, SendGrid, Mailgun, or SMTP if needed
+Email API - Uses ONLY PhazeVPN's own email service!
+No fallbacks - we use our own infrastructure exclusively.
 """
 
 import os
 import requests
 from pathlib import Path
 
-# Try SendGrid first (easiest, free)
-try:
-    from sendgrid import SendGridAPIClient
-    from sendgrid.helpers.mail import Mail
-    SENDGRID_AVAILABLE = True
-except ImportError:
-    SENDGRID_AVAILABLE = False
-
-# Fallback: Mailgun
-try:
-    import requests
-    MAILGUN_AVAILABLE = True
-except ImportError:
-    MAILGUN_AVAILABLE = False
-
-# Try SMTP first (simplest - just need email credentials)
-SMTP_AVAILABLE = False
-send_email_smtp = None
-
-try:
-    from email_smtp import send_email as send_email_smtp_func
-    send_email_smtp = send_email_smtp_func
-    
-    # Check if SMTP is configured
-    import os
-    if os.environ.get('SMTP_USER') and os.environ.get('SMTP_PASSWORD'):
-        SMTP_AVAILABLE = True
-except ImportError:
-    pass
-
-# Try Mailjet second (automatic emails, no authorization needed!)
-MAILJET_AVAILABLE = False
-send_email_mailjet = None
-
-try:
-    from email_mailjet import send_email as send_email_mailjet_func
-    send_email_mailjet = send_email_mailjet_func
-    
-    # Check if Mailjet is actually configured
-    try:
-        from mailjet_config import MAILJET_API_KEY, MAILJET_SECRET_KEY
-        if MAILJET_API_KEY and MAILJET_SECRET_KEY and len(MAILJET_API_KEY) > 10 and len(MAILJET_SECRET_KEY) > 10:
-            MAILJET_AVAILABLE = True
-    except ImportError:
-        # Try environment variables
-        import os
-        if os.environ.get('MAILJET_API_KEY') and os.environ.get('MAILJET_SECRET_KEY'):
-            MAILJET_AVAILABLE = True
-except ImportError:
-    pass
-
-# Try to load Mailgun config
-try:
-    from mailgun_config import (
-        MAILGUN_API_KEY, MAILGUN_DOMAIN, FROM_EMAIL, FROM_NAME
-    )
-except ImportError:
-    # Fallback to environment variables
-    MAILGUN_API_KEY = os.environ.get('MAILGUN_API_KEY', '')
-    MAILGUN_DOMAIN = os.environ.get('MAILGUN_DOMAIN', 'mg.phazevpn.com')
-    FROM_EMAIL = os.environ.get('FROM_EMAIL', 'noreply@phazevpn.com')
-    FROM_NAME = os.environ.get('FROM_NAME', 'PhazeVPN')
-
-# SendGrid (optional)
-SENDGRID_API_KEY = os.environ.get('SENDGRID_API_KEY', '')
-
 # PhazeVPN's own email service (running on VPS)
-EMAIL_SERVICE_URL = os.environ.get('EMAIL_SERVICE_URL', 'http://localhost:5005/api/v1/email')
+# Default to VPS IP if running on VPS, otherwise localhost for local dev
+VPS_IP = os.environ.get('VPS_IP', '15.204.11.19')
+EMAIL_SERVICE_URL = os.environ.get('EMAIL_SERVICE_URL', f'http://{VPS_IP}:5005/api/v1/email')
 EMAIL_SERVICE_USER = os.environ.get('EMAIL_SERVICE_USER', 'admin@phazevpn.duckdns.org')
+FROM_EMAIL = os.environ.get('FROM_EMAIL', 'noreply@phazevpn.com')
+FROM_NAME = os.environ.get('FROM_NAME', 'PhazeVPN')
+
 # SECURITY: Default password removed - MUST be set via environment variable
 EMAIL_SERVICE_PASSWORD = os.environ.get('EMAIL_SERVICE_PASSWORD', '')
 if not EMAIL_SERVICE_PASSWORD:
@@ -125,129 +64,27 @@ def send_via_phazevpn_email_service(to_email, subject, html_content, text_conten
 
 def send_email(to_email, subject, html_content, text_content=None):
     """
-    Send email - Tries PhazeVPN's own email service FIRST, then Mailjet, SendGrid, Mailgun, SMTP
-    
-    Priority:
-    1. PhazeVPN Email Service (our own Postfix/Dovecot - BEST option!)
-    2. Mailjet (professional, 6,000 emails/month free)
-    3. SendGrid (100 emails/day free)
-    4. Mailgun (5,000 emails/month free)
-    5. SMTP (Gmail/Outlook - personal email, last resort only)
+    Send email - Uses ONLY PhazeVPN's own email service!
+    No fallbacks - we use our own infrastructure exclusively.
     """
     if not to_email:
         return False, "No recipient email provided"
     
-    # Try PhazeVPN's own email service FIRST (best option - our own infrastructure!)
+    if not EMAIL_SERVICE_PASSWORD:
+        return False, "EMAIL_SERVICE_PASSWORD not set. Email service requires authentication."
+    
+    # Use ONLY PhazeVPN's own email service
     try:
         result = send_via_phazevpn_email_service(to_email, subject, html_content, text_content)
         if result[0]:  # Success
             return result
-        # If failed, log why but continue to next option
-        print(f"PhazeVPN email service failed: {result[1]}")
+        # If failed, return error (no fallbacks)
+        return False, f"PhazeVPN email service failed: {result[1]}"
     except Exception as e:
-        print(f"PhazeVPN email service error: {e}")
-    
-    # Try Mailjet second (professional service, already configured!)
-    if send_email_mailjet and MAILJET_AVAILABLE:
-        try:
-            result = send_email_mailjet(to_email, subject, html_content, text_content)
-            if result[0]:  # Success
-                return result
-            # If failed but function exists, log why
-            if not result[0] and "not configured" not in result[1].lower():
-                print(f"Mailjet returned: {result[1]}")
-        except Exception as e:
-            print(f"Mailjet failed: {e}")
-            import traceback
-            traceback.print_exc()
-    
-    # Try SendGrid second (no domain verification needed!)
-    if SENDGRID_AVAILABLE and SENDGRID_API_KEY:
-        try:
-            result = send_via_sendgrid(to_email, subject, html_content)
-            if result[0]:  # Success
-                return result
-        except Exception as e:
-            print(f"SendGrid failed: {e}")
-    
-    # Try Mailgun third (requires domain verification or authorized recipients)
-    if MAILGUN_AVAILABLE and MAILGUN_API_KEY:
-        try:
-            result = send_via_mailgun(to_email, subject, html_content)
-            if result[0]:  # Success
-                return result
-        except Exception as e:
-            print(f"Mailgun failed: {e}")
-    
-    # Try SMTP LAST (personal Gmail - only as fallback, not recommended for production!)
-    if send_email_smtp:
-        try:
-            # Check if SMTP is configured
-            try:
-                from smtp_config import SMTP_USER, SMTP_PASSWORD
-                if SMTP_USER and SMTP_PASSWORD:
-                    print("⚠️  Using Gmail SMTP as fallback (not recommended for production)")
-                    result = send_email_smtp(to_email, subject, html_content, text_content)
-                    if result[0]:  # Success
-                        return result
-                    # If failed, log why but continue
-                    print(f"SMTP failed: {result[1]}")
-            except ImportError:
-                pass
-        except Exception as e:
-            print(f"SMTP error: {e}")
-    
-    # Skip if not configured (don't break signup)
-    print(f"⚠️  Email not configured - would send to {to_email}: {subject}")
-    return True, "Email skipped (not configured)"
+        return False, f"PhazeVPN email service error: {str(e)}"
 
 
-def send_via_sendgrid(to_email, subject, html_content):
-    """Send via SendGrid API - NO SMTP, NO PERSONAL EMAIL!"""
-    if not SENDGRID_AVAILABLE:
-        return False, "SendGrid not installed (pip install sendgrid)"
-    
-    if not SENDGRID_API_KEY:
-        return False, "SENDGRID_API_KEY not set"
-    
-    message = Mail(
-        from_email=FROM_EMAIL,
-        to_emails=to_email,
-        subject=subject,
-        html_content=html_content
-    )
-    
-    try:
-        sg = SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
-        return True, f"Email sent (status: {response.status_code})"
-    except Exception as e:
-        return False, str(e)
-
-
-def send_via_mailgun(to_email, subject, html_content):
-    """Send via Mailgun API - NO SMTP, NO PERSONAL EMAIL!"""
-    if not MAILGUN_AVAILABLE:
-        return False, "requests not installed"
-    
-    if not MAILGUN_API_KEY:
-        return False, "MAILGUN_API_KEY not set"
-    
-    response = requests.post(
-        f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages",
-        auth=("api", MAILGUN_API_KEY),
-        data={
-            "from": f"{FROM_NAME} <{FROM_EMAIL}>",
-            "to": to_email,
-            "subject": subject,
-            "html": html_content
-        }
-    )
-    
-    if response.status_code == 200:
-        return True, "Email sent via Mailgun"
-    else:
-        return False, f"Mailgun error: {response.text}"
+# Removed SendGrid and Mailgun functions - we only use PhazeVPN email service now!
 
 
 def send_welcome_email(to_email, username):
@@ -382,25 +219,27 @@ def send_password_reset_email(to_email, username, reset_token):
 
 if __name__ == "__main__":
     print("==========================================")
-    print("📧 EMAIL API SETUP")
+    print("📧 PHAZEVPN EMAIL API")
     print("==========================================")
     print("")
-    print("✅ Option 1: SendGrid (Recommended)")
-    print("   1. Go to: https://sendgrid.com")
-    print("   2. Sign up (free - 100 emails/day)")
-    print("   3. Get API key (Settings → API Keys)")
-    print("   4. Set: export SENDGRID_API_KEY='your-key'")
+    print("✅ Using ONLY PhazeVPN's own email service!")
+    print("   - No third-party services (Mailgun, SendGrid, Gmail)")
+    print("   - Uses our own Postfix/Dovecot email server")
+    print("   - Full control over deliverability")
     print("")
-    print("✅ Option 2: Mailgun (5,000 emails/month)")
-    print("   1. Go to: https://mailgun.com")
-    print("   2. Sign up (free tier)")
-    print("   3. Get API key and domain")
-    print("   4. Set: export MAILGUN_API_KEY='your-key'")
-    print("   5. Set: export MAILGUN_DOMAIN='mg.yourdomain.com'")
+    print("📋 Setup:")
+    print("   1. Set EMAIL_SERVICE_PASSWORD:")
+    print("      export EMAIL_SERVICE_PASSWORD='your-secure-password'")
     print("")
-    print("✅ Option 3: Skip emails (current)")
-    print("   - Emails are optional")
-    print("   - Just stores email for account recovery")
-    print("   - No emails sent if not configured")
+    print("   2. Set EMAIL_SERVICE_URL (if not using default):")
+    print("      export EMAIL_SERVICE_URL='http://your-vps-ip:5005/api/v1/email'")
+    print("")
+    print("   3. Email service should be running on VPS at port 5005")
+    print("")
+    print("⚠️  If emails aren't working:")
+    print("   - Check if email service is running: systemctl status email-service")
+    print("   - Check email service logs")
+    print("   - Verify EMAIL_SERVICE_PASSWORD is set correctly")
+    print("   - Check if domain/IP is blacklisted (may need to get unbanned)")
     print("")
 
