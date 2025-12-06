@@ -5,10 +5,15 @@ import paramiko
 import os
 import sys
 
-VPS_IP = "15.204.11.19"
-VPS_USER = "root"
-VPS_PASS = "Jakes1328!@"
-MYSQL_PASS = "PhazeVPN2025SecureDB!"
+VPS_IP = os.environ.get('VPS_IP', '15.204.11.19')
+VPS_USER = os.environ.get('VPS_USER', 'root')
+VPS_PASS = os.environ.get('VPS_PASS', '')
+MYSQL_PASS = os.environ.get('MYSQL_PASSWORD', 'PhazeVPN2025SecureDB!')
+
+if not VPS_PASS:
+    print("❌ Error: VPS_PASS environment variable not set")
+    print("   Set it with: export VPS_PASS='your-password'")
+    sys.exit(1)
 
 ssh = paramiko.SSHClient()
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())

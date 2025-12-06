@@ -4,9 +4,15 @@
 
 set -e
 
-VPS_IP="15.204.11.19"
-VPS_USER="root"
-VPS_PASS="Jakes1328!@"
+VPS_IP="${VPS_IP:-15.204.11.19}"
+VPS_USER="${VPS_USER:-root}"
+VPS_PASS="${VPS_PASS:-}"
+
+if [ -z "$VPS_PASS" ]; then
+    echo "❌ Error: VPS_PASS environment variable not set"
+    echo "   Set it with: export VPS_PASS='your-password'"
+    exit 1
+fi
 VPS_PATH="/opt/secure-vpn/web-portal"
 LOCAL_PATH="web-portal"
 
