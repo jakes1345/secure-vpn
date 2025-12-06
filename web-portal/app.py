@@ -22,6 +22,7 @@ import csv
 import secrets
 import shlex
 from collections import defaultdict
+import logging
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -4980,7 +4981,100 @@ def repo_file(filename):
         return send_file(str(file_path), mimetype=mimetype)
     return 'File not found', 404
 
+# ============================================
+# HEALTH CHECK ENDPOINTS
+# ============================================
+
+@app.route('/health')
+@app.route('/health/status')
+def health_check():
+    """Basic health check endpoint"""
+    try:
+        from health_check import comprehensive_health_check
+        health = comprehensive_health_check()
+        
+        status_code = 200
+        if health['status'] == 'unhealthy':
+            status_code = 503
+        elif health['status'] == 'degraded':
+            status_code = 200  # Still operational
+        
+        return jsonify(health), status_code
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+@app.route('/health/database')
+def health_database():
+    """Database health check"""
+    try:
+        from health_check import check_database_health
+        health = check_database_health()
+        status_code = 200 if health['status'] == 'healthy' else 503
+        return jsonify(health), status_code
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+@app.route('/health/disk')
+def health_disk():
+    """Disk space health check"""
+    try:
+        from health_check import check_disk_space
+        health = check_disk_space()
+        return jsonify(health), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+@app.route('/health/vpn')
+def health_vpn():
+    """VPN service health check"""
+    try:
+        from health_check import check_vpn_service
+        health = check_vpn_service()
+        status_code = 200 if health['status'] == 'healthy' else 503
+        return jsonify(health), status_code
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'error': str(e),
+            'timestamp': datetime.now().isoformat()
+        }), 500
+
+@app.route('/api/status')
+def api_status():
+    """API status endpoint - returns basic service status"""
+    return jsonify({
+        'status': 'operational',
+        'service': 'PhazeVPN Web Portal',
+        'version': '1.0.0',
+        'timestamp': datetime.now().isoformat()
+    }), 200
+
 if __name__ == '__main__':
+    # Set up logging
+    try:
+        from logging_config import setup_logging
+        log_level = logging.INFO
+        if os.environ.get('DEBUG', 'false').lower() == 'true':
+            log_level = logging.DEBUG
+        setup_logging(log_level=log_level)
+        logger = logging.getLogger('phazevpn.system')
+        logger.info("Logging configured successfully")
+    except Exception as e:
+        print(f"Warning: Could not set up logging: {e}")
+        logger = None
+    
     # Ensure directories exist
     VPN_DIR.mkdir(parents=True, exist_ok=True)
     CLIENT_CONFIGS_DIR.mkdir(parents=True, exist_ok=True)
@@ -4991,10 +5085,16 @@ if __name__ == '__main__':
     print(f"Admin Dashboard: http://localhost:5000/admin")
     print(f"Moderator Panel: http://localhost:5000/moderator")
     print(f"Analytics: http://localhost:5000/admin/analytics")
+    print(f"Health Check: http://localhost:5000/health")
     print()
     # Security: Don't print default credentials in production
     # Users should set their own passwords via signup or admin panel
     print("="*60)
+    
+    if logger:
+        logger.info("Starting PhazeVPN Web Portal")
+        logger.info(f"Port: {os.environ.get('PORT', 5000)}")
+        logger.info(f"Debug mode: {os.environ.get('DEBUG', 'false')}")
     
     # Run on port 5000 (or from environment variable)
     port = int(os.environ.get('PORT', 5000))
