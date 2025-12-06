@@ -274,11 +274,13 @@ def check_browser(ssh):
     
     # Check SearXNG
     print('\n3. SearXNG Search Engine:')
-    success, output, _ = run_vps(ssh, 'docker ps | grep searxng || echo "NOT_RUNNING"')
+    # Docker not used - SearXNG would be installed natively if needed
+    output = "NOT_RUNNING"
     if 'searxng' in output.lower() and 'NOT_RUNNING' not in output:
         print('✅ SearXNG container is running')
         # Check port
-        success, output, _ = run_vps(ssh, 'docker ps | grep searxng | grep -o "0.0.0.0:[0-9]*" || echo "NO_PORT"')
+        # Docker not used
+        output = "NO_PORT"
         if 'NO_PORT' not in output:
             print(f'   Running on port: {output.strip()}')
     else:
@@ -350,14 +352,9 @@ def check_integrations(ssh):
     else:
         print('⚠️  SSL certificate NOT found (may use self-signed)')
     
-    # Check Docker
+    # Docker not used - using native systemd services instead
     print('\n5. Docker:')
-    success, output, _ = run_vps(ssh, 'docker --version 2>&1')
-    if 'version' in output.lower():
-        print(f'✅ Docker installed: {output.strip()[:50]}')
-    else:
-        print('❌ Docker NOT installed')
-        issues.append('Docker missing')
+    print('   ℹ️  Docker not used - using native systemd services')
     
     return issues
 
