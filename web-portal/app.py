@@ -579,7 +579,30 @@ def require_api_auth(f):
     Decorator to require API authentication via session.
     
     Usage:
-        @app.route('/api/endpoint', methods=['POST'])
+        @app.route('/api/docs')
+def api_docs():
+    """API documentation endpoint"""
+    try:
+        docs_path = Path(__file__).parent / 'API-DOCUMENTATION.md'
+        if docs_path.exists():
+            return send_file(str(docs_path), mimetype='text/markdown')
+        else:
+            return jsonify({
+                'message': 'API documentation',
+                'endpoints': {
+                    'health': '/health - Health check',
+                    'status': '/api/status - Service status',
+                    'login': 'POST /login - User login',
+                    'signup': 'POST /signup - User registration',
+                    'clients': 'POST /api/clients - Create VPN client',
+                    'tickets': 'POST /api/tickets - Create support ticket',
+                },
+                'documentation': 'See API-DOCUMENTATION.md for full details'
+            }), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/endpoint', methods=['POST'])
         @require_api_auth
         def api_endpoint():
             ...
