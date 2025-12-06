@@ -1,0 +1,20 @@
+[Unit]
+Description=PhazeVPN Email Queue Worker
+After=network.target redis.service
+Requires=redis.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/secure-vpn/web-portal
+Environment="PYTHONPATH=/opt/secure-vpn/web-portal"
+Environment="REDIS_HOST=localhost"
+Environment="REDIS_PORT=6379"
+ExecStart=/usr/bin/python3 /opt/secure-vpn/web-portal/email_worker.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

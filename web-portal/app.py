@@ -751,7 +751,7 @@ def get_active_connections():
                             connections.append({
                                 'virtual_ip': parts[0],
                                 'name': parts[1] if len(parts) > 1 else 'Unknown',
-                                'real_ip': parts[2] if len(parts) > 2 else 'N/A',
+                                # NO real_ip - Privacy: We don't track real IP addresses
                                 'bytes_rx': int(parts[3]) if len(parts) > 3 and parts[3].isdigit() else 0,
                                 'bytes_tx': int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else 0,
                                 'connected_since': parts[5] if len(parts) > 5 else 'N/A'
@@ -775,25 +775,15 @@ def generate_qr_code(data):
     return f"data:image/png;base64,{img_str}"
 
 def log_activity(user, action, details=""):
-    """Log admin/moderator activity"""
-    ACTIVITY_LOG.parent.mkdir(parents=True, exist_ok=True)
-    timestamp = datetime.now().isoformat()
-    entry = f"[{timestamp}] {user}: {action} {details}\n"
-    with open(ACTIVITY_LOG, 'a') as f:
-        f.write(entry)
+    """NO LOGGING - Complete privacy - we don't track user activity"""
+    # DO NOTHING - Complete anonymity
+    # Users are completely ghost - no tracking, no logging
+    pass
 
 def get_activity_logs(limit=100):
-    """Get recent activity logs"""
-    if not ACTIVITY_LOG.exists():
-        return []
-    
-    try:
-        with open(ACTIVITY_LOG, 'r') as f:
-            lines = f.readlines()
-            # Return last N lines, reversed (newest first)
-            return [line.strip() for line in lines[-limit:]][::-1]
-    except:
-        return []
+    """NO LOGS - Complete privacy"""
+    # We don't track user activity - complete anonymity
+    return []
 
 def update_connection_history(connections):
     """Update connection history with file locking"""
@@ -816,7 +806,7 @@ def update_connection_history(connections):
             history.append({
                 'name': name,
                 'virtual_ip': conn.get('virtual_ip', 'N/A'),
-                'real_ip': conn.get('real_ip', 'N/A'),
+                # NO real_ip - Privacy: We don't track real IP addresses
                 'action': 'connected',
                 'timestamp': datetime.now().isoformat()
             })
@@ -866,30 +856,31 @@ except ImportError:
     RATE_LIMIT_MAX = 5
     RATE_LIMIT_WINDOW = 900  # 15 minutes
     
-    def check_rate_limit(ip):
-        """Check if IP is rate limited (fallback in-memory version)"""
+    def check_rate_limit(username):
+        """Check if username is rate limited - NO IP tracking for privacy"""
+        # Privacy: Rate limit by username, NOT IP address
         import time
         now = time.time()
         
-        if ip not in login_attempts:
-            login_attempts[ip] = []
+        if username not in login_attempts:
+            login_attempts[username] = []
         
         # Remove old attempts
-        login_attempts[ip] = [t for t in login_attempts[ip] if now - t < RATE_LIMIT_WINDOW]
+        login_attempts[username] = [t for t in login_attempts[username] if now - t < RATE_LIMIT_WINDOW]
         
-        if len(login_attempts[ip]) >= RATE_LIMIT_MAX:
+        if len(login_attempts[username]) >= RATE_LIMIT_MAX:
             return False
         
-        login_attempts[ip].append(now)
+        login_attempts[username].append(now)
         return True
     
-    def get_rate_limit_status(ip):
-        """Get rate limit status (fallback)"""
+    def get_rate_limit_status(username):
+        """Get rate limit status (fallback) - NO IP tracking"""
         import time
         now = time.time()
-        if ip not in login_attempts:
+        if username not in login_attempts:
             return {'limited': False, 'attempts': 0, 'remaining': RATE_LIMIT_MAX, 'reset_in': 0}
-        attempts = [t for t in login_attempts[ip] if now - t < RATE_LIMIT_WINDOW]
+        attempts = [t for t in login_attempts[username] if now - t < RATE_LIMIT_WINDOW]
         return {
             'limited': len(attempts) >= RATE_LIMIT_MAX,
             'attempts': len(attempts),
@@ -897,17 +888,18 @@ except ImportError:
             'reset_in': 0
         }
     
-    def reset_rate_limit(ip):
-        """Reset rate limit (fallback)"""
-        if ip in login_attempts:
-            del login_attempts[ip]
+    def reset_rate_limit(username):
+        """Reset rate limit (fallback) - NO IP tracking"""
+        if username in login_attempts:
+            del login_attempts[username]
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """Login page"""
     if request.method == 'POST':
-        # Rate limiting
-        if not check_rate_limit(request.remote_addr):
+        # Rate limiting by username only (NO IP tracking for privacy)
+        username_for_rate_limit = request.form.get('username', '').strip()
+        if username_for_rate_limit and not check_rate_limit(username_for_rate_limit):
             return render_template('login.html', error='Too many login attempts. Please try again in 15 minutes.')
         
         username = sanitize_input(request.form.get('username', '').strip(), max_length=30)
@@ -2722,7 +2714,7 @@ def api_client_details(client_name):
         'connected': True,
         'name': client_conn.get('name', client_name),
         'virtual_ip': client_conn.get('virtual_ip', 'N/A'),
-        'real_ip': client_conn.get('real_ip', 'N/A'),
+        # NO real_ip - Privacy: We don't track real IP addresses
         'bytes_rx': client_conn.get('bytes_rx', 0),
         'bytes_tx': client_conn.get('bytes_tx', 0),
         'connected_since': client_conn.get('connected_since', 'N/A'),
@@ -3264,7 +3256,7 @@ def api_add_client():
             
             config_content = f"""[PhazeVPN]
 Server = {server_host}:{server_port}
-ServerPublicKey = placeholder_server_key
+ServerPublicKey = {server_public_key}
 ClientPrivateKey = {client_private_key}
 ClientPublicKey = {client_public_key}
 VPNNetwork = 10.9.0.0/24
@@ -3788,7 +3780,7 @@ def api_my_clients():
             
             config_content = f"""[PhazeVPN]
 Server = {server_host}:{server_port}
-ServerPublicKey = placeholder_server_key
+ServerPublicKey = {server_public_key}
 ClientPrivateKey = {client_private_key}
 ClientPublicKey = {client_public_key}
 VPNNetwork = 10.9.0.0/24
@@ -4615,7 +4607,7 @@ def api_export_connections():
             event.get('name', 'Unknown'),
             event.get('action', ''),
             event.get('virtual_ip', ''),
-            event.get('real_ip', '')
+            ''  # NO real_ip - Privacy: We don't track real IP addresses
         ])
     
     output.seek(0)

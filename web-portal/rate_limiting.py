@@ -20,7 +20,7 @@ RATE_LIMIT_FILE.parent.mkdir(parents=True, exist_ok=True)
 
 
 def load_rate_limits():
-    """Load rate limit data from file"""
+    """Load rate limit data from file - Privacy: Uses username, NOT IP"""
     if not RATE_LIMIT_FILE.exists():
         return {}
     
@@ -28,19 +28,21 @@ def load_rate_limits():
         with open(RATE_LIMIT_FILE, 'r') as f:
             data = json.load(f)
             # Convert timestamp strings back to floats
+            # Privacy: Keys are usernames, NOT IP addresses
             result = {}
-            for ip, timestamps in data.items():
-                result[ip] = [float(ts) for ts in timestamps]
+            for username, timestamps in data.items():
+                result[username] = [float(ts) for ts in timestamps]
             return result
     except (json.JSONDecodeError, IOError, ValueError):
         return {}
 
 
 def save_rate_limits(rate_limits):
-    """Save rate limit data to file"""
+    """Save rate limit data to file - Privacy: Uses username, NOT IP"""
     try:
         # Convert floats to strings for JSON serialization
-        data = {ip: [str(ts) for ts in timestamps] for ip, timestamps in rate_limits.items()}
+        # Privacy: Keys are usernames, NOT IP addresses
+        data = {username: [str(ts) for ts in timestamps] for username, timestamps in rate_limits.items()}
         
         # Use file locking if available
         try:
@@ -55,31 +57,35 @@ def save_rate_limits(rate_limits):
 
 
 def cleanup_old_attempts(rate_limits, now=None):
-    """Remove attempts older than RATE_LIMIT_WINDOW"""
+    """Remove attempts older than RATE_LIMIT_WINDOW - Privacy: Uses username, NOT IP"""
     if now is None:
         now = time.time()
     
     cleaned = {}
-    for ip, timestamps in rate_limits.items():
+    for username, timestamps in rate_limits.items():
         recent = [ts for ts in timestamps if now - ts < RATE_LIMIT_WINDOW]
         if recent:
-            cleaned[ip] = recent
+            cleaned[username] = recent
     
     return cleaned
 
 
-def check_rate_limit(ip, max_attempts=None, window=None):
+def check_rate_limit(username, max_attempts=None, window=None):
     """
-    Check if IP is rate limited
+    Check if username is rate limited - NO IP tracking for privacy
     
     Args:
-        ip: IP address to check
+        username: Username to check (NOT IP address - privacy)
         max_attempts: Maximum attempts allowed (defaults to RATE_LIMIT_MAX)
         window: Time window in seconds (defaults to RATE_LIMIT_WINDOW)
     
     Returns:
         True if allowed, False if rate limited
     """
+    # Privacy: Rate limit by username, NOT IP address
+    if not username:
+        return True  # No username = no rate limit
+    
     if max_attempts is None:
         max_attempts = RATE_LIMIT_MAX
     if window is None:
@@ -93,24 +99,24 @@ def check_rate_limit(ip, max_attempts=None, window=None):
     # Clean up old attempts
     rate_limits = cleanup_old_attempts(rate_limits, now)
     
-    # Check if IP is rate limited
-    if ip not in rate_limits:
-        rate_limits[ip] = []
+    # Check if username is rate limited (NOT IP)
+    if username not in rate_limits:
+        rate_limits[username] = []
     
-    attempts = rate_limits[ip]
+    attempts = rate_limits[username]
     
     # Remove attempts outside the window
     attempts = [ts for ts in attempts if now - ts < window]
     
     if len(attempts) >= max_attempts:
         # Rate limited - save current state
-        rate_limits[ip] = attempts
+        rate_limits[username] = attempts
         save_rate_limits(rate_limits)
         return False
     
     # Add new attempt
     attempts.append(now)
-    rate_limits[ip] = attempts
+    rate_limits[username] = attempts
     
     # Save updated rate limits
     save_rate_limits(rate_limits)
@@ -118,20 +124,20 @@ def check_rate_limit(ip, max_attempts=None, window=None):
     return True
 
 
-def reset_rate_limit(ip):
-    """Reset rate limit for an IP address"""
+def reset_rate_limit(username):
+    """Reset rate limit for a username - NO IP tracking"""
     rate_limits = load_rate_limits()
-    if ip in rate_limits:
-        del rate_limits[ip]
+    if username in rate_limits:
+        del rate_limits[username]
         save_rate_limits(rate_limits)
 
 
-def get_rate_limit_status(ip):
-    """Get current rate limit status for an IP"""
+def get_rate_limit_status(username):
+    """Get current rate limit status for a username - NO IP tracking"""
     now = time.time()
     rate_limits = load_rate_limits()
     
-    if ip not in rate_limits:
+    if username not in rate_limits:
         return {
             'limited': False,
             'attempts': 0,
@@ -139,7 +145,7 @@ def get_rate_limit_status(ip):
             'reset_in': 0
         }
     
-    attempts = [ts for ts in rate_limits[ip] if now - ts < RATE_LIMIT_WINDOW]
+    attempts = [ts for ts in rate_limits[username] if now - ts < RATE_LIMIT_WINDOW]
     
     if len(attempts) >= RATE_LIMIT_MAX:
         # Calculate when the oldest attempt expires

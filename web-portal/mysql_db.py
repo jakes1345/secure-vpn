@@ -233,43 +233,28 @@ def get_user_payments(username: str, limit: int = 100) -> List[Dict[str, Any]]:
 
 def log_connection(username: str, client_name: str, protocol: str, 
                   action: str = 'connect', ip_address: str = None) -> bool:
-    """Log connection event"""
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO connection_history (username, client_name, protocol, action, ip_address)
-            VALUES (%s, %s, %s, %s, %s)
-        """, (username, client_name, protocol, action, ip_address))
-        return True
+    """NO LOGGING - Complete privacy - we don't track connections"""
+    # DO NOTHING - Complete anonymity
+    # We don't store connection history or IP addresses
+    return True
 
 def get_connection_history(username: str = None, limit: int = 1000) -> List[Dict[str, Any]]:
-    """Get connection history"""
-    with get_connection() as conn:
-        cursor = conn.cursor(dictionary=True)
-        if username:
-            cursor.execute("""
-                SELECT username, client_name, protocol, action, ip_address, created_at
-                FROM connection_history
-                WHERE username = %s
-                ORDER BY created_at DESC
-                LIMIT %s
-            """, (username, limit))
-        else:
-            cursor.execute("""
-                SELECT username, client_name, protocol, action, ip_address, created_at
-                FROM connection_history
-                ORDER BY created_at DESC
-                LIMIT %s
-            """, (limit,))
-        return cursor.fetchall()
+    """NO HISTORY - Complete privacy"""
+    # We don't track connection history - complete anonymity
+    return []
 
 # ============================================
 # RATE LIMITING (MySQL alternative to Redis)
 # ============================================
 
-def check_rate_limit(ip_address: str, endpoint: str = 'default', 
+def check_rate_limit(username: str, endpoint: str = 'default', 
                     max_attempts: int = 5, window_seconds: int = 900) -> tuple[bool, int]:
-    """Check rate limit (MySQL-based)"""
+    """Check rate limit by username ONLY - NO IP tracking for privacy"""
+    # Rate limit by username, NOT IP address
+    # This prevents abuse without tracking IPs - complete privacy
+    if not username:
+        return (True, max_attempts)  # No username = no rate limit
+    
     with get_connection() as conn:
         cursor = conn.cursor()
         
@@ -279,13 +264,13 @@ def check_rate_limit(ip_address: str, endpoint: str = 'default',
             WHERE window_start < DATE_SUB(NOW(), INTERVAL %s SECOND)
         """, (window_seconds,))
         
-        # Check current attempts
+        # Check current attempts (by username, NOT IP)
         cursor.execute("""
             SELECT attempts
             FROM rate_limits
-            WHERE ip_address = %s AND endpoint = %s
+            WHERE username = %s AND endpoint = %s
             AND window_start > DATE_SUB(NOW(), INTERVAL %s SECOND)
-        """, (ip_address, endpoint, window_seconds))
+        """, (username, endpoint, window_seconds))
         
         result = cursor.fetchone()
         if result:
@@ -297,25 +282,25 @@ def check_rate_limit(ip_address: str, endpoint: str = 'default',
             cursor.execute("""
                 UPDATE rate_limits
                 SET attempts = attempts + 1
-                WHERE ip_address = %s AND endpoint = %s
-            """, (ip_address, endpoint))
+                WHERE username = %s AND endpoint = %s
+            """, (username, endpoint))
             return True, attempts + 1
         else:
-            # Create new entry
+            # Create new entry (username only, NO IP)
             cursor.execute("""
-                INSERT INTO rate_limits (ip_address, endpoint, attempts)
+                INSERT INTO rate_limits (username, endpoint, attempts)
                 VALUES (%s, %s, 1)
-            """, (ip_address, endpoint))
+            """, (username, endpoint))
             return True, 1
 
-def reset_rate_limit(ip_address: str, endpoint: str = 'default') -> bool:
-    """Reset rate limit"""
+def reset_rate_limit(username: str, endpoint: str = 'default') -> bool:
+    """Reset rate limit by username - NO IP tracking"""
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             DELETE FROM rate_limits
-            WHERE ip_address = %s AND endpoint = %s
-        """, (ip_address, endpoint))
+            WHERE username = %s AND endpoint = %s
+        """, (username, endpoint))
         return cursor.rowcount > 0
 
 # ============================================

@@ -1,0 +1,17 @@
+Welcome to {{ site_name }}
+
+Hi {{ username }},
+
+Your account has been successfully created!
+
+You can now:
+- Login to the dashboard
+- Create VPN client configurations
+- Download config files
+- Manage your subscription
+
+Login: {{ site_url }}/login
+
+---
+This is an automated message from {{ site_name }}.
+© 2025 {{ company_name }}. All rights reserved.

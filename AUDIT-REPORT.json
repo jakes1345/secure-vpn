@@ -1,0 +1,110 @@
+{
+  "summary": {
+    "total_issues": 20,
+    "missing_static_files": 1,
+    "missing_templates": 1,
+    "missing_dependencies": 6,
+    "missing_config_files": 2,
+    "vps_sync_missing": 10
+  },
+  "issues": {
+    "missing_static_files": [
+      {
+        "file": "style.css",
+        "referenced_in": "templates"
+      }
+    ],
+    "missing_templates": [
+      {
+        "template": "sitemap.xml",
+        "referenced_in": "app.py"
+      }
+    ],
+    "missing_routes": [],
+    "missing_dependencies": [
+      {
+        "module": "flask_wtf",
+        "imported_in": "app.py"
+      },
+      {
+        "module": "importlib",
+        "imported_in": "app.py"
+      },
+      {
+        "module": "qrcode",
+        "imported_in": "app.py"
+      },
+      {
+        "module": "vpn_manager",
+        "imported_in": "app.py"
+      },
+      {
+        "module": "twofa",
+        "imported_in": "app.py"
+      },
+      {
+        "module": "glob",
+        "imported_in": "app.py"
+      }
+    ],
+    "missing_config_files": [
+      {
+        "file": "db_config.json",
+        "location": "/media/jack/Liunux/secure-vpn/web-portal/db_config.json"
+      },
+      {
+        "file": ".env",
+        "location": "/media/jack/Liunux/secure-vpn/web-portal/.env"
+      }
+    ],
+    "vps_sync_missing": [
+      {
+        "file": "web-portal/requirements.txt",
+        "sync_script": "sync-to-vps.sh"
+      },
+      {
+        "file": "web-portal/templates/base.html",
+        "sync_script": "sync-to-vps.sh"
+      },
+      {
+        "file": "web-portal/static/css/style.css",
+        "sync_script": "sync-to-vps.sh"
+      },
+      {
+        "file": "web-portal/static/js/main.js",
+        "sync_script": "sync-to-vps.sh"
+      },
+      {
+        "file": "web-portal/static/images/logo-optimized.png",
+        "sync_script": "sync-to-vps.sh"
+      },
+      {
+        "file": "web-portal/static/images/favicon.png",
+        "sync_script": "sync-to-vps.sh"
+      },
+      {
+        "file": "web-portal/static/css/style.css",
+        "sync_script": "SYNC-TO-VPS.sh"
+      },
+      {
+        "file": "web-portal/static/js/main.js",
+        "sync_script": "SYNC-TO-VPS.sh"
+      },
+      {
+        "file": "web-portal/static/images/logo-optimized.png",
+        "sync_script": "SYNC-TO-VPS.sh"
+      },
+      {
+        "file": "web-portal/static/images/favicon.png",
+        "sync_script": "SYNC-TO-VPS.sh"
+      }
+    ],
+    "orphaned_files": [],
+    "broken_references": []
+  },
+  "existing": {
+    "static_files": 10,
+    "templates": 64,
+    "routes": 91
+  }
+}

@@ -62,10 +62,23 @@ def send_via_phazevpn_email_service(to_email, subject, html_content, text_conten
     except Exception as e:
         return False, f"Email service error: {str(e)}"
 
-def send_email(to_email, subject, html_content, text_content=None):
+def send_email(to_email, subject, html_content, text_content=None, use_queue=True, 
+               validate=True, check_rate_limit=True):
     """
     Send email - Uses ONLY PhazeVPN's own email service!
     No fallbacks - we use our own infrastructure exclusively.
+    
+    Args:
+        to_email: Recipient email
+        subject: Email subject
+        html_content: HTML email body
+        text_content: Plain text email body (optional)
+        use_queue: If True, queue email for reliable delivery (default: True)
+        validate: If True, validate email format (default: True)
+        check_rate_limit: If True, check rate limits (default: True)
+    
+    Returns:
+        (success: bool, message: str)
     """
     if not to_email:
         return False, "No recipient email provided"
@@ -73,10 +86,54 @@ def send_email(to_email, subject, html_content, text_content=None):
     if not EMAIL_SERVICE_PASSWORD:
         return False, "EMAIL_SERVICE_PASSWORD not set. Email service requires authentication."
     
-    # Use ONLY PhazeVPN's own email service
+    # Validate email format
+    if validate:
+        try:
+            from email_validation import validate_email
+            is_valid, error = validate_email(to_email, check_mx=False, reject_disposable=True)
+            if not is_valid:
+                return False, f"Email validation failed: {error}"
+        except ImportError:
+            pass  # Validation not available
+        except Exception as e:
+            print(f"⚠️  Validation error: {e}")
+    
+    # Check rate limits
+    if check_rate_limit:
+        try:
+            from email_rate_limit import check_rate_limit, increment_rate_limit
+            is_allowed, error = check_rate_limit(to_email, sender='system')
+            if not is_allowed:
+                return False, f"Rate limit exceeded: {error}"
+            # Increment after check (will be incremented again on actual send)
+        except ImportError:
+            pass  # Rate limiting not available
+        except Exception as e:
+            print(f"⚠️  Rate limit check error: {e}")
+    
+    # Try to use queue if available (for reliability)
+    if use_queue:
+        try:
+            from email_queue import queue_email
+            if queue_email(to_email, subject, html_content, text_content):
+                return True, "Email queued for delivery"
+        except ImportError:
+            # Queue not available - fall back to direct send
+            pass
+        except Exception as e:
+            print(f"⚠️  Queue failed, using direct send: {e}")
+    
+    # Direct send (fallback or if queue disabled)
     try:
         result = send_via_phazevpn_email_service(to_email, subject, html_content, text_content)
         if result[0]:  # Success
+            # Increment rate limit on successful send
+            if check_rate_limit:
+                try:
+                    from email_rate_limit import increment_rate_limit
+                    increment_rate_limit(to_email, sender='system')
+                except:
+                    pass
             return result
         # If failed, return error (no fallbacks)
         return False, f"PhazeVPN email service failed: {result[1]}"
@@ -88,9 +145,23 @@ def send_email(to_email, subject, html_content, text_content=None):
 
 
 def send_welcome_email(to_email, username):
-    """Send welcome email to new user"""
-    subject = "Welcome to PhazeVPN!"
+    """Send welcome email to new user - Uses template system"""
+    try:
+        from email_templates import render_with_defaults
+        
+        # Try to use template
+        html_content, text_content = render_with_defaults('welcome', {
+            'username': username,
+        })
+        
+        if html_content:
+            subject = "Welcome to PhazeVPN!"
+            return send_email(to_email, subject, html_content, text_content)
+    except ImportError:
+        pass  # Template system not available, fall back to inline
     
+    # Fallback to inline HTML
+    subject = "Welcome to PhazeVPN!"
     html_content = f"""
     <html>
     <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
