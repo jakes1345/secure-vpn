@@ -112,6 +112,24 @@ except ImportError:
         def __exit__(self, *args):
             pass
 
+# Import input validation
+try:
+    sys.path.insert(0, str(Path(__file__).parent))
+    from input_validation import (
+        validate_username, validate_email, validate_password, validate_client_name,
+        validate_message, validate_subject, validate_protocol, sanitize_input
+    )
+except ImportError:
+    # Fallback validation functions
+    def validate_username(u): return (len(u) >= 3 and len(u) <= 30, None)
+    def validate_email(e): return ('@' in e and '.' in e.split('@')[1], None)
+    def validate_password(p, min_len=8): return (len(p) >= min_len, None)
+    def validate_client_name(c): return (len(c) >= 1 and len(c) <= 50, None)
+    def validate_message(m): return (len(m) >= 10, None)
+    def validate_subject(s): return (len(s) >= 3, None)
+    def validate_protocol(p): return (p.lower() in ['openvpn', 'wireguard', 'phazevpn'], None)
+    def sanitize_input(i, max_length=None, allow_html=False): return i.strip()[:max_length] if max_length else i.strip()
+
 # Import MySQL database helper - REQUIRED, NO FALLBACK
 try:
     sys.path.insert(0, str(Path(__file__).parent))
@@ -764,8 +782,12 @@ def get_active_connections():
                                 'bytes_tx': int(parts[4]) if len(parts) > 4 and parts[4].isdigit() else 0,
                                 'connected_since': parts[5] if len(parts) > 5 else 'N/A'
                             })
-        except:
-            pass
+        except Exception as e:
+            # Log error but don't expose to user (privacy)
+            import logging
+            logger = logging.getLogger('phazevpn.system')
+            logger.error(f"Failed to read status log: {e}")
+            # Return empty list on error
     return connections
 
 def generate_qr_code(data):
@@ -934,6 +956,11 @@ def login():
         password = request.form.get('password', '')
         
         # Validate username
+        is_valid_username, username_error = validate_username(username)
+        if not is_valid_username:
+            return render_template('login.html', error=username_error)
+        
+        # Validate username
         if not validate_username(username):
             return render_template('login.html', error='Invalid username format. Use 3-30 alphanumeric characters, underscore, or dash.')
         
@@ -989,26 +1016,28 @@ def signup():
         return redirect(url_for('dashboard'))
     
     if request.method == 'POST':
-        username = request.form.get('username', '').strip()
-        email = request.form.get('email', '').strip()
+        username = sanitize_input(request.form.get('username', '').strip(), max_length=30)
+        email = sanitize_input(request.form.get('email', '').strip().lower(), max_length=255)
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
         
-        # Validation - email is now required
-        if not username or not password:
-            return render_template('signup.html', error='Username and password are required')
+        # Validate username
+        is_valid_username, username_error = validate_username(username)
+        if not is_valid_username:
+            return render_template('signup.html', error=username_error)
         
-        if not email:
-            return render_template('signup.html', error='Email address is required for account verification')
+        # Validate email
+        is_valid_email, email_error = validate_email(email)
+        if not is_valid_email:
+            return render_template('signup.html', error=email_error)
         
-        if not validate_email(email):
-            return render_template('signup.html', error='Please enter a valid email address')
+        # Validate password
+        is_valid_password, password_error = validate_password(password, min_length=8)
+        if not is_valid_password:
+            return render_template('signup.html', error=password_error)
         
         if password != confirm_password:
             return render_template('signup.html', error='Passwords do not match')
-        
-        if len(password) < 6:
-            return render_template('signup.html', error='Password must be at least 6 characters')
         
         users, roles = load_users()
         
@@ -2413,6 +2442,11 @@ def api_vpn_connect():
     client_name = data.get('client_name', '').strip()
     protocol = data.get('protocol', 'openvpn').lower()
     
+    # Validate protocol
+    is_valid_protocol, protocol_error = validate_protocol(protocol)
+    if not is_valid_protocol:
+        return jsonify({'success': False, 'error': protocol_error}), 400
+    
     username = session['username']
     users, _ = load_users()
     user = users.get(username, {})
@@ -2425,12 +2459,17 @@ def api_vpn_connect():
     if not client_name:
         return jsonify({'success': False, 'error': 'No client config available. Create a client first.'}), 400
     
+    # Validate client name
+    is_valid_client, client_error = validate_client_name(client_name)
+    if not is_valid_client:
+        return jsonify({'success': False, 'error': client_error}), 400
+    
     # Security: Check if user owns this client
     if client_name not in user_clients and user.get('role') != 'admin':
         return jsonify({'success': False, 'error': 'You can only connect using your own clients'}), 403
     
-    # Sanitize
-    safe_name = "".join(c for c in client_name if c.isalnum() or c in ('-', '_'))
+    # Sanitize (already validated, but double-check)
+    safe_name = sanitize_input(client_name, max_length=50)
     
     try:
         # Find config file
