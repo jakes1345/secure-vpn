@@ -1280,12 +1280,25 @@ def contact():
             return render_template('contact.html', error='Please login to submit a ticket')
         
         username = session.get('username')
-        subject = request.form.get('subject', '').strip()
-        message = request.form.get('message', '').strip()
-        email = request.form.get('email', '').strip()
+        subject = sanitize_input(request.form.get('subject', '').strip(), max_length=200)
+        message = sanitize_input(request.form.get('message', '').strip(), max_length=5000)
+        email = sanitize_input(request.form.get('email', '').strip().lower(), max_length=255)
         
-        if not subject or not message:
-            return render_template('contact.html', error='Subject and message are required')
+        # Validate subject
+        is_valid_subject, subject_error = validate_subject(subject)
+        if not is_valid_subject:
+            return render_template('contact.html', error=subject_error)
+        
+        # Validate message
+        is_valid_message, message_error = validate_message(message)
+        if not is_valid_message:
+            return render_template('contact.html', error=message_error)
+        
+        # Validate email if provided
+        if email:
+            is_valid_email, email_error = validate_email(email)
+            if not is_valid_email:
+                return render_template('contact.html', error=email_error)
         
         ticket_id, ticket = create_ticket(username, subject, message, email)
         
@@ -3098,12 +3111,25 @@ def api_create_ticket():
     if not username:
         return jsonify({'success': False, 'error': 'Not authenticated'}), 401
     
-    subject = data.get('subject', '').strip()
-    message = data.get('message', '').strip()
-    email = data.get('email', '').strip()
+    subject = sanitize_input(data.get('subject', '').strip(), max_length=200)
+    message = sanitize_input(data.get('message', '').strip(), max_length=5000)
+    email = sanitize_input(data.get('email', '').strip().lower(), max_length=255) if data.get('email') else None
     
-    if not subject or not message:
-        return jsonify({'success': False, 'error': 'Subject and message are required'}), 400
+    # Validate subject
+    is_valid_subject, subject_error = validate_subject(subject)
+    if not is_valid_subject:
+        return jsonify({'success': False, 'error': subject_error}), 400
+    
+    # Validate message
+    is_valid_message, message_error = validate_message(message)
+    if not is_valid_message:
+        return jsonify({'success': False, 'error': message_error}), 400
+    
+    # Validate email if provided
+    if email:
+        is_valid_email, email_error = validate_email(email)
+        if not is_valid_email:
+            return jsonify({'success': False, 'error': email_error}), 400
     
     ticket_id, ticket = create_ticket(username, subject, message, email)
     
@@ -3234,15 +3260,15 @@ def api_clients():
 def api_add_client():
     """Add new client"""
     data = request.json
-    client_name = data.get('name', '').strip()
+    client_name = sanitize_input(data.get('name', '').strip(), max_length=50)
     
-    if not client_name:
-        return jsonify({'success': False, 'error': 'Client name required'}), 400
+    # Validate client name
+    is_valid_client, client_error = validate_client_name(client_name)
+    if not is_valid_client:
+        return jsonify({'success': False, 'error': client_error}), 400
     
-    # Sanitize client name
-    safe_name = ''.join(c for c in client_name if c.isalnum() or c in ['-', '_'])
-    if not safe_name or safe_name != client_name:
-        return jsonify({'success': False, 'error': f'Invalid client name. Use only letters, numbers, dashes, and underscores.'}), 400
+    # Sanitize client name (already validated, but ensure safe)
+    safe_name = sanitize_input(client_name, max_length=50)
     
     # Check subscription limits (unless admin/moderator creating for someone else)
     username = session.get('username', 'unknown')
@@ -3758,14 +3784,18 @@ def api_update_profile():
     
     username = session['username']
     data = request.json
-    email = data.get('email', '').strip()  # Optional
+    email = sanitize_input(data.get('email', '').strip().lower(), max_length=255) if data.get('email') else None
     
     users, roles = load_users()
     if username not in users:
         return jsonify({'success': False, 'error': 'User not found'}), 404
     
-    # Check email uniqueness only if email provided
+    # Validate and check email uniqueness only if email provided
     if email:
+        is_valid_email, email_error = validate_email(email)
+        if not is_valid_email:
+            return jsonify({'success': False, 'error': email_error}), 400
+        
         for user_name, user_data in users.items():
             if user_name != username and user_data.get('email') == email:
                 return jsonify({'success': False, 'error': 'Email already in use'}), 400
@@ -3793,8 +3823,10 @@ def api_change_password():
     if not current_password or not new_password:
         return jsonify({'success': False, 'error': 'Current and new password required'}), 400
     
-    if len(new_password) < 6:
-        return jsonify({'success': False, 'error': 'New password must be at least 6 characters'}), 400
+    # Validate new password
+    is_valid_password, password_error = validate_password(new_password, min_length=8)
+    if not is_valid_password:
+        return jsonify({'success': False, 'error': password_error}), 400
     
     users, roles = load_users()
     if username not in users:
