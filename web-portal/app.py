@@ -1045,6 +1045,7 @@ def login():
         # Get user from MySQL ONLY
         user_db = get_user(username)
         if not user_db:
+            # Don't reveal if username exists (security best practice)
             return render_template('login.html', error='Invalid username or password.')
         
         user = {
@@ -3531,14 +3532,21 @@ ClientIP = {client_ip}
         
         # Return more user-friendly error
         if 'already exists' in error_msg.lower() or 'exists' in error_msg.lower():
-            return jsonify({'success': False, 'error': f'Client {client_name} already exists'}), 400
+            return jsonify({
+                'success': False, 
+                'error': 'A client with this name already exists. Please choose a different name.'
+            }), 400
         elif 'permission' in error_msg.lower() or 'denied' in error_msg.lower():
-            return jsonify({'success': False, 'error': 'Permission denied. Please check server permissions.'}), 403
+            return jsonify({
+                'success': False, 
+                'error': 'Permission denied. Please check server permissions or contact support.'
+            }), 403
         else:
-            # Truncate very long error messages
-            if len(error_msg) > 200:
-                error_msg = error_msg[:200] + '...'
-            return jsonify({'success': False, 'error': f'Failed to create client: {error_msg}'}), 400
+            # User-friendly error message (don't expose internal errors)
+            return jsonify({
+                'success': False, 
+                'error': 'Failed to create VPN client. Please try again or contact support if the problem persists.'
+            }), 400
 
 @app.route('/api/clients/<client_name>', methods=['DELETE'])
 @require_permission('can_revoke_clients')

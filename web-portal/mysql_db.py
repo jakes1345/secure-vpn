@@ -101,7 +101,11 @@ def get_user(username: str) -> Optional[Dict[str, Any]]:
     """
     with get_connection() as conn:
         cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
+        # Optimize: Select only needed fields instead of *
+        cursor.execute("""
+            SELECT id, username, email, password_hash, role, created_at, updated_at, email_verified
+            FROM users WHERE username = %s
+        """, (username,))
         return cursor.fetchone()
 
 def create_user(username: str, email: str, password_hash: str, role: str = 'user') -> bool:
