@@ -1880,11 +1880,16 @@ def reset_password():
         new_password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
         
-        if not new_password or len(new_password) < 6:
-            return render_template('reset-password.html', token=token, username=username, error='Password must be at least 6 characters')
+        if not new_password or not confirm_password:
+            return render_template('reset-password.html', token=token, username=username, error='Password and confirmation required')
         
         if new_password != confirm_password:
             return render_template('reset-password.html', token=token, username=username, error='Passwords do not match')
+        
+        # Validate password strength
+        is_valid_password, password_error = validate_password(new_password, min_length=8)
+        if not is_valid_password:
+            return render_template('reset-password.html', token=token, username=username, error=password_error)
         
         # Update password
         users, roles = load_users()
