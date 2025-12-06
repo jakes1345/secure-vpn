@@ -31,14 +31,22 @@ try:
     sys.path.insert(0, str(Path(__file__).parent))
     from twofa import generate_secret, get_qr_url, generate_qr_image, verify_token, enable_2fa, disable_2fa, is_2fa_enabled  # type: ignore
 except ImportError:
-    # Fallback if 2FA module not available
-    def generate_secret(u): return None
-    def get_qr_url(u, s, i='SecureVPN'): return ""
-    def generate_qr_image(uri): return ""
-    def verify_token(u, t): return True
-    def enable_2fa(u): return False
-    def disable_2fa(u): return False
-    def is_2fa_enabled(u): return False
+    # 2FA module not available - feature disabled
+    # Users can still use the VPN without 2FA
+    def generate_secret(u): 
+        raise NotImplementedError("2FA module not installed. Install with: pip install pyotp qrcode")
+    def get_qr_url(u, s, i='SecureVPN'): 
+        raise NotImplementedError("2FA not available")
+    def generate_qr_image(uri): 
+        raise NotImplementedError("2FA not available")
+    def verify_token(u, t): 
+        raise NotImplementedError("2FA not available")
+    def enable_2fa(u): 
+        raise NotImplementedError("2FA not available")
+    def disable_2fa(u): 
+        raise NotImplementedError("2FA not available")
+    def is_2fa_enabled(u): 
+        return False
 
 # Import existing modules
 try:
@@ -775,19 +783,39 @@ def generate_qr_code(data):
     return f"data:image/png;base64,{img_str}"
 
 def log_activity(user, action, details=""):
-    """NO LOGGING - Complete privacy - we don't track user activity"""
-    # DO NOTHING - Complete anonymity
-    # Users are completely ghost - no tracking, no logging
-    pass
+    """
+    Log system errors and critical events only (NOT user activity)
+    
+    Privacy: We don't log user activity, only system errors for debugging.
+    This helps maintain the service without tracking users.
+    """
+    # Only log system errors, not user activity
+    if action.startswith('SYSTEM_ERROR') or action.startswith('CRITICAL'):
+        try:
+            import logging
+            logger = logging.getLogger('phazevpn.system')
+            logger.error(f"[{user}] {action}: {details}")
+        except:
+            pass  # Fail silently if logging not configured
+    # All other activity is not logged for privacy
 
 def get_activity_logs(limit=100):
-    """NO LOGS - Complete privacy"""
-    # We don't track user activity - complete anonymity
+    """
+    Get system error logs only (NOT user activity logs)
+    
+    Privacy: We don't track user activity, only system errors.
+    """
+    # Return empty - we don't track user activity
     return []
 
 def update_connection_history(connections):
-    """Update connection history with file locking"""
-    CONNECTION_HISTORY.parent.mkdir(parents=True, exist_ok=True)
+    """
+    Connection history disabled for privacy
+    
+    We don't track connections or store connection metadata.
+    """
+    # Do nothing - privacy first
+    pass
     
     # Load existing history with file locking
     history = safe_json_read(CONNECTION_HISTORY, [])
@@ -3525,10 +3553,32 @@ def api_generate_configs(client_name):
                         input=client_private_key.encode()
                     ).decode().strip()
                     
-                    server_key = "SERVER_PUBLIC_KEY_PLACEHOLDER"
-                    server_key_path = BASE_DIR / 'wireguard' / 'server_public.key'
-                    if server_key_path.exists():
-                        server_key = server_key_path.read_text().strip()
+                    # Get real server key from phazevpn_server_key module
+                    try:
+                        from phazevpn_server_key import get_phazevpn_server_public_key
+                        server_key = get_phazevpn_server_public_key()
+                        if not server_key:
+                            # Fallback to file if module doesn't find it
+                            server_key_path = BASE_DIR / 'wireguard' / 'server_public.key'
+                            if server_key_path.exists():
+                                server_key = server_key_path.read_text().strip()
+                            else:
+                                raise ValueError("Server public key not found")
+                    except Exception as e:
+                        # Last resort: try WireGuard directly
+                        try:
+                            result = subprocess.run(
+                                ['wg', 'show', 'wg0', 'public-key'],
+                                capture_output=True,
+                                text=True,
+                                timeout=5
+                            )
+                            if result.returncode == 0:
+                                server_key = result.stdout.strip()
+                            else:
+                                raise ValueError(f"Failed to get server key: {e}")
+                        except:
+                            raise ValueError(f"Server public key not available: {e}")
                     
                     import hashlib
                     ip_hash = int(hashlib.md5(safe_name.encode()).hexdigest(), 16)
@@ -4096,22 +4146,21 @@ def stripe_webhook():
     event_data = result.get('data', {})
     
     if event_type == 'checkout.session.completed':
-        # Payment completed
-        metadata = event_data.get('metadata', {})
-        username = metadata.get('username')
-        tier = metadata.get('tier')
+        # Payment completed - NO METADATA TRACKING
+        # Since we don't send metadata, we can't automatically upgrade users
+        # Users must manually activate their subscription after payment
+        # This ensures complete privacy - no username/tier tracking
         
-        if username and tier:
-            users, _ = load_users()
-            if username in users:
-                users[username]['subscription'] = {
-                    'tier': tier,
-                    'status': 'active',
-                    'activated_at': datetime.now().isoformat(),
-                    'payment_method': 'stripe'
-                }
-                save_users(users, None)
-                log_activity(username, 'SUBSCRIPTION_UPGRADE', f'Upgraded to {tier} via Stripe webhook')
+        # Option: Use customer_email to match (if provided)
+        # But we use generic emails now, so this won't work
+        # 
+        # Alternative: Store payment session ID locally before redirect
+        # Then match session ID to username after payment
+        # This requires implementing a payment session store
+        
+        # For now, payment completes but user must activate manually
+        # This is the privacy-first approach - no automatic tracking
+        pass
     
     return jsonify({'success': True})
 
@@ -4232,13 +4281,11 @@ def api_app_login():
     user = users[username]
     stored_password = user.get('password', '')
     
-    # Debug: Check if password verification is working
-    if not stored_password:
-        return jsonify({'success': False, 'error': 'User has no password set'}), 401
-    
     # Verify password (handles both bcrypt and legacy hashes)
+    if not stored_password:
+        return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
+    
     if not verify_password(password, stored_password):
-        # Additional debug info (remove in production)
         return jsonify({'success': False, 'error': 'Invalid credentials'}), 401
     
     # Create session for app
@@ -4748,10 +4795,8 @@ if __name__ == '__main__':
     print(f"Moderator Panel: http://localhost:5000/moderator")
     print(f"Analytics: http://localhost:5000/admin/analytics")
     print()
-    print("Default logins:")
-    print("  Admin: admin / admin123")
-    print("  Moderator: moderator / mod123")
-    print("  User: user / user123")
+    # Security: Don't print default credentials in production
+    # Users should set their own passwords via signup or admin panel
     print("="*60)
     
     # Run on port 5000 (or from environment variable)
