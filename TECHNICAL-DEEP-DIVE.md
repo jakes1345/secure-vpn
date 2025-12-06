@@ -208,13 +208,13 @@ Cost: $200-400/month
 
 **Java:**
 - Maven/Gradle: Dependency management
-- Docker: Easy containerization
+- Systemd: Native service management
 - Kubernetes: Production-ready deployments
 - AWS/Azure: First-class support
 
 **Python:**
 - pip: Dependency hell
-- Docker: Works, but not optimized
+- Systemd: Native services, optimized
 - Kubernetes: Works, but Java is better supported
 
 ---
@@ -487,7 +487,7 @@ fetch(`${API_BASE}/users`)
 - Security testing (OWASP ZAP)
 
 **Deployment:**
-- Docker containers
+- Systemd services
 - Kubernetes (optional)
 - CI/CD pipeline (GitHub Actions)
 

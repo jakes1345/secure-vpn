@@ -100,3 +100,10 @@ htmlcov/
 node_modules/
 npm-debug.log
 yarn-error.log
+
+# Docker (not used)
+Dockerfile
+docker-compose.yml
+.dockerignore
+*Dockerfile*
+*docker-compose*
