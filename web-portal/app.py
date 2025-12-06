@@ -206,15 +206,70 @@ app.config['SESSION_REFRESH_EACH_REQUEST'] = False  # Disable to prevent session
 # Additional Security Headers - Applied to all responses
 @app.after_request
 def set_security_headers(response):
-    """Add security headers to prevent cookie theft and attacks"""
-    response.headers['X-Content-Type-Options'] = 'nosniff'  # Prevent MIME sniffing
-    response.headers['X-Frame-Options'] = 'DENY'  # Prevent clickjacking
-    response.headers['X-XSS-Protection'] = '1; mode=block'  # XSS protection
-    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'  # Force HTTPS
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'  # Privacy - limit referrer info
+    """
+    Add comprehensive security headers to prevent attacks and protect privacy.
+    
+    Security Headers:
+    - X-Content-Type-Options: Prevents MIME sniffing
+    - X-Frame-Options: Prevents clickjacking
+    - X-XSS-Protection: XSS protection
+    - Strict-Transport-Security: Forces HTTPS (only if HTTPS enabled)
+    - Content-Security-Policy: Restricts resource loading
+    - Referrer-Policy: Limits referrer information (privacy)
+    - Permissions-Policy: Restricts browser features
+    - Cross-Origin-Embedder-Policy: Prevents cross-origin attacks
+    - Cross-Origin-Opener-Policy: Isolates browsing context
+    """
+    # Prevent MIME sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    
+    # Prevent clickjacking
+    response.headers['X-Frame-Options'] = 'DENY'
+    
+    # XSS protection (legacy, but still useful)
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    
+    # Force HTTPS (only if HTTPS is enabled)
+    if is_https:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
+    
+    # Content Security Policy - restrict resource loading
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "  # unsafe-eval needed for some JS
+        "style-src 'self' 'unsafe-inline'; "
+        "img-src 'self' data: https:; "
+        "font-src 'self' data:; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'"
+    )
+    response.headers['Content-Security-Policy'] = csp
+    
+    # Privacy - limit referrer information
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    
+    # Restrict browser features (privacy and security)
+    response.headers['Permissions-Policy'] = (
+        'geolocation=(), '
+        'microphone=(), '
+        'camera=(), '
+        'payment=(), '
+        'usb=(), '
+        'magnetometer=(), '
+        'gyroscope=(), '
+        'accelerometer=()'
+    )
+    
+    # Cross-Origin policies (additional security)
+    response.headers['Cross-Origin-Embedder-Policy'] = 'require-corp'
+    response.headers['Cross-Origin-Opener-Policy'] = 'same-origin'
+    response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+    
     # Privacy: Don't reveal server info
     response.headers['Server'] = ''  # Don't reveal server type
+    
     return response
 
 # Paths
