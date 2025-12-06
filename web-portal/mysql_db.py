@@ -90,14 +90,36 @@ def get_connection():
 # ============================================
 
 def get_user(username: str) -> Optional[Dict[str, Any]]:
-    """Get user by username"""
+    """
+    Get user by username from database.
+    
+    Args:
+        username: Username to look up
+        
+    Returns:
+        User dictionary with all fields, or None if not found
+    """
     with get_connection() as conn:
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
         return cursor.fetchone()
 
 def create_user(username: str, email: str, password_hash: str, role: str = 'user') -> bool:
-    """Create new user"""
+    """
+    Create a new user in the database.
+    
+    Args:
+        username: Unique username (3-30 chars, alphanumeric + underscore/hyphen)
+        email: User email address
+        password_hash: Bcrypt hashed password
+        role: User role ('admin', 'moderator', or 'user')
+        
+    Returns:
+        True if user created successfully, False if username already exists
+        
+    Raises:
+        Error: Database error (other than duplicate entry)
+    """
     try:
         with get_connection() as conn:
             cursor = conn.cursor()
@@ -112,7 +134,19 @@ def create_user(username: str, email: str, password_hash: str, role: str = 'user
         raise
 
 def update_user(username: str, **kwargs) -> bool:
-    """Update user fields"""
+    """
+    Update user fields in database.
+    
+    Args:
+        username: Username of user to update
+        **kwargs: Fields to update (email, password_hash, role)
+        
+    Returns:
+        True if user was updated, False if no valid fields provided
+        
+    Note:
+        Only 'email', 'password_hash', and 'role' fields are allowed
+    """
     allowed_fields = ['email', 'password_hash', 'role']
     updates = {k: v for k, v in kwargs.items() if k in allowed_fields}
     
@@ -249,7 +283,24 @@ def get_connection_history(username: str = None, limit: int = 1000) -> List[Dict
 
 def check_rate_limit(username: str, endpoint: str = 'default', 
                     max_attempts: int = 5, window_seconds: int = 900) -> tuple[bool, int]:
-    """Check rate limit by username ONLY - NO IP tracking for privacy"""
+    """
+    Check rate limit by username (NO IP tracking for privacy).
+    
+    Args:
+        username: Username to check rate limit for
+        endpoint: Endpoint identifier (default: 'default')
+        max_attempts: Maximum attempts allowed in time window (default: 5)
+        window_seconds: Time window in seconds (default: 900 = 15 minutes)
+        
+    Returns:
+        Tuple of (is_allowed, current_attempts)
+        - is_allowed: True if under limit, False if rate limited
+        - current_attempts: Current number of attempts in window
+        
+    Privacy:
+        Rate limiting uses username only, NOT IP address.
+        This prevents abuse without tracking user IPs.
+    """
     # Rate limit by username, NOT IP address
     # This prevents abuse without tracking IPs - complete privacy
     if not username:

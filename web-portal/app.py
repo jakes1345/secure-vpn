@@ -519,7 +519,22 @@ def generate_payment_links(payment_id, amount, venmo_username=None, cashapp_user
 # ============================================
 
 def require_api_auth(f):
-    """Decorator to require API authentication"""
+    """
+    Decorator to require API authentication via session.
+    
+    Usage:
+        @app.route('/api/endpoint', methods=['POST'])
+        @require_api_auth
+        def api_endpoint():
+            ...
+    
+    Returns:
+        Decorated function that checks authentication before execution
+        
+    Behavior:
+        - Returns 401 JSON error if not authenticated
+        - Allows access if user is logged in via session
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'username' not in session:
@@ -624,8 +639,20 @@ def hash_password(password):
     salt = bcrypt.gensalt(rounds=12)
     return bcrypt.hashpw(password, salt).decode('utf-8')
 
-def verify_password(password, password_hash):
-    """Verify password against bcrypt hash"""
+def verify_password(password: str, password_hash: str) -> bool:
+    """
+    Verify password against bcrypt hash.
+    
+    Args:
+        password: Plain text password to verify
+        password_hash: Bcrypt hash to compare against
+        
+    Returns:
+        True if password matches hash, False otherwise
+        
+    Note:
+        Handles both bcrypt and legacy hash formats for migration
+    """
     if isinstance(password, str):
         password = password.encode('utf-8')
     if isinstance(password_hash, str):
