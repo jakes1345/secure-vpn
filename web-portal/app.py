@@ -1042,10 +1042,6 @@ def login():
         if not is_valid_username:
             return render_template('login.html', error=username_error)
         
-        # Validate username
-        if not validate_username(username):
-            return render_template('login.html', error='Invalid username format. Use 3-30 alphanumeric characters, underscore, or dash.')
-        
         # Get user from MySQL ONLY
         user_db = get_user(username)
         if not user_db:
