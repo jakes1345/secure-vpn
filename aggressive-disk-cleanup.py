@@ -77,7 +77,6 @@ def main():
         ("rm -rf /root/.cache/* 2>/dev/null", "Clearing root cache"),
         ("rm -rf /var/cache/apt/archives/*.deb 2>/dev/null", "Removing downloaded .deb files"),
         ("rm -rf /var/lib/apt/lists/* 2>/dev/null", "Clearing apt lists"),
-        ("docker system prune -af 2>/dev/null || true", "Cleaning Docker (if exists)"),
         ("rm -rf /opt/phazebrowser/src/out 2>/dev/null", "Removing Chromium build artifacts (if exists)"),
         ("rm -rf /opt/phazebrowser/src/build 2>/dev/null", "Removing Chromium build dir (if exists)"),
         ("find /var/log -type f -name '*.log' -size +10M -delete 2>/dev/null", "Removing large log files"),

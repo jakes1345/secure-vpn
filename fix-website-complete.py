@@ -26,17 +26,11 @@ def main():
     ssh.connect(VPS_IP, username=VPS_USER, password=VPS_PASS, timeout=30)
     
     try:
-        # 1. Remove old SearXNG container
-        print("\n1️⃣ Removing old SearXNG container...")
-        run_command(ssh, "docker rm -f searxng 2>/dev/null || true")
-        print("   ✅ Done")
-        
-        # 2. Start SearXNG on port 8081
-        print("\n2️⃣ Starting SearXNG on port 8081...")
-        success, output = run_command(ssh, "docker run -d --name searxng -p 8081:8080 -v /opt/searxng:/etc/searxng:rw searxng/searxng:latest")
-        if success:
-            print("   ✅ SearXNG started on port 8081")
-        else:
+        # SearXNG would be installed natively if needed (no Docker)
+        print("\n1️⃣ SearXNG setup skipped (Docker not used)")
+        print("   ℹ️  SearXNG can be installed natively if needed")
+        success = False
+        if False:  # Placeholder - SearXNG not used
             print(f"   ⚠️  {output[:100]}")
         
         # 3. Fix nginx - read phazevpn config

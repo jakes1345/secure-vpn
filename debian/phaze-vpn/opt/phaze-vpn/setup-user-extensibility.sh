@@ -26,7 +26,6 @@ pip3 install \
     celery \
     python-jose \
     cryptography \
-    docker \
     requests
 
 # Create directories
