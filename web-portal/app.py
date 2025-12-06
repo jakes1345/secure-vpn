@@ -3217,10 +3217,12 @@ def api_ticket_reply(ticket_id):
         return jsonify({'success': False, 'error': 'Access denied'}), 403
     
     data = request.json
-    message = data.get('message', '').strip()
+    message = sanitize_input(data.get('message', '').strip(), max_length=5000)
     
-    if not message:
-        return jsonify({'success': False, 'error': 'Message is required'}), 400
+    # Validate message
+    is_valid_message, message_error = validate_message(message)
+    if not is_valid_message:
+        return jsonify({'success': False, 'error': message_error}), 400
     
     success, updated_ticket = add_ticket_reply(ticket_id, username, message)
     
