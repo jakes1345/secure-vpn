@@ -723,21 +723,54 @@ def verify_password(password: str, password_hash: str) -> bool:
             return False
 
 def load_users():
-    """Load users from MySQL ONLY - no fallback"""
-    # Load from MySQL
-    mysql_users = list_users()
-    users = {}
-    for u in mysql_users:
-        # Get user details including password_hash
-        user_data = get_user(u['username'])
-        if user_data:
-            users[u['username']] = {
-                'password': user_data.get('password_hash', ''),
-                'role': user_data.get('role', 'user'),
-                'email': user_data.get('email', ''),
-                'email_verified': bool(user_data.get('email_verified', False)),
-                'created': user_data.get('created_at', datetime.now()).isoformat() if isinstance(user_data.get('created_at'), datetime) else str(user_data.get('created_at', datetime.now())),
-            }
+    """
+    Load users from MySQL - OPTIMIZED: Single query instead of N+1 queries.
+    
+    Performance: Previously called get_user() for each user (N+1 queries).
+    Now uses a single query to fetch all users at once.
+    """
+    # Optimize: Load all users in a single query instead of N+1 queries
+    try:
+        from mysql_db import get_connection
+        from mysql.connector import Error
+        
+        users = {}
+        with get_connection() as conn:
+            cursor = conn.cursor(dictionary=True)
+            # Single query to get all users with needed fields
+            cursor.execute("""
+                SELECT username, password_hash, role, email, email_verified, created_at
+                FROM users
+            """)
+            mysql_users = cursor.fetchall()
+            
+            for user_data in mysql_users:
+                username = user_data['username']
+                users[username] = {
+                    'password': user_data.get('password_hash', ''),
+                    'role': user_data.get('role', 'user'),
+                    'email': user_data.get('email', ''),
+                    'email_verified': bool(user_data.get('email_verified', False)),
+                    'created': user_data.get('created_at', datetime.now()).isoformat() 
+                        if isinstance(user_data.get('created_at'), datetime) 
+                        else str(user_data.get('created_at', datetime.now())),
+                }
+    except Exception as e:
+        # Fallback to original method if optimization fails
+        mysql_users = list_users()
+        users = {}
+        for u in mysql_users:
+            user_data = get_user(u['username'])
+            if user_data:
+                users[u['username']] = {
+                    'password': user_data.get('password_hash', ''),
+                    'role': user_data.get('role', 'user'),
+                    'email': user_data.get('email', ''),
+                    'email_verified': bool(user_data.get('email_verified', False)),
+                    'created': user_data.get('created_at', datetime.now()).isoformat() 
+                        if isinstance(user_data.get('created_at'), datetime) 
+                        else str(user_data.get('created_at', datetime.now())),
+                }
     
     # If no users, create defaults
     if not users:

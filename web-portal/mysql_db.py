@@ -313,11 +313,15 @@ def check_rate_limit(username: str, endpoint: str = 'default',
     with get_connection() as conn:
         cursor = conn.cursor()
         
-        # Clean old entries
-        cursor.execute("""
-            DELETE FROM rate_limits
-            WHERE window_start < DATE_SUB(NOW(), INTERVAL %s SECOND)
-        """, (window_seconds,))
+        # Clean old entries (optimize: only clean if table is getting large)
+        # Check table size first to avoid unnecessary deletes
+        cursor.execute("SELECT COUNT(*) as count FROM rate_limits")
+        count_result = cursor.fetchone()
+        if count_result and count_result[0] > 1000:  # Only clean if > 1000 entries
+            cursor.execute("""
+                DELETE FROM rate_limits
+                WHERE window_start < DATE_SUB(NOW(), INTERVAL %s SECOND)
+            """, (window_seconds,))
         
         # Check current attempts (by username, NOT IP)
         cursor.execute("""
