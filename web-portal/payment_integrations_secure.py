@@ -135,10 +135,13 @@ def create_stripe_checkout_session(amount: int, currency: str = 'usd', username:
         'cancel_url': cancel_url or f'{os.getenv("BASE_URL", "https://phazevpn.com")}/payment/cancel',
     }
     
+    # NO METADATA - Complete privacy
+    # We don't send username or tier to payment processor
+    # Payment is anonymous - no tracking
+    # Note: Stripe requires customer_email for payment, but we use a generic email
     if username:
-        data['metadata[username]'] = username
-        data['metadata[tier]'] = tier or 'premium'
-        data['customer_email'] = username  # Use username as email if no email provided
+        # Use generic email format - no username tracking
+        data['customer_email'] = f'user@{os.getenv("DOMAIN", "phazevpn.com")}'
     
     try:
         response = requests.post(

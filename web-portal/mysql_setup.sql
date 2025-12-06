@@ -53,40 +53,22 @@ CREATE TABLE IF NOT EXISTS payments (
     INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Sessions table (for Flask sessions)
-CREATE TABLE IF NOT EXISTS sessions (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    session_id VARCHAR(255) UNIQUE NOT NULL,
-    username VARCHAR(100),
-    data TEXT,
-    expires_at TIMESTAMP NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_session_id (session_id),
-    INDEX idx_expires_at (expires_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- NO SESSIONS TABLE - Flask uses in-memory sessions only
+-- We don't store sessions in database for privacy
 
--- Connection history table
-CREATE TABLE IF NOT EXISTS connection_history (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100),
-    client_name VARCHAR(100),
-    protocol VARCHAR(50),
-    action ENUM('connect', 'disconnect') DEFAULT 'connect',
-    ip_address VARCHAR(45),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_username (username),
-    INDEX idx_client_name (client_name),
-    INDEX idx_created_at (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- NO CONNECTION HISTORY TABLE - Complete privacy
+-- We don't track connections or IP addresses
 
--- Rate limiting table (alternative to Redis)
+-- Rate limiting table - NO IP TRACKING (username only)
 CREATE TABLE IF NOT EXISTS rate_limits (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    ip_address VARCHAR(45) NOT NULL,
+    username VARCHAR(100) NOT NULL,
     endpoint VARCHAR(255),
     attempts INT DEFAULT 1,
     window_start TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_ip_endpoint (ip_address, endpoint),
+    PRIMARY KEY (username, endpoint, window_start),
+    INDEX idx_username (username),
+    INDEX idx_endpoint (endpoint),
     INDEX idx_window_start (window_start)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

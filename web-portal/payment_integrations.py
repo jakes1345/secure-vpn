@@ -100,9 +100,9 @@ def create_stripe_checkout_session(amount, currency='usd', username=None, tier=N
         'cancel_url': cancel_url or 'https://phazevpn.duckdns.org/payment/cancel',
     }
     
-    if username:
-        data['metadata[username]'] = username
-        data['metadata[tier]'] = tier or 'premium'
+    # NO METADATA - Complete privacy
+    # We don't send username or tier to payment processor
+    # Payment is anonymous - no tracking
     
     try:
         response = requests.post(
@@ -166,8 +166,9 @@ def verify_stripe_payment(session_id):
                 'amount_total': session.get('amount_total', 0) / 100,  # Convert from cents
                 'currency': session.get('currency', 'usd'),
                 'customer_email': session.get('customer_details', {}).get('email'),
-                'username': session.get('metadata', {}).get('username'),
-                'tier': session.get('metadata', {}).get('tier'),
+                # NO METADATA - Complete privacy
+                # 'username': None,  # Not tracked
+                # 'tier': None,  # Not tracked
                 'payment_intent': session.get('payment_intent')
             }
         else:
