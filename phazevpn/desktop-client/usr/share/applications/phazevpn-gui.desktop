@@ -1,9 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=PhazeVPN
-Comment=Native Go VPN Client
-Exec=phazevpn-gui
-Icon=utilities-terminal
-Terminal=false
-Categories=Network;

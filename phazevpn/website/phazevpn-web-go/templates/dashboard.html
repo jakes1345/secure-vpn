@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - PhazeVPN</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">🔒 PhazeVPN</a>
+            <div class="nav-links">
+                <a href="/dashboard">Dashboard</a>
+                <a href="/profile">Profile</a>
+                <a href="/logout" class="btn-secondary">Logout</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <div class="dashboard">
+            <div class="dashboard-header">
+                <h1>Welcome, {{.Username}}</h1>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>🔐 WireGuard VPN</h3>
+                    <p>Modern, fast, and secure</p>
+                    <div style="margin: 1.5rem 0;">
+                        <form method="POST" action="/vpn/generate" style="display: inline;">
+                            <button type="submit" class="btn-secondary">Generate Keys</button>
+                        </form>
+                        <a href="/vpn/download/wireguard" class="btn-primary">Download Config</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🛡️ OpenVPN</h3>
+                    <p>Industry standard, widely compatible</p>
+                    <div style="margin: 1.5rem 0;">
+                        <a href="/vpn/download/openvpn" class="btn-primary">Download Config</a>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>⚡ PhazeVPN Protocol</h3>
+                    <p>Our custom protocol - maximum privacy</p>
+                    <div style="margin: 1.5rem 0;">
+                        <form method="POST" action="/vpn/generate" style="display: inline;">
+                            <button type="submit" class="btn-secondary">Generate Keys</button>
+                        </form>
+                        <a href="/vpn/download/phazevpn" class="btn-primary">Download Config</a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <div class="card">
+                    <h3>📱 Client Downloads</h3>
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1.5rem;">
+                        <a href="/download" class="btn-secondary">Windows Client</a>
+                        <a href="/download" class="btn-secondary">macOS Client</a>
+                        <a href="/download" class="btn-secondary">Linux Client</a>
+                        <a href="/download" class="btn-secondary">Android App</a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <div class="card">
+                    <h3>📊 Connection Status</h3>
+                    <div class="status-indicator offline">Disconnected</div>
+                    <p style="color: rgba(255,255,255,0.6); margin-top: 1rem;">
+                        Download a config file above and import it into your VPN client to connect.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+    </footer>
+</body>
+
+</html>
