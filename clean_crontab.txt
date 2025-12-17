@@ -1,0 +1,6 @@
+*/5 * * * * ~/duckdns/duck.sh >/dev/null 2>&1
+*/5 * * * * /usr/local/bin/securevpn-status-check
+# PhazeVPN Scheduled Tasks
+0 2 * * * /opt/phaze-vpn/web-portal/scripts/daily-backup.sh >> /opt/phaze-vpn/logs/backup.log 2>&1
+0 3 * * * /opt/phaze-vpn/web-portal/scripts/daily-cleanup.sh >> /opt/phaze-vpn/logs/cleanup.log 2>&1
+0 * * * * /opt/phaze-vpn/web-portal/scripts/health-check.sh >> /opt/phaze-vpn/logs/health-check.log 2>&1

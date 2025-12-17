@@ -1,0 +1,112 @@
+/* PhazeBrowser UserChrome.css - ULTRA MODERN THEME */
+
+:root {
+    --phaze-primary: #667eea;
+    --phaze-secondary: #764ba2;
+    --phaze-accent: #00ff88;
+    --phaze-bg: #0f0f1a;
+    --phaze-panel: #1e1e2e;
+    --phaze-text: #ffffff;
+
+    /* Overwrite Firefox Variables */
+    --toolbar-bgcolor: var(--phaze-bg) !important;
+    --tab-selected-bgcolor: var(--phaze-primary) !important;
+    --chrome-content-separator-color: none !important;
+    --lwt-toolbar-field-background-color: rgba(255, 255, 255, 0.08) !important;
+    --lwt-toolbar-field-focus: rgba(30, 30, 46, 0.95) !important;
+    --lwt-tab-text: #ccc !important;
+    --lwt-selected-tab-text: #fff !important;
+}
+
+/* 1. REMOVE FIREFOX BLOAT */
+#TabsToolbar {
+    background: var(--phaze-bg) !important;
+    border-bottom: none !important;
+}
+
+#nav-bar {
+    background: var(--phaze-bg) !important;
+    border: none !important;
+    box-shadow: none !important;
+    margin-top: -1px !important;
+}
+
+/* 2. MODERN TABS */
+.tabbrowser-tab {
+    padding-inline: 2px !important;
+}
+
+.tab-background {
+    border-radius: 6px !important;
+    margin-block: 2px !important;
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    transition: background 0.2s ease !important;
+}
+
+.tabbrowser-tab:hover>.tab-stack>.tab-background:not([selected="true"]) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.tab-background[selected="true"] {
+    background: linear-gradient(90deg, var(--phaze-primary), var(--phaze-secondary)) !important;
+    background-clip: padding-box !important;
+}
+
+/* Tab Line - Remove it or make it glow */
+.tab-line {
+    display: none !important;
+}
+
+/* 3. GLOWING URL BAR */
+#urlbar-background {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    backdrop-filter: blur(10px) !important;
+}
+
+#urlbar[focused="true"] #urlbar-background {
+    background-color: var(--phaze-panel) !important;
+    border-color: var(--phaze-primary) !important;
+    box-shadow: 0 0 15px rgba(102, 126, 234, 0.3) !important;
+}
+
+/* 4. HIDE SIDEBAR HEADER */
+#sidebar-header {
+    background-color: var(--phaze-bg) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* 5. NEW TAB BUTTON */
+#tabs-newtab-button .toolbarbutton-icon {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 50% !important;
+    padding: 6px !important;
+    height: 28px !important;
+    width: 28px !important;
+    fill: var(--phaze-accent) !important;
+}
+
+/* 6. STATUS PANEL (LINK PREVIEW) */
+#statuspanel-label {
+    background-color: var(--phaze-primary) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 4px !important;
+}
+
+/* 7. PHAZBROWSER LOGO (Technically text injection into nav bar) */
+#nav-bar::before {
+    content: "PhazeBrowser";
+    display: flex;
+    align-items: center;
+    color: var(--phaze-primary);
+    font-weight: 800;
+    font-size: 14px;
+    margin-left: 12px;
+    margin-right: 5px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}

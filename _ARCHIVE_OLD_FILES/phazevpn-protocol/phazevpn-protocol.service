@@ -1,0 +1,21 @@
+[Unit]
+Description=PhazeVPN Protocol Server - Custom VPN Implementation
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/phaze-vpn/phazevpn-protocol
+ExecStart=/usr/bin/python3 /opt/phaze-vpn/phazevpn-protocol/phazevpn-server-production.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security settings
+NoNewPrivileges=false
+PrivateTmp=false
+
+[Install]
+WantedBy=multi-user.target
+

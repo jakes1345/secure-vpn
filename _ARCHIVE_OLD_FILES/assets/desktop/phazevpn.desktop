@@ -1,0 +1,15 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PhazeVPN Dashboard
+GenericName=VPN Management Dashboard
+Comment=Professional VPN server management dashboard with military-grade security
+Exec=python3 /opt/secure-vpn/vpn-gui.py
+Icon=phazevpn
+Terminal=false
+Categories=Network;Security;Internet;
+Keywords=vpn;security;network;privacy;encryption;
+StartupNotify=true
+StartupWMClass=PhazeVPN Dashboard
+MimeType=
+

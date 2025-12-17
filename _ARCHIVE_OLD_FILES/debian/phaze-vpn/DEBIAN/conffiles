@@ -1,0 +1,2 @@
+/etc/systemd/system/phaze-vpn-download.service
+/etc/systemd/system/phaze-vpn.service

@@ -1,0 +1,9 @@
+{
+    "name": "phaze-hello",
+    "version": "1.0.0",
+    "description": "A test package for PhazePkg",
+    "arch": "x86_64",
+    "dependencies": [],
+    "maintainer": "test@phazeos.org",
+    "license": "MIT"
+}

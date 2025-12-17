@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Dashboard - SecureVPN{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin: 1rem 0;
+    }
+    .stat-card {
+        background: #3a3a3a;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #4a9eff;
+    }
+    .stat-label {
+        color: #b0b0b0;
+        margin-top: 0.5rem;
+    }
+    .chart-container {
+        background: #2b2b2b;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        min-height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>📊 Analytics Dashboard</h1>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value" id="active-connections">0</div>
+        <div class="stat-label">Active Connections</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" id="total-bandwidth">0 MB</div>
+        <div class="stat-label">Total Bandwidth</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ total_clients }}</div>
+        <div class="stat-label">Total Clients</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" id="avg-speed">--</div>
+        <div class="stat-label">Avg Speed</div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">🌍 Active Connections Map</div>
+    <div id="connection-map" style="height: 400px; background: #1a1a1a; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+        <p style="color: #666;">Connection map visualization coming soon...</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">📈 Bandwidth Usage (Last 24 Hours)</div>
+    <div class="chart-container">
+        <canvas id="bandwidth-chart"></canvas>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">🔌 Active Connections</div>
+    <table id="connections-table">
+        <thead>
+            <tr>
+                <th>Client</th>
+                <th>Virtual IP</th>
+                <th>Download</th>
+                <th>Upload</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td colspan="5" style="text-align: center;">Loading...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let bandwidthChart;
+
+function updateStats() {
+    fetch('/api/stats/bandwidth')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('active-connections').textContent = data.connection_count;
+            
+            const totalMB = (data.total / (1024 * 1024)).toFixed(2);
+            document.getElementById('total-bandwidth').textContent = totalMB + ' MB';
+            
+            // Update connections table
+            const tbody = document.querySelector('#connections-table tbody');
+            if (data.connection_count === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #666;">No active connections</td></tr>';
+            } else {
+                tbody.innerHTML = data.connections.map(conn => {
+                    const rxMB = (conn.bytes_rx / (1024 * 1024)).toFixed(2);
+                    const txMB = (conn.bytes_tx / (1024 * 1024)).toFixed(2);
+                    const totalMB = ((conn.bytes_rx + conn.bytes_tx) / (1024 * 1024)).toFixed(2);
+                    return `
+                        <tr>
+                            <td>${conn.name || 'Unknown'}</td>
+                            <td>${conn.virtual_ip || 'N/A'}</td>
+                            <td>${rxMB} MB</td>
+                            <td>${txMB} MB</td>
+                            <td><strong>${totalMB} MB</strong></td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+        });
+}
+
+function initChart() {
+    const ctx = document.getElementById('bandwidth-chart').getContext('2d');
+    bandwidthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Download (MB)',
+                data: [],
+                borderColor: '#4a9eff',
+                backgroundColor: 'rgba(74, 158, 255, 0.1)'
+            }, {
+                label: 'Upload (MB)',
+                data: [],
+                borderColor: '#4caf50',
+                backgroundColor: 'rgba(76, 175, 80, 0.1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+// Update every 5 seconds
+updateStats();
+setInterval(updateStats, 5000);
+
+// Initialize chart
+initChart();
+</script>
+{% endblock %}
+

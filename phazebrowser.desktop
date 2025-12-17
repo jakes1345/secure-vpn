@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=PhazeBrowser
+Comment=Secure VPN Browser by PhazeVPN
+Exec=/media/jack/Liunux/secure-vpn/phazebrowser-gecko/phazebrowser/phazebrowser %u
+Icon=/media/jack/Liunux/secure-vpn/phazebrowser-gecko/phazebrowser/icons/phazebrowser-128x128.png
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;
+StartupNotify=true

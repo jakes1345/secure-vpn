@@ -1,0 +1,3 @@
+#!/bin/sh
+# Stage 2: Service Monitor
+exec runsvdir -P /etc/service

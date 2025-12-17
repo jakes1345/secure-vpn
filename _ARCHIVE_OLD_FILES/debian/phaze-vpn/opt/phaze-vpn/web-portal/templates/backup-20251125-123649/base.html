@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block description %}PhazeVPN - Military-grade VPN with ChaCha20-Poly1305 encryption, zero-logs policy, and network-level security. Protect your privacy today.{% endblock %}">
+    <meta name="keywords" content="VPN, secure VPN, privacy VPN, military-grade encryption, no-logs VPN, ChaCha20-Poly1305">
+    <meta name="author" content="PhazeVPN">
+    <meta property="og:title" content="{% block og_title %}PhazeVPN - Military-Grade VPN Protection{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Protect your privacy with PhazeVPN. Zero-logs policy, military-grade encryption, and network-level security.{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://phazevpn.duckdns.org">
+    <link rel="canonical" href="https://phazevpn.duckdns.org{% block canonical_path %}{{ request.path }}{% endblock %}">
+    <title>{% block title %}PhazeVPN - Military-Grade VPN Protection{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background: #2b2b2b;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3a3a3a;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4a9eff;
+            text-decoration: none;
+        }
+        
+        .navbar-nav {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-link {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .nav-link:hover {
+            background: #3a3a3a;
+            transform: translateY(-1px);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .badge-admin {
+            background: #f44336;
+            color: white;
+        }
+        
+        .badge-moderator {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .badge-user {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .card {
+            background: #2b2b2b;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #3a3a3a;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #3a3a3a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-primary {
+            background: #4a9eff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #3a8eef;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e43326;
+        }
+        
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #3c9f40;
+        }
+        
+        .btn-secondary {
+            background: #666;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #555;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        
+        .status-active {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .status-inactive {
+            background: #f44336;
+            color: white;
+            animation: none;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: auto;
+            display: block;
+        }
+        
+        @media (min-width: 768px) {
+            table {
+                display: table;
+            }
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #3a3a3a;
+        }
+        
+        th {
+            background: #3a3a3a;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr {
+            transition: background 0.2s;
+        }
+        
+        tr:hover {
+            background: #3a3a3a;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .alert-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .alert-error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .alert-info {
+            background: #4a9eff;
+            color: white;
+        }
+        
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10000;
+            max-width: 400px;
+        }
+        
+        .toast {
+            background: #2b2b2b;
+            border: 1px solid #3a3a3a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            animation: toastSlideIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateX(400px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .toast-success {
+            border-left: 4px solid #4caf50;
+        }
+        
+        .toast-error {
+            border-left: 4px solid #f44336;
+        }
+        
+        .toast-info {
+            border-left: 4px solid #4a9eff;
+        }
+        
+        .toast-close {
+            background: none;
+            border: none;
+            color: #e0e0e0;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-left: auto;
+            opacity: 0.7;
+        }
+        
+        .toast-close:hover {
+            opacity: 1;
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid #3a3a3a;
+            border-top: 3px solid #4a9eff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            
+            .navbar-nav {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+            
+            .card {
+                padding: 1rem;
+            }
+            
+            .toast-container {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+        
+        /* Utility Classes */
+        .text-center { text-align: center; }
+        .text-muted { color: #b0b0b0; }
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body data-flash-messages='{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{{ messages|tojson|safe }}{% else %}[]{% endif %}{% endwith %}'>
+    {% if 'username' in session %}
+    <nav class="navbar">
+        <a href="/dashboard" class="navbar-brand">🔒 SecureVPN</a>
+        <div class="navbar-nav">
+            <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+            {% if session.role == 'admin' %}
+            <a href="/admin" class="nav-link">👑 Admin</a>
+            <a href="/admin/analytics" class="nav-link">📈 Analytics</a>
+            <a href="/admin/users" class="nav-link">👥 Users</a>
+            <a href="/admin/clients" class="nav-link">💻 Clients</a>
+            <a href="/admin/payments" class="nav-link">💳 Payments</a>
+            <a href="/admin/payment-settings" class="nav-link">⚙️ Payment Settings</a>
+            <a href="/admin/activity" class="nav-link">📋 Activity</a>
+            {% elif session.role == 'moderator' %}
+            <a href="/admin/clients" class="nav-link">💻 Clients</a>
+            {% endif %}
+            <a href="/profile" class="nav-link">⚙️ Account</a>
+            <a href="/download" class="nav-link">📥 Download Client</a>
+            <span class="badge badge-{{ session.role }}">{{ session.role|title }}</span>
+            <span class="nav-link">{{ session.username }}</span>
+            <a href="/logout" class="nav-link">🚪 Logout</a>
+        </div>
+    </nav>
+    {% endif %}
+    
+    <div class="toast-container" id="toastContainer"></div>
+    
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️'
+            };
+            
+            toast.innerHTML = `
+                <span>${icons[type] || 'ℹ️'}</span>
+                <span style="flex: 1;">${message}</span>
+                <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'toastSlideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        // Show flash messages as toasts
+        (function() {
+            try {
+                var flashData = document.body.getAttribute('data-flash-messages');
+                var flashMessages = flashData ? JSON.parse(flashData) : [];
+                flashMessages.forEach(function(msg) {
+                    showToast(msg[1], msg[0] || 'info');
+                });
+            } catch (e) {
+                console.error('Error parsing flash messages:', e);
+            }
+        })();
+        
+        // Loading state helper
+        function setLoadingState(element, loading) {
+            if (loading) {
+                element.classList.add('loading');
+                element.disabled = true;
+                if (!element.querySelector('.spinner')) {
+                    element.insertAdjacentHTML('afterbegin', '<span class="spinner"></span>');
+                }
+            } else {
+                element.classList.remove('loading');
+                element.disabled = false;
+                const spinner = element.querySelector('.spinner');
+                if (spinner) spinner.remove();
+            }
+        }
+        
+        // Better error handling for fetch
+        async function safeFetch(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
+                }
+                return data;
+            } catch (error) {
+                showToast(error.message || 'An error occurred', 'error');
+                throw error;
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+    
+    <!-- Analytics (Privacy-friendly, optional) -->
+    <script>
+        // Privacy-friendly analytics - can be disabled
+        if (localStorage.getItem('analytics_opt_out') !== 'true') {
+            // Add your analytics code here (Google Analytics, etc.)
+            // For now, just basic page view tracking
+            console.log('PhazeVPN Analytics: Page view', window.location.pathname);
+        }
+    </script>
+</body>
+</html>

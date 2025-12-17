@@ -1,0 +1,51 @@
+name: Build Windows Client
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller requests
+    
+    - name: Build Windows executable
+      run: |
+        pyinstaller --onefile ^
+          --windowed ^
+          --name "PhazeVPN-Client" ^
+          --add-data "assets;assets" ^
+          --hidden-import=tkinter ^
+          --hidden-import=requests ^
+          --hidden-import=urllib3 ^
+          --clean ^
+          vpn-gui.py
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: phazevpn-windows-client
+        path: dist/PhazeVPN-Client.exe
+    
+    - name: Deploy to VPS
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: easingthemes/ssh-deploy@v4
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+        REMOTE_HOST: ${{ secrets.VPS_HOST }}
+        REMOTE_USER: ${{ secrets.VPS_USER }}
+        SOURCE: "dist/PhazeVPN-Client.exe"
+        TARGET: "/opt/phaze-vpn/web-portal/static/downloads/"

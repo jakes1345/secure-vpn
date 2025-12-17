@@ -1,0 +1,15 @@
+@-moz-document url("about:home"), url("about:newtab") {
+
+    /* Hide EVERYTHING on the default page */
+    body {
+        display: none !important;
+    }
+}
+
+@-moz-document url-prefix("about:home"), url-prefix("about:newtab") {
+
+    /* Force background to match our theme just in case */
+    body {
+        background-color: #0f0f1a !important;
+    }
+}

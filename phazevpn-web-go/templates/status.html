@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beta Status - PhazeVPN</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <nav>
+        <div class="container">
+            <a href="/" class="logo">🔒 PhazeVPN <span style="font-size: 0.6em; color: #ff006e;">BETA</span></a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/login" class="btn-secondary">Login</a>
+            </div>
+        </div>
+    </nav>
+    <main>
+        <div class="dashboard" style="max-width: 1000px;">
+            <h1>Beta Status & Feature Availability</h1>
+
+            <div class="card">
+                <h3 style="color: var(--success);">✅ What's Working Now</h3>
+                <table style="width: 100%; color: rgba(255,255,255,0.8); margin-top: 1rem;">
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>User Accounts</strong></td>
+                        <td style="padding: 0.75rem; color: var(--success);">✅ WORKING</td>
+                        <td style="padding: 0.75rem;">Signup, login, password hashing</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>VPN Servers</strong></td>
+                        <td style="padding: 0.75rem; color: var(--success);">✅ WORKING</td>
+                        <td style="padding: 0.75rem;">OpenVPN, WireGuard, PhazeVPN</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Key Generation</strong></td>
+                        <td style="padding: 0.75rem; color: var(--success);">✅ WORKING</td>
+                        <td style="padding: 0.75rem;">Generate VPN keys for all protocols</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Config Downloads</strong></td>
+                        <td style="padding: 0.75rem; color: var(--success);">✅ WORKING</td>
+                        <td style="padding: 0.75rem;">.conf and .ovpn files</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>CLI Clients</strong></td>
+                        <td style="padding: 0.75rem; color: var(--success);">✅ WORKING</td>
+                        <td style="padding: 0.75rem;">Windows, macOS, Linux</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem;"><strong>Zero Logs</strong></td>
+                        <td style="padding: 0.75rem; color: var(--success);">✅ WORKING</td>
+                        <td style="padding: 0.75rem;">No tracking or data storage</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 style="color: #ff006e;">🚧 In Development</h3>
+                <table style="width: 100%; color: rgba(255,255,255,0.8); margin-top: 1rem;">
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>GUI Client Login</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">🚧 IN PROGRESS</td>
+                        <td style="padding: 0.75rem;">GUI works but no account integration</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Payment System</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">Stripe integration needed</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Email Verification</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">SMTP not configured</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Password Reset</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">Email system required first</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>2FA</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">TOTP implementation needed</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Server Selection</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">Currently only 1 server</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Usage Statistics</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">Bandwidth/connection tracking</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid rgba(0,212,255,0.1);">
+                        <td style="padding: 0.75rem;"><strong>Mobile Apps</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">Android/iOS apps</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.75rem;"><strong>Admin Panel</strong></td>
+                        <td style="padding: 0.75rem; color: #ff006e;">❌ NOT STARTED</td>
+                        <td style="padding: 0.75rem;">User management dashboard</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card">
+                <h3 style="color: var(--primary);">📋 How to Use PhazeVPN Today</h3>
+                <ol style="color: rgba(255,255,255,0.8); line-height: 2; margin-top: 1rem;">
+                    <li>Sign up for a free account</li>
+                    <li>Login to your dashboard</li>
+                    <li>Click "Generate Keys" to create your VPN credentials</li>
+                    <li>Download a config file (WireGuard, OpenVPN, or PhazeVPN)</li>
+                    <li>Download a client from the <a href="/download" style="color: var(--primary);">downloads page</a>
+                    </li>
+                    <li>Import the config file into your client</li>
+                    <li>Connect and enjoy private browsing!</li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3 style="color: var(--primary);">🔒 Privacy & Security</h3>
+                <ul style="color: rgba(255,255,255,0.8); line-height: 2; margin-top: 1rem;">
+                    <li>✅ <strong>Zero logs policy</strong> - We don't track your activity</li>
+                    <li>✅ <strong>bcrypt password hashing</strong> - Your password is secure</li>
+                    <li>✅ <strong>HTTPS only</strong> - All connections encrypted</li>
+                    <li>✅ <strong>Open source</strong> - Code is available for review</li>
+                    <li>⚠️ <strong>Beta software</strong> - Use at your own risk</li>
+                </ul>
+            </div>
+
+            <div
+                style="background: rgba(0, 212, 255, 0.1); border: 1px solid var(--primary); padding: 2rem; border-radius: 15px; margin-top: 2rem;">
+                <h3 style="color: var(--primary); margin-bottom: 1rem;">Questions or Issues?</h3>
+                <p style="color: rgba(255,255,255,0.8);">
+                    We're actively developing PhazeVPN and appreciate your patience during beta testing.
+                    If you encounter any issues or have feature requests, please <a href="/contact"
+                        style="color: var(--primary);">contact us</a>.
+                </p>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+    </footer>
+</body>
+
+</html>

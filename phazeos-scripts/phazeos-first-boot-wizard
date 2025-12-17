@@ -1,0 +1,180 @@
+#!/bin/bash
+# PhazeOS First Boot Privacy Wizard
+# Educates users about privacy and sets up VPN
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       WELCOME TO PHAZEOS!"
+echo "   The Ultimate Privacy Powerhouse"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+sleep 2
+
+echo "🎯 PhazeOS comes with EVERYTHING you need:"
+echo ""
+echo "  ✅ PhazeBrowser - Better than Chrome, zero tracking"
+echo "  ✅ Steam & Lutris - Gaming without Windows"
+echo "  ✅ VS Code & Docker - Development tools"
+echo "  ✅ Ollama AI - Local AI assistant"
+echo "  ✅ Hacking tools - Nmap, Wireshark, etc."
+echo "  ✅ VPN built-in - Always private"
+echo ""
+sleep 3
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       ⚠️  PRIVACY RULES ⚠️"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "❌ DON'T install Chrome, Opera, or Edge"
+echo "   → Use PhazeBrowser instead (same features, zero tracking)"
+echo ""
+echo "❌ DON'T sign into Google/Microsoft accounts"
+echo "   → Use PhazeCloud sync instead (your VPS)"
+echo ""
+echo "❌ DON'T install Discord, Zoom, or Skype"
+echo "   → Use Element (Matrix) or Jitsi Meet instead"
+echo ""
+echo "❌ DON'T disable the VPN"
+echo "   → Everything routes through VPN for your safety"
+echo ""
+sleep 5
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       🛡️  PRIVACY FEATURES 🛡️"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "PhazeOS protects you with:"
+echo ""
+echo "  🔒 VPN Kill Switch - Blocks internet if VPN drops"
+echo "  🛡️  Privacy Guardian - Warns about tracking software"
+echo "  👻 Ghost Mode - Route through Tor network"
+echo "  🎭 Phaze Mode - Privacy lockdown (clear data, randomize MAC)"
+echo "  🔐 PhazeBrowser - VPN-enforced browsing"
+echo ""
+sleep 3
+
+read -p "Press ENTER to set up your VPN..."
+echo ""
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       VPN SETUP"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Do you have a PhazeVPN account?"
+echo ""
+echo "  1) Yes - I have an account"
+echo "  2) No - Create account at phazevpn.com"
+echo "  3) Skip for now"
+echo ""
+read -p "Choose [1-3]: " choice
+
+case $choice in
+    1)
+        echo ""
+        read -p "Email: " email
+        read -sp "Password: " password
+        echo ""
+        
+        # Save credentials
+        mkdir -p ~/.config/phazevpn
+        cat > ~/.config/phazevpn/config.json << EOF
+{
+  "email": "$email",
+  "server": "phazevpn.com",
+  "protocol": "wireguard",
+  "auto_connect": true,
+  "dns_leak_protection": true,
+  "kill_switch": true
+}
+EOF
+        
+        echo "✅ VPN configured!"
+        echo ""
+        echo "Connecting to VPN..."
+        phazevpn-gui --connect &
+        sleep 3
+        ;;
+    2)
+        echo ""
+        echo "Visit: https://phazevpn.com"
+        echo "Then run: phazevpn-cli login"
+        ;;
+    3)
+        echo ""
+        echo "⚠️  You can set up VPN later with: phazevpn-cli login"
+        ;;
+esac
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       INSTALL PROTECTION LAYERS?"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Recommended protection:"
+echo ""
+echo "  1) VPN Kill Switch - Block internet if VPN drops"
+echo "  2) Privacy Guardian - Warn about tracking software"
+echo "  3) Both (recommended)"
+echo "  4) Skip"
+echo ""
+read -p "Choose [1-4]: " protection
+
+case $protection in
+    1)
+        sudo phazeos-install-killswitch
+        ;;
+    2)
+        sudo phazeos-install-privacy-guardian
+        ;;
+    3)
+        sudo phazeos-install-killswitch
+        sudo phazeos-install-privacy-guardian
+        ;;
+    4)
+        echo "⚠️  You can install later from the PhazeOS Features menu"
+        ;;
+esac
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       INSTALL AI ASSISTANT?"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Ollama (Local AI) - 100% private, runs on your machine"
+echo ""
+echo "  • Ask questions: phaze-ai \"how do I...\""
+echo "  • Code help: phaze-ai \"write a Python script\""
+echo "  • System help: phaze-ai \"fix my wifi\""
+echo ""
+read -p "Install Ollama AI? [Y/n]: " install_ai
+
+if [[ ! $install_ai =~ ^[Nn]$ ]]; then
+    sudo phazeos-install-ollama
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       ✅ SETUP COMPLETE!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "🎉 Welcome to PhazeOS!"
+echo ""
+echo "Quick Start:"
+echo "  • Browse: phazebrowser"
+echo "  • VPN: phazevpn-cli status"
+echo "  • Features: phazeos-features"
+echo "  • AI: phaze-ai \"your question\""
+echo ""
+echo "Unique Modes:"
+echo "  • sudo phaze-mode    - Privacy lockdown"
+echo "  • sudo ghost-mode    - Tor network"
+echo "  • sudo gaming-mode   - Performance boost"
+echo "  • sudo dev-mode      - Development setup"
+echo ""
+echo "Remember:"
+echo "  ✅ Use PhazeBrowser, not Chrome"
+echo "  ✅ Keep VPN connected"
+echo "  ✅ Don't sign into Google/Microsoft"
+echo "  ✅ Install from official repos only"
+echo ""
+echo "Need help? Visit: https://phazevpn.com/support"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

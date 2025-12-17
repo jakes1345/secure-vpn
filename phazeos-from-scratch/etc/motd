@@ -1,0 +1,11 @@
+========================================
+  Welcome to PhazeOS 1.0 Alpha!
+========================================
+
+This OS was built COMPLETELY from scratch.
+Every byte compiled and configured by hand.
+
+Available commands: ls, cat, cp, mv, rm, vi, top, ps, free, etc.
+Type 'help' for full BusyBox command list
+
+========================================

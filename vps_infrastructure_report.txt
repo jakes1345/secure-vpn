@@ -1,0 +1,25 @@
+🔍 Checking VPS Infrastructure...
+VPS: 51.91.121.135 (phazevpn.com)
+
+=== VPN SERVER ===
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+
+=== CERTIFICATES ===
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+
+=== EMAIL SERVICE ===
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+
+=== WEB PORTAL ===
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+
+=== LISTENING PORTS ===
+ssh: connect to host 51.91.121.135 port 22: Connection timed out
+
+✅ VPS audit complete

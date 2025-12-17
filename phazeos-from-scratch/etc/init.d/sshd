@@ -1,0 +1,8 @@
+#!/bin/sh
+# Generate keys if missing
+if [ ! -f /etc/ssh/ssh_host_rsa_key ]; then
+    echo "Generating SSH keys..."
+    ssh-keygen -A
+fi
+echo "Starting SSHD..."
+/usr/sbin/sshd

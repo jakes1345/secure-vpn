@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Client Connection Details - SecureVPN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .status-connected {
+            background: #10b981;
+            color: white;
+        }
+        
+        .status-disconnected {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .detail-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .detail-title {
+            font-size: 0.9rem;
+            color: #aaa;
+            margin-bottom: 0.3rem;
+            text-transform: uppercase;
+        }
+        
+        .detail-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4a9eff;
+            word-break: break-all;
+        }
+        
+        .log-section {
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .log-title {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: #4a9eff;
+        }
+        
+        .log-content {
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            background: rgba(0,0,0,0.5);
+            padding: 0.5rem;
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            color: #0f0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .refresh-btn {
+            background: #4a9eff;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📱 Connection Details</h1>
+        <div id="status" class="status-badge status-disconnected">Checking...</div>
+    </div>
+    
+    <div id="connection-details">
+        <div class="detail-card">
+            <div class="detail-title">VPN IP Address</div>
+            <div class="detail-value" id="vpn-ip">-</div>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-title">Real IP Address</div>
+            <div class="detail-value" id="real-ip">-</div>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-title">Server Address</div>
+            <div class="detail-value" id="server-addr">-</div>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-title">Protocol</div>
+            <div class="detail-value" id="protocol">-</div>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-title">Cipher</div>
+            <div class="detail-value" id="cipher">-</div>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-title">Bytes Received</div>
+            <div class="detail-value" id="bytes-rx">-</div>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-title">Bytes Sent</div>
+            <div class="detail-value" id="bytes-tx">-</div>
+        </div>
+        
+        <div class="detail-card">
+            <div class="detail-title">Connected Since</div>
+            <div class="detail-value" id="connected-since">-</div>
+        </div>
+    </div>
+    
+    <div class="log-section">
+        <div class="log-title">📋 Connection Log</div>
+        <div class="log-content" id="connection-log">Loading...</div>
+    </div>
+    
+    <button class="refresh-btn" onclick="loadDetails()">🔄 Refresh</button>
+    
+    <script>
+        const clientName = new URLSearchParams(window.location.search).get('client') || '';
+        
+        function formatBytes(bytes) {
+            if (!bytes) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+        
+        function loadDetails() {
+            if (!clientName) {
+                document.getElementById('connection-details').innerHTML = 
+                    '<div class="detail-card">Client name required in URL: ?client=yourname</div>';
+                return;
+            }
+            
+            fetch(`/api/client/${clientName}/details`)
+                .then(r => r.json())
+                .then(data => {
+                    if (data.connected) {
+                        document.getElementById('status').textContent = '✓ Connected';
+                        document.getElementById('status').className = 'status-badge status-connected';
+                        
+                        document.getElementById('vpn-ip').textContent = data.virtual_ip || 'N/A';
+                        document.getElementById('real-ip').textContent = data.real_ip || 'N/A';
+                        document.getElementById('server-addr').textContent = data.server_addr || 'N/A';
+                        document.getElementById('protocol').textContent = data.protocol || 'UDP';
+                        document.getElementById('cipher').textContent = data.cipher || 'CHACHA20-POLY1305';
+                        document.getElementById('bytes-rx').textContent = formatBytes(data.bytes_rx || 0);
+                        document.getElementById('bytes-tx').textContent = formatBytes(data.bytes_tx || 0);
+                        document.getElementById('connected-since').textContent = data.connected_since || 'N/A';
+                        
+                        if (data.log) {
+                            document.getElementById('connection-log').textContent = data.log;
+                        }
+                    } else {
+                        document.getElementById('status').textContent = '✗ Not Connected';
+                        document.getElementById('status').className = 'status-badge status-disconnected';
+                        
+                        document.getElementById('connection-details').innerHTML = 
+                            '<div class="detail-card">Not currently connected to VPN</div>';
+                    }
+                })
+                .catch(err => {
+                    console.error('Error:', err);
+                    document.getElementById('connection-details').innerHTML = 
+                        '<div class="detail-card">Error loading connection details</div>';
+                });
+        }
+        
+        // Auto-refresh every 3 seconds
+        loadDetails();
+        setInterval(loadDetails, 3000);
+    </script>
+</body>
+</html>
+

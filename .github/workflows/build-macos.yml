@@ -1,0 +1,61 @@
+name: Build macOS Client
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install pyinstaller requests
+    
+    - name: Build macOS app
+      run: |
+        pyinstaller --onefile \
+          --windowed \
+          --name "PhazeVPN-Client" \
+          --osx-bundle-identifier "com.phazevpn.client" \
+          --add-data "assets:assets" \
+          --hidden-import=tkinter \
+          --hidden-import=requests \
+          --hidden-import=urllib3 \
+          --clean \
+          vpn-gui.py
+    
+    - name: Create DMG
+      run: |
+        hdiutil create -volname PhazeVPN \
+          -srcfolder dist/PhazeVPN-Client.app \
+          -ov -format UDZO \
+          dist/PhazeVPN-Client.dmg || echo "DMG creation failed, using .app"
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: phazevpn-macos-client
+        path: |
+          dist/PhazeVPN-Client.app
+          dist/PhazeVPN-Client.dmg
+    
+    - name: Deploy to VPS
+      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+      uses: easingthemes/ssh-deploy@v4
+      env:
+        SSH_PRIVATE_KEY: ${{ secrets.VPS_SSH_KEY }}
+        REMOTE_HOST: ${{ secrets.VPS_HOST }}
+        REMOTE_USER: ${{ secrets.VPS_USER }}
+        SOURCE: "dist/"
+        TARGET: "/opt/phaze-vpn/web-portal/static/downloads/"

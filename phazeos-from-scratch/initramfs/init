@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# Mount essential filesystems
+mount -t proc none /proc
+mount -t sysfs none /sys
+mount -t devtmpfs none /dev
+
+# Print boot message
+echo ""
+echo "=========================================="
+echo "  PHAZEOS - Privacy-Focused Gaming OS"
+echo "=========================================="
+echo ""
+
+# Switch to real root
+exec switch_root /newroot /sbin/init

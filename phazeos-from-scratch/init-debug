@@ -1,0 +1,124 @@
+#!/bin/sh
+export PATH=/bin
+
+echo "========================================"
+echo "   🚀 PhazeOS Live Boot (Debug Mode)"
+echo "========================================"
+
+# Mount kernel filesystems
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mount -t devtmpfs devtmpfs /dev
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+
+# Wait longer for devices
+echo "⏳ Waiting for devices (5 seconds)..."
+sleep 5
+
+echo ""
+echo "📋 Available block devices:"
+ls -l /dev/sr* /dev/sd* /dev/vd* /dev/hd* 2>/dev/null || echo "No devices found yet"
+echo ""
+
+echo "🔎 Searching for boot media..."
+FOUND=""
+
+# Try CD-ROM devices first (most common for ISO)
+for dev in /dev/sr0 /dev/sr1 /dev/sr2; do
+    [ -e "$dev" ] || continue
+    echo "   Trying $dev (CD-ROM)..."
+    
+    if mount -t iso9660 -o ro "$dev" /cdrom 2>/dev/null; then
+        echo "   Mounted $dev"
+        if [ -f /cdrom/live/filesystem.squashfs ]; then
+            echo "✅ Found Live Media on $dev"
+            FOUND="yes"
+            break
+        else
+            echo "   No filesystem.squashfs found, unmounting..."
+            umount /cdrom 2>/dev/null
+        fi
+    else
+        echo "   Failed to mount $dev"
+    fi
+done
+
+# Try SCSI/SATA devices if CD-ROM didn't work
+if [ -z "$FOUND" ]; then
+    for dev in /dev/sda /dev/sdb /dev/sdc /dev/vda /dev/vdb; do
+        [ -e "$dev" ] || continue
+        echo "   Trying $dev (Disk)..."
+        
+        if mount -t iso9660 -o ro "$dev" /cdrom 2>/dev/null; then
+            echo "   Mounted $dev"
+            if [ -f /cdrom/live/filesystem.squashfs ]; then
+                echo "✅ Found Live Media on $dev"
+                FOUND="yes"
+                break
+            else
+                echo "   No filesystem.squashfs found, unmounting..."
+                umount /cdrom 2>/dev/null
+            fi
+        else
+            echo "   Failed to mount $dev"
+        fi
+    done
+fi
+
+if [ -z "$FOUND" ]; then
+    echo ""
+    echo "❌ FATAL: Could not find boot media"
+    echo ""
+    echo "Debug information:"
+    echo "Available devices:"
+    ls -l /dev/sd* /dev/sr* /dev/vd* 2>/dev/null || echo "No devices"
+    echo ""
+    echo "Block devices:"
+    cat /proc/partitions 2>/dev/null || echo "Cannot read partitions"
+    echo ""
+    echo "Dropping to emergency shell..."
+    echo "Commands to try:"
+    echo "  ls -l /dev/"
+    echo "  cat /proc/partitions"
+    echo "  mount -t iso9660 /dev/sr0 /cdrom"
+    exec /bin/sh
+fi
+
+echo "📂 Mounting System Layers..."
+
+# Mount SquashFS
+if ! mount -t squashfs -o loop /cdrom/live/filesystem.squashfs /run/ro; then
+    echo "❌ Failed to mount squashfs"
+    echo "Dropping to shell..."
+    exec /bin/sh
+fi
+
+# Mount TmpFS
+mount -t tmpfs -o size=50% tmpfs /run/rw
+mkdir -p /run/rw/upper /run/rw/work
+
+# Create OverlayFS
+echo "✨ Assembling OverlayFS..."
+if ! mount -t overlay overlay -o lowerdir=/run/ro,upperdir=/run/rw/upper,workdir=/run/rw/work /new_root; then
+    echo "❌ Failed to mount OverlayFS"
+    echo "Dropping to shell..."
+    exec /bin/sh
+fi
+
+# Move mounts
+echo "➡️  Switching Root..."
+mkdir -p /new_root/run/initramfs/{cdrom,ro,rw}
+mount --move /cdrom /new_root/run/initramfs/cdrom 2>/dev/null || true
+mount --move /run/ro /new_root/run/initramfs/ro 2>/dev/null || true
+mount --move /run/rw /new_root/run/initramfs/rw 2>/dev/null || true
+
+# Unmount boot filesystems
+umount /dev/pts 2>/dev/null || true
+umount /dev 2>/dev/null || true
+umount /sys 2>/dev/null || true
+umount /proc 2>/dev/null || true
+
+# Switch to real system
+echo "🎉 Booting PhazeOS..."
+exec switch_root /new_root /sbin/init

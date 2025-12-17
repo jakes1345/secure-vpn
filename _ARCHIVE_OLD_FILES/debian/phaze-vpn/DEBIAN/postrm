@@ -1,0 +1,22 @@
+#!/bin/bash
+# Post-removal script for secure-vpn package
+
+set -e
+
+# Remove symlinks
+rm -f /usr/local/bin/secure-vpn
+rm -f /usr/local/bin/secure-vpn-gui
+rm -f /usr/local/bin/secure-vpn-download
+
+# Remove systemd services
+rm -f /etc/systemd/system/secure-vpn.service
+rm -f /etc/systemd/system/secure-vpn-download.service
+
+# Reload systemd
+systemctl daemon-reload 2>/dev/null || true
+
+# Update desktop database
+update-desktop-database /usr/share/applications/ 2>/dev/null || true
+
+exit 0
+

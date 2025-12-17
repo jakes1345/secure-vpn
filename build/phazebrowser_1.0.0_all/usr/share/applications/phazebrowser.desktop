@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PhazeBrowser
+Comment=Secure VPN-Native Browser
+Exec=/usr/bin/phazebrowser
+Icon=web-browser
+Terminal=false
+Categories=Network;WebBrowser;
+Keywords=privacy;vpn;browser;secure;

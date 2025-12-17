@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}QR Code - {{ client_name }}{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 2rem auto; text-align: center;">
+    <div class="card-header">📱 QR Code for {{ client_name }}</div>
+    
+    <div style="padding: 2rem;">
+        <img src="{{ qr_code }}" alt="QR Code" style="max-width: 300px; border: 2px solid #3a3a3a; padding: 1rem; background: white;">
+        <p style="margin-top: 1.5rem; color: #b0b0b0;">
+            Scan this QR code with your phone to download the VPN config
+        </p>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">
+            Or visit: <a href="{{ download_url }}" style="color: #4a9eff;">{{ download_url }}</a>
+        </p>
+    </div>
+    
+    <div style="margin-top: 1rem;">
+        <a href="/admin/clients" class="btn btn-primary">Back to Clients</a>
+    </div>
+</div>
+{% endblock %}
+

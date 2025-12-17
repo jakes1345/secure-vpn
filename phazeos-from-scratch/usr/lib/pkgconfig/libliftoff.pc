@@ -1,0 +1,11 @@
+prefix=/usr
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: libliftoff
+Description: KMS plane library
+URL: https://gitlab.freedesktop.org/emersion/libliftoff
+Version: 0.4.1
+Requires.private: libdrm >=  2.4.108
+Libs: -L${libdir} -lliftoff
+Cflags: -I${includedir}

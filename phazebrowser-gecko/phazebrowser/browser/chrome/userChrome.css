@@ -1,0 +1,100 @@
+/* PhazeBrowser UserChrome.css - Modern PhazeVPN Aesthetic */
+
+:root {
+    --phaze-primary: #667eea;
+    --phaze-secondary: #764ba2;
+    --phaze-dark-bg: #1e1e2e;
+    --phaze-darker-bg: #0f0f1a;
+    --phaze-text: #ffffff;
+    --phaze-glass: rgba(30, 30, 46, 0.7);
+    --toolbar-bgcolor: #0f0f1a !important;
+    --tab-selected-bgcolor: #667eea !important;
+    --lwt-selected-tab-background-color: #667eea !important;
+}
+
+/* Main Toolbar / Navbar */
+#nav-bar,
+#navigator-toolbox {
+    background-color: var(--toolbar-bgcolor) !important;
+    background-image: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%) !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
+}
+
+/* Tabs Toolbar */
+#TabsToolbar {
+    background: transparent !important;
+    color: var(--phaze-text) !important;
+}
+
+/* Tab Styling - Floating & Rounded */
+.tabbrowser-tab {
+    margin-top: 4px !important;
+    margin-bottom: 4px !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease !important;
+}
+
+.tab-background {
+    border-radius: 8px !important;
+    border: none !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    box-shadow: none !important;
+}
+
+.tab-background[selected="true"] {
+    background: linear-gradient(135deg, var(--phaze-primary), var(--phaze-secondary)) !important;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+}
+
+.tab-label {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: 500 !important;
+}
+
+.tabbrowser-tab[selected="true"] .tab-label {
+    color: #fff !important;
+    font-weight: bold !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* URL Bar - Glassmorphism */
+#urlbar-background {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(10px) !important;
+    border-radius: 12px !important;
+}
+
+#urlbar[focused="true"] #urlbar-background {
+    background-color: rgba(30, 30, 46, 0.95) !important;
+    border-color: var(--phaze-primary) !important;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.3) !important;
+}
+
+#urlbar-input {
+    color: #fff !important;
+    text-align: center !important;
+    /* Safari style center text */
+}
+
+#urlbar[focused="true"] #urlbar-input {
+    text-align: left !important;
+}
+
+/* Sidebar */
+#sidebar-box {
+    background-color: var(--phaze-darker-bg) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Bookmarks Toolbar */
+#PersonalToolbar {
+    background-color: var(--phaze-dark-bg) !important;
+    color: #fff !important;
+}
+
+/* Hide some clutter */
+#tabs-newtab-button {
+    fill: var(--phaze-primary) !important;
+}

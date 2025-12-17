@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy - PhazeVPN{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>🔒 Privacy Policy</h1>
+        <p style="color: #aaa; font-size: 0.9rem;">Last Updated: November 24, 2025</p>
+    </div>
+    
+    <div style="margin-top: 2rem; line-height: 1.8;">
+        <h2 style="color: #4a9eff; margin-bottom: 1rem;">1. No-Logs Policy</h2>
+        <p style="color: #aaa; margin-bottom: 1.5rem;">
+            PhazeVPN operates under a strict <strong>zero-logs policy</strong>. We do not collect, store, or log:
+        </p>
+        <ul style="color: #aaa; margin-left: 2rem; margin-bottom: 1.5rem;">
+            <li>Your browsing history or websites you visit</li>
+            <li>Your connection timestamps</li>
+            <li>Your original IP address</li>
+            <li>Your VPN IP address</li>
+            <li>Your bandwidth usage (except for billing purposes on paid plans)</li>
+            <li>Your DNS queries</li>
+            <li>Any data transmitted through the VPN</li>
+        </ul>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">2. Information We Collect</h2>
+        <p style="color: #aaa; margin-bottom: 1rem;">
+            We only collect the minimum information necessary to provide our service:
+        </p>
+        <ul style="color: #aaa; margin-left: 2rem; margin-bottom: 1.5rem;">
+            <li><strong>Account Information:</strong> Username, email address (for account management and support)</li>
+            <li><strong>Payment Information:</strong> Processed securely through Stripe (we don't store credit card details)</li>
+            <li><strong>Technical Data:</strong> Connection logs for troubleshooting (anonymized, deleted after 7 days)</li>
+        </ul>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">3. How We Use Your Information</h2>
+        <p style="color: #aaa; margin-bottom: 1rem;">We use your information only to:</p>
+        <ul style="color: #aaa; margin-left: 2rem; margin-bottom: 1.5rem;">
+            <li>Provide and maintain the VPN service</li>
+            <li>Process payments and manage subscriptions</li>
+            <li>Send important service updates (via email)</li>
+            <li>Respond to support requests</li>
+            <li>Prevent fraud and abuse</li>
+        </ul>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">4. Data Security</h2>
+        <p style="color: #aaa; margin-bottom: 1.5rem;">
+            We use military-grade encryption (ChaCha20-Poly1305) to protect all data transmitted through our VPN. 
+            Your account information is encrypted and stored securely. We never share your data with third parties except 
+            as required by law or to provide the service (e.g., payment processing through Stripe).
+        </p>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">5. Third-Party Services</h2>
+        <p style="color: #aaa; margin-bottom: 1rem;">We use the following third-party services:</p>
+        <ul style="color: #aaa; margin-left: 2rem; margin-bottom: 1.5rem;">
+            <li><strong>Stripe:</strong> Payment processing (see Stripe's privacy policy)</li>
+            <li><strong>Mailjet:</strong> Email delivery (see Mailjet's privacy policy)</li>
+        </ul>
+        <p style="color: #aaa; margin-bottom: 1.5rem;">
+            These services have their own privacy policies. We only share the minimum data necessary for them to function.
+        </p>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">6. Your Rights</h2>
+        <p style="color: #aaa; margin-bottom: 1rem;">You have the right to:</p>
+        <ul style="color: #aaa; margin-left: 2rem; margin-bottom: 1.5rem;">
+            <li>Access your account data</li>
+            <li>Update or correct your information</li>
+            <li>Delete your account and all associated data</li>
+            <li>Export your data</li>
+            <li>Opt-out of marketing emails (account emails are required)</li>
+        </ul>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">7. Legal Compliance</h2>
+        <p style="color: #aaa; margin-bottom: 1.5rem;">
+            We comply with all applicable privacy laws. If we receive a valid legal request for information, 
+            we will respond as required by law. However, due to our no-logs policy, we typically have no data to provide.
+        </p>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">8. Changes to This Policy</h2>
+        <p style="color: #aaa; margin-bottom: 1.5rem;">
+            We may update this privacy policy from time to time. We will notify you of any significant changes via email 
+            or through the service. Your continued use of PhazeVPN after changes constitutes acceptance of the new policy.
+        </p>
+        
+        <h2 style="color: #4a9eff; margin: 2rem 0 1rem;">9. Contact Us</h2>
+        <p style="color: #aaa; margin-bottom: 1.5rem;">
+            If you have questions about this privacy policy or our data practices, contact us through your dashboard 
+            or email support at <a href="mailto:support@phazevpn.com" style="color: #4a9eff;">support@phazevpn.com</a>.
+        </p>
+        
+        <div style="background: rgba(74, 158, 255, 0.1); padding: 1.5rem; border-radius: 8px; margin-top: 3rem; border: 1px solid rgba(74, 158, 255, 0.3);">
+            <p style="color: #aaa; margin: 0;">
+                <strong style="color: #4a9eff;">Your privacy is our priority.</strong> We built PhazeVPN to protect your 
+                online privacy, and we take that responsibility seriously. We don't log your activity, and we never will.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

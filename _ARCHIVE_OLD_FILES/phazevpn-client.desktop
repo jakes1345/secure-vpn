@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=PhazeVPN Client
+Comment=PhazeVPN Desktop Client
+Exec=/opt/phaze-vpn/start-vpn-gui.sh
+Icon=/opt/phaze-vpn/assets/icons/phazevpn.png
+Terminal=false
+Categories=Network;VPN;
+StartupNotify=true
+

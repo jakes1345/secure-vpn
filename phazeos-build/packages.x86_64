@@ -1,0 +1,398 @@
+# ============================================
+# TIER 1: CORE SYSTEM (CRITICAL)
+# ============================================
+
+# Kernel & Base
+linux-zen
+linux-zen-headers
+linux-firmware
+base
+base-devel
+
+# CPU Microcode
+amd-ucode
+intel-ucode
+
+# Filesystem & Snapshots
+btrfs-progs
+timeshift
+dosfstools
+mtools
+rsync
+
+# Boot & System
+grub
+efibootmgr
+os-prober
+networkmanager
+sudo
+
+# ============================================
+# TIER 2: DESKTOP ENVIRONMENT (KDE PLASMA)
+# ============================================
+
+# KDE Plasma Full Suite
+plasma-meta
+plasma-nm
+plasma-pa
+kscreen
+powerdevil
+kinfocenter
+kdeplasma-addons
+konsole
+dolphin
+dolphin-plugins
+ark
+spectacle
+gwenview
+okular
+kate
+kcalc
+kwrite
+plasma-systemmonitor
+kwalletmanager
+
+# Display Server
+xorg-server
+xorg-xinit
+xorg-xinput
+mesa-utils
+wayland
+
+# Audio (Pipewire)
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack
+wireplumber
+
+# File Manager Extras
+kdegraphics-thumbnailers
+ffmpegthumbs
+taglib
+
+# ============================================
+# TIER 3: FIRMWARE (COMPLETE HARDWARE SUPPORT)
+# ============================================
+
+# Base Firmware
+linux-firmware
+linux-firmware-marvell
+linux-firmware-qlogic
+linux-firmware-bnx2x
+
+# Audio Firmware
+sof-firmware
+wireless-regdb
+
+# ============================================
+# TIER 4: GAMING (PERFORMANCE OPTIMIZED)
+# ============================================
+
+# Game Platforms
+steam
+lutris
+wine
+wine-staging
+winetricks
+flatpak
+
+# Gaming Optimization
+gamemode
+lib32-gamemode
+mangohud
+lib32-mangohud
+
+# Graphics Drivers (Explicit & Stable)
+mesa
+lib32-mesa
+xf86-video-amdgpu
+xf86-video-intel
+intel-media-driver
+libva-intel-driver
+intel-gpu-tools
+xf86-video-vesa
+mesa-demos
+vulkan-radeon
+lib32-vulkan-radeon
+vulkan-intel
+lib32-vulkan-intel
+vulkan-icd-loader
+lib32-vulkan-icd-loader
+nvidia
+nvidia-utils
+lib32-nvidia-utils
+nvidia-settings
+
+# 32-bit Gaming Libraries (CRITICAL)
+lib32-openal
+lib32-libpulse
+lib32-alsa-plugins
+lib32-gtk3
+lib32-gnutls
+
+# ============================================
+# TIER 5: SECURITY & PRIVACY
+# ============================================
+
+# Firewall & Security
+ufw
+apparmor
+firewalld
+iptables
+nftables
+
+# VPN
+openvpn
+wireguard-tools
+openresolv
+
+# Tor
+tor
+torsocks
+
+# Privacy Tools
+veracrypt
+mat2
+macchanger
+proxychains-ng
+
+# ============================================
+# TIER 6: HACKING & SECURITY
+# ============================================
+
+# Network Scanning
+nmap
+wireshark-qt
+aircrack-ng
+tcpdump
+ettercap
+
+# Password Cracking
+hashcat
+john
+hydra
+
+# Web Security
+nikto
+
+# Reverse Engineering
+radare2
+
+# Forensics
+sleuthkit
+binwalk
+foremost
+
+# ============================================
+# TIER 7: AI & DEVELOPMENT
+# ============================================
+
+# Code Editors
+code
+neovim
+vim
+
+# Development Tools
+docker
+docker-compose
+git
+git-lfs
+github-cli
+nodejs
+npm
+python
+python-pip
+go
+rust
+cmake
+ninja
+meson
+extra-cmake-modules
+
+# Compilers
+gcc
+clang
+jdk-openjdk
+
+# Debuggers
+gdb
+valgrind
+strace
+ltrace
+
+# Python ML Libraries
+python-pytorch
+python-numpy
+python-pandas
+python-scikit-learn
+python-matplotlib
+python-seaborn
+jupyter-notebook
+jupyterlab
+python-ipykernel
+python-ipywidgets
+
+# ============================================
+# TIER 8: CREATIVE & PRODUCTIVITY
+# ============================================
+
+# Media
+obs-studio
+kdenlive
+audacity
+vlc
+mpv
+ffmpeg
+handbrake
+gimp
+krita
+blender
+inkscape
+
+# Photo Editing
+imagemagick
+
+# Office
+libreoffice-fresh
+thunderbird
+
+# Password Managers
+keepassxc
+
+# ============================================
+# TIER 9: BROWSERS
+# ============================================
+
+firefox
+
+# PhazeBrowser Dependencies
+qt6-base
+qt6-webengine
+qt6-declarative
+qt6-svg
+qt6-multimedia
+qt6-webchannel
+qt6-positioning
+qt6-translations
+
+# ============================================
+# TIER 10: SYSTEM UTILITIES
+# ============================================
+
+# Monitoring
+btop
+htop
+fastfetch
+lshw
+dmidecode
+inxi
+
+# System Management
+bleachbit
+gparted
+baobab
+
+# Disk Tools
+smartmontools
+hdparm
+nvme-cli
+ddrescue
+testdisk
+
+# Backup
+rclone
+duplicity
+
+# Compression
+p7zip
+unrar
+unzip
+zip
+
+# Fonts (Complete)
+ttf-dejavu
+ttf-liberation
+noto-fonts
+noto-fonts-emoji
+noto-fonts-cjk
+ttf-jetbrains-mono
+ttf-jetbrains-mono-nerd
+ttf-fira-code
+ttf-hack
+ttf-roboto
+ttf-ubuntu-font-family
+
+# Networking
+qbittorrent
+discord
+telegram-desktop
+net-tools
+inetutils
+bind
+traceroute
+whois
+wget
+curl
+
+# Printing
+cups
+hplip
+system-config-printer
+
+# Bluetooth
+bluez
+bluez-utils
+bluedevil
+
+# Package Management
+reflector
+pacman-contrib
+
+# ============================================
+# TIER 11: TERMINAL ENHANCEMENTS
+# ============================================
+
+fish
+bash-completion
+tmux
+fzf
+bat
+ripgrep
+eza
+fd
+
+# ============================================
+# TIER 12: THEMES & APPEARANCE
+# ============================================
+
+papirus-icon-theme
+breeze-gtk
+
+# ============================================
+# TIER 13: UTILITIES
+# ============================================
+
+flameshot
+
+# ============================================
+# TIER 14: DIAGNOSTICS
+# ============================================
+
+pciutils
+usbutils
+lm_sensors
+stress
+
+# ============================================
+# TIER 15: FYNE/GO GUI DEPENDENCIES
+# ============================================
+
+libgl
+libxcursor
+libxrandr
+libxinerama
+libxi
+libxxf86vm
+libx11
+

@@ -1,0 +1,20 @@
+# Commands to run on VPS (you're already SSH'd in)
+
+# 1. Check what apt process is running
+ps aux | grep apt
+
+# 2. Wait for it to finish, OR if it's stuck, kill it:
+# (Only do this if you're sure nothing important is installing)
+# killall apt-get
+# killall dpkg
+
+# 3. Wait a few seconds, then try again:
+cd /opt/secure-vpn
+./setup-complete-email-server.sh
+
+# 4. After script finishes (5-10 minutes), set password:
+passwd admin
+
+# 5. Get DKIM key:
+cat /etc/opendkim/mail.txt
+

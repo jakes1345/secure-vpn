@@ -1,0 +1,3 @@
+#!/bin/sh
+# Stage 3: Shutdown
+echo "System Configured to Halt."

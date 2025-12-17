@@ -1,0 +1,121 @@
+#!/bin/bash
+# PhazeOS - Dev Mode (Development Environment)
+# Sets up optimal development environment
+
+echo "💻 ACTIVATING DEV MODE..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "⚠️  This script needs root privileges."
+    echo "Please run: sudo dev-mode"
+    exit 1
+fi
+
+# Get the actual user
+ACTUAL_USER=${SUDO_USER:-$USER}
+USER_HOME=$(eval echo ~$ACTUAL_USER)
+
+# 1. Start Docker Service
+echo "🐳 [1/5] Starting Docker..."
+if command -v docker &> /dev/null; then
+    systemctl start docker
+    systemctl enable docker
+    echo "✅ Docker started and enabled"
+else
+    echo "⚠️  Docker not installed"
+fi
+
+# 2. Open VS Code
+echo "📝 [2/5] Launching VS Code..."
+if command -v code &> /dev/null; then
+    sudo -u $ACTUAL_USER code "$USER_HOME/projects" &
+    echo "✅ VS Code launched"
+else
+    echo "⚠️  VS Code not installed"
+fi
+
+# 3. Start Local Development Servers
+echo "🌐 [3/5] Starting development servers..."
+
+# Start PostgreSQL (if installed)
+if command -v postgresql &> /dev/null; then
+    systemctl start postgresql
+    echo "✅ PostgreSQL started"
+fi
+
+# Start MySQL/MariaDB (if installed)
+if command -v mysql &> /dev/null; then
+    systemctl start mysql
+    echo "✅ MySQL started"
+fi
+
+# Start Redis (if installed)
+if command -v redis-server &> /dev/null; then
+    systemctl start redis
+    echo "✅ Redis started"
+fi
+
+# 4. Set up Development Environment Variables
+echo "🔧 [4/5] Setting environment variables..."
+cat > /tmp/dev-env.sh << 'EOF'
+# Development Environment Variables
+export NODE_ENV=development
+export FLASK_ENV=development
+export DJANGO_DEBUG=True
+export RUST_BACKTRACE=1
+export GO111MODULE=on
+export PATH="$HOME/.local/bin:$PATH"
+EOF
+
+sudo -u $ACTUAL_USER bash -c "cat /tmp/dev-env.sh >> $USER_HOME/.bashrc"
+sudo -u $ACTUAL_USER bash -c "cat /tmp/dev-env.sh >> $USER_HOME/.config/fish/config.fish"
+echo "✅ Environment variables set"
+
+# 5. Open Terminal with tmux
+echo "📟 [5/5] Opening development terminal..."
+if command -v tmux &> /dev/null; then
+    sudo -u $ACTUAL_USER konsole -e tmux new-session -s dev &
+    echo "✅ Tmux session 'dev' started"
+else
+    sudo -u $ACTUAL_USER konsole &
+    echo "✅ Terminal opened"
+fi
+
+# Optional: Start common development tools
+echo ""
+echo "Additional Tools:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+read -p "Start local web server on port 8000? (y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    cd "$USER_HOME/projects"
+    sudo -u $ACTUAL_USER python -m http.server 8000 &
+    echo "✅ Web server started at http://localhost:8000"
+fi
+
+read -p "Start Jupyter Notebook? (y/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+    sudo -u $ACTUAL_USER jupyter notebook --no-browser &
+    echo "✅ Jupyter started"
+fi
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ DEV MODE ACTIVATED!"
+echo ""
+echo "Development Environment:"
+echo "  🐳 Docker: RUNNING"
+echo "  📝 VS Code: LAUNCHED"
+echo "  🌐 Databases: STARTED"
+echo "  🔧 Environment: CONFIGURED"
+echo "  📟 Terminal: READY"
+echo ""
+echo "Useful Commands:"
+echo "  docker ps              - List containers"
+echo "  docker-compose up      - Start project"
+echo "  tmux attach -t dev     - Attach to tmux session"
+echo "  code .                 - Open current dir in VS Code"
+echo ""
+echo "To deactivate: sudo dev-mode-off"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

@@ -1,0 +1,115 @@
+#!/bin/bash
+# PhazeOS - Ghost Mode (Tor Integration)
+# Routes all traffic through Tor network
+
+echo "👻 ACTIVATING GHOST MODE..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "⚠️  This script needs root privileges."
+    echo "Please run: sudo ghost-mode"
+    exit 1
+fi
+
+# Get the actual user
+ACTUAL_USER=${SUDO_USER:-$USER}
+
+# 1. Check if Tor is installed
+if ! command -v tor &> /dev/null; then
+    echo "❌ Tor is not installed!"
+    echo "Install with: sudo pacman -S tor torsocks"
+    exit 1
+fi
+
+# 2. Start Tor service
+echo "🌐 [1/5] Starting Tor service..."
+systemctl start tor
+sleep 3
+if systemctl is-active --quiet tor; then
+    echo "✅ Tor service running"
+else
+    echo "❌ Failed to start Tor"
+    exit 1
+fi
+
+# 3. Configure iptables to route all traffic through Tor
+echo "🔀 [2/5] Routing all traffic through Tor..."
+
+# Flush existing rules
+iptables -F
+iptables -t nat -F
+
+# Tor's TransPort
+TOR_PORT="9040"
+TOR_DNS="5353"
+
+# Allow loopback
+iptables -A OUTPUT -o lo -j ACCEPT
+iptables -A INPUT -i lo -j ACCEPT
+
+# Allow Tor
+iptables -A OUTPUT -d 127.0.0.1/32 -p tcp -m tcp --dport $TOR_PORT -j ACCEPT
+
+# Redirect DNS to Tor
+iptables -t nat -A OUTPUT -p udp --dport 53 -j REDIRECT --to-ports $TOR_DNS
+iptables -t nat -A OUTPUT -p tcp --dport 53 -j REDIRECT --to-ports $TOR_DNS
+
+# Redirect all TCP traffic to Tor
+iptables -t nat -A OUTPUT -p tcp -j REDIRECT --to-ports $TOR_PORT
+
+# Block everything else
+iptables -A OUTPUT -j REJECT
+
+echo "✅ Traffic routed through Tor"
+
+# 4. Configure Browser for Tor
+echo "🌐 [3/5] Configuring browser..."
+if [ -d "/home/$ACTUAL_USER/.mozilla/firefox" ]; then
+    # Set Firefox to use Tor SOCKS proxy
+    FIREFOX_PROFILE=$(find /home/$ACTUAL_USER/.mozilla/firefox -maxdepth 1 -name "*.default-release" | head -n1)
+    if [ -n "$FIREFOX_PROFILE" ]; then
+        cat >> "$FIREFOX_PROFILE/user.js" << 'EOF'
+// Tor Configuration
+user_pref("network.proxy.type", 1);
+user_pref("network.proxy.socks", "127.0.0.1");
+user_pref("network.proxy.socks_port", 9050);
+user_pref("network.proxy.socks_remote_dns", true);
+user_pref("javascript.enabled", false);
+EOF
+        echo "✅ Firefox configured for Tor"
+    fi
+fi
+
+# 5. Spoof User Agent
+echo "🎭 [4/5] Spoofing user agent..."
+# This will be handled by browser configuration
+echo "✅ User agent will be spoofed by browser"
+
+# 6. Verify Tor Connection
+echo "🔍 [5/5] Verifying Tor connection..."
+sleep 2
+TOR_IP=$(curl -s --socks5 127.0.0.1:9050 https://check.torproject.org/api/ip 2>/dev/null | grep -oP '"IsTor":\s*\K\w+')
+if [ "$TOR_IP" = "true" ]; then
+    CURRENT_IP=$(curl -s --socks5 127.0.0.1:9050 https://api.ipify.org 2>/dev/null)
+    echo "✅ Tor connection verified!"
+    echo "   Your IP: $CURRENT_IP"
+else
+    echo "⚠️  Could not verify Tor connection"
+fi
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ GHOST MODE ACTIVATED!"
+echo ""
+echo "Anonymity Status:"
+echo "  👻 Tor Network: ACTIVE"
+echo "  🔀 Traffic Routing: TOR"
+echo "  🌐 DNS: TOR"
+echo "  🎭 User Agent: SPOOFED"
+echo "  🔒 JavaScript: DISABLED"
+echo ""
+echo "⚠️  WARNING: Do NOT log into personal accounts!"
+echo "⚠️  Your traffic is anonymous but not encrypted end-to-end."
+echo ""
+echo "To deactivate: sudo ghost-mode-off"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

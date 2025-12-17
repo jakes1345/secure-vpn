@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download PhazeVPN Client - SecureVPN</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #4a9eff 0%, #10b981 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            color: #aaa;
+        }
+        
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .download-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .download-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(74, 158, 255, 0.3);
+            border-color: #4a9eff;
+        }
+        
+        .os-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        .download-card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4a9eff;
+        }
+        
+        .download-card p {
+            color: #aaa;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+        
+        .download-btn {
+            background: linear-gradient(135deg, #4a9eff 0%, #10b981 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(74, 158, 255, 0.5);
+        }
+        
+        .features {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .auto-updates-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(74, 158, 255, 0.2) 100%);
+            border: 2px solid rgba(16, 185, 129, 0.5);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 3rem 0;
+            text-align: center;
+        }
+        
+        .auto-updates-banner h2 {
+            color: #10b981;
+            margin-bottom: 1rem;
+            font-size: 1.8rem;
+        }
+        
+        .auto-updates-banner p {
+            color: #aaa;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .auto-updates-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .auto-update-feature {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .auto-update-feature .icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .auto-update-feature h3 {
+            color: #4a9eff;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .auto-update-feature p {
+            color: #888;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        
+        .features h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #4a9eff;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+        }
+        
+        .feature-text {
+            flex: 1;
+        }
+        
+        .feature-text h3 {
+            color: #4a9eff;
+            margin-bottom: 0.3rem;
+        }
+        
+        .feature-text p {
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-top: 2rem;
+            color: #4a9eff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .back-link:hover {
+            color: #10b981;
+        }
+        
+        .recommended {
+            border: 2px solid #4a9eff !important;
+            box-shadow: 0 0 20px rgba(74, 158, 255, 0.5) !important;
+            transform: scale(1.05);
+        }
+        
+        .recommended-badge {
+            background: linear-gradient(135deg, #4a9eff 0%, #10b981 100%);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+        
+        .auto-download-btn {
+            background: linear-gradient(135deg, #10b981 0%, #4a9eff 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2rem 0;
+        }
+        
+        .auto-download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 25px rgba(16, 185, 129, 0.5);
+        }
+        
+        .detected-os {
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .detected-os h3 {
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+    <script>
+        // Detect user's OS
+        function detectOS() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+            const platform = navigator.platform || '';
+            
+            // Windows
+            if (/win/i.test(platform) || /Win32|Win64|Windows/i.test(userAgent)) {
+                return 'windows';
+            }
+            
+            // macOS
+            if (/mac/i.test(platform) || /Macintosh|MacIntel|MacPPC|Mac68K/i.test(userAgent)) {
+                return 'macos';
+            }
+            
+            // Linux
+            if (/linux/i.test(platform) || /Linux|X11/i.test(userAgent)) {
+                return 'linux';
+            }
+            
+            // iOS
+            if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                return 'ios';
+            }
+            
+            // Android
+            if (/android/i.test(userAgent)) {
+                return 'android';
+            }
+            
+            // Unknown
+            return 'unknown';
+        }
+        
+        // Highlight recommended download
+        function highlightRecommended(os) {
+            if (os === 'ios' || os === 'android') {
+                // Mobile users - show message
+                const container = document.querySelector('.container');
+                const mobileMsg = document.createElement('div');
+                mobileMsg.className = 'detected-os';
+                mobileMsg.innerHTML = `
+                    <h3>📱 Mobile Device Detected</h3>
+                    <p>For ${os === 'ios' ? 'iPhone/iPad' : 'Android'}, use the <a href="/guide" style="color: #4a9eff;">OpenVPN Connect app</a> from the app store instead.</p>
+                    <p style="margin-top: 1rem;">Looking for the desktop client? Select your operating system below:</p>
+                `;
+                container.insertBefore(mobileMsg, container.firstChild.nextSibling);
+                return;
+            }
+            
+            if (os === 'unknown') return;
+            
+            // Find the matching card and highlight it
+            const cards = document.querySelectorAll('.download-card');
+            const osMap = {
+                'windows': 0,
+                'linux': 1,
+                'macos': 2
+            };
+            
+            const cardIndex = osMap[os];
+            if (cardIndex !== undefined && cards[cardIndex]) {
+                cards[cardIndex].classList.add('recommended');
+                
+                // Add recommended badge
+                const card = cards[cardIndex];
+                const badge = document.createElement('div');
+                badge.className = 'recommended-badge';
+                badge.textContent = '✓ Recommended for Your System';
+                card.insertBefore(badge, card.querySelector('.os-icon').nextSibling);
+                
+                // Scroll to recommended card smoothly
+                setTimeout(() => {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 300);
+                
+                // Add auto-download button
+                const downloadBtn = card.querySelector('.download-btn');
+                const autoBtn = document.createElement('a');
+                autoBtn.href = downloadBtn.href;
+                autoBtn.className = 'auto-download-btn';
+                autoBtn.textContent = `⬇️ Download PhazeVPN for ${os.charAt(0).toUpperCase() + os.slice(1)}`;
+                card.appendChild(autoBtn);
+            }
+        }
+        
+        // Run on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            const detectedOS = detectOS();
+            highlightRecommended(detectedOS);
+            
+            // Log for debugging
+            console.log('Detected OS:', detectedOS);
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📥 Download PhazeVPN Client</h1>
+            <p>Download PhazeVPN Protocol client with built-in PhazeBrowser - The most secure VPN</p>
+        </div>
+        
+        <div class="download-grid">
+            <div class="download-card">
+                <div class="os-icon">🪟</div>
+                <h2>Windows</h2>
+                <p>Download the PhazeVPN client for Windows 10/11</p>
+                <a href="/download/client/windows" class="download-btn">Download for Windows</a>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">
+                    Windows 10/11 • 64-bit
+                </p>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #666;">
+                    Requires: Python 3 + OpenVPN
+                </p>
+            </div>
+            
+            <div class="download-card">
+                <div class="os-icon">🐧</div>
+                <h2>Linux</h2>
+                <p>Download the PhazeVPN client for Linux</p>
+                <a href="/download/client/linux" class="download-btn">Download for Linux</a>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">
+                    Ubuntu/Debian • 64-bit
+                </p>
+                <div style="background: rgba(16, 185, 129, 0.15); padding: 0.75rem; border-radius: 6px; margin-top: 0.75rem; border-left: 3px solid #10b981;">
+                    <p style="margin: 0; font-size: 0.85rem; color: #10b981; font-weight: 600;">
+                        ✨ Easy Install: Double-click .deb file → Install in Ubuntu Software
+                    </p>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #aaa;">
+                        🎉 Repository automatically added • Updates show in Update Manager!
+                    </p>
+                </div>
+            </div>
+            
+            <div class="download-card">
+                <div class="os-icon">🍎</div>
+                <h2>macOS</h2>
+                <p>Download the PhazeVPN client for macOS</p>
+                <a href="/download/client/macos" class="download-btn">Download for macOS</a>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">
+                    macOS 10.14+ • 64-bit
+                </p>
+                <p style="margin-top: 0.5rem; font-size: 0.8rem; color: #666;">
+                    Requires: Python 3 + OpenVPN
+                </p>
+            </div>
+            
+            <div class="download-card" style="grid-column: span 3; max-width: 1000px; margin: 0 auto;">
+                <div class="os-icon">📱</div>
+                <h2>Mobile Apps</h2>
+                <p>Use OpenVPN Connect app with your PhazeVPN config</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+                    <a href="https://apps.apple.com/app/openvpn-connect/id590379981" target="_blank" class="download-btn" style="background: #000; color: #fff;">📱 iOS App Store</a>
+                    <a href="https://play.google.com/store/apps/details?id=net.openvpn.openvpn" target="_blank" class="download-btn" style="background: #000; color: #fff;">🤖 Google Play</a>
+                </div>
+                <p style="margin-top: 1rem; font-size: 0.85rem; color: #888;">
+                    Download OpenVPN Connect, then import your .ovpn config file
+                </p>
+            </div>
+        </div>
+        
+        <!-- Automatic Updates Banner -->
+        <div class="auto-updates-banner">
+            <h2>🎉 Automatic Updates Enabled!</h2>
+            <p>
+                When you install PhazeVPN, the repository is automatically added to your system.<br>
+                Future updates will appear in <strong>Update Manager</strong>, <strong>Software Updater</strong>, and <strong>Ubuntu Software</strong> automatically!
+            </p>
+            <div class="auto-updates-features">
+                <div class="auto-update-feature">
+                    <div class="icon">📦</div>
+                    <h3>Auto Repository Setup</h3>
+                    <p>Repository added during installation</p>
+                </div>
+                <div class="auto-update-feature">
+                    <div class="icon">🔄</div>
+                    <h3>Update Manager Integration</h3>
+                    <p>Updates show automatically</p>
+                </div>
+                <div class="auto-update-feature">
+                    <div class="icon">✨</div>
+                    <h3>One-Click Updates</h3>
+                    <p>Just click "Install Updates"</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="features">
+            <h2>✨ Client Features</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-text">
+                        <h3>One-Click Connect</h3>
+                        <p>Connect to VPN with a single click</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📊</div>
+                    <div class="feature-text">
+                        <h3>Real-Time Stats</h3>
+                        <p>See connection speed and bandwidth</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-text">
+                        <h3>Fast & Secure</h3>
+                        <p>Military-grade encryption</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🎯</div>
+                    <div class="feature-text">
+                        <h3>Server Selection</h3>
+                        <p>Choose your VPN server location</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🔄</div>
+                    <div class="feature-text">
+                        <h3>Auto-Reconnect</h3>
+                        <p>Automatically reconnect if dropped</p>
+                    </div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🛡️</div>
+                    <div class="feature-text">
+                        <h3>Kill Switch</h3>
+                        <p>Block internet if VPN disconnects</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <a href="/" class="back-link">← Back to Portal</a>
+    </div>
+</body>
+</html>
+

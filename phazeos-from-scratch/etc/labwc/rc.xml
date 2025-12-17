@@ -1,0 +1,9 @@
+<labwc_config>
+  <windowRules>
+    <windowRule identifier="*" serverDecoration="yes" />
+  </windowRules>
+  <theme>
+    <name>PhazeDark</name>
+    <font>Roboto 10</font>
+  </theme>
+</labwc_config>

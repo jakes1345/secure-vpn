@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing - SecureVPN{% endblock %}
+
+{% block content %}
+<h1>💰 Upgrade Your Plan</h1>
+<p>Choose the plan that fits your needs</p>
+
+{% if current_tier %}
+<div class="alert alert-info" style="margin-bottom: 2rem;">
+    <strong>Current Plan:</strong> {{ current_tier_name }} 
+    {% if current_tier != 'premium' %}
+    <a href="#pricing" style="color: #4a9eff; margin-left: 1rem;">Upgrade now →</a>
+    {% endif %}
+</div>
+{% endif %}
+
+<div id="pricing" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; margin: 2rem 0;">
+    
+    <!-- Free Tier -->
+    <div class="card" style="{% if current_tier == 'free' %}border: 2px solid #4a9eff;{% endif %}">
+        <div class="card-header" style="text-align: center;">
+            <h2 style="margin: 0; color: #4a9eff;">Free</h2>
+            <div style="font-size: 2rem; font-weight: bold; margin: 1rem 0;">$0</div>
+            <p style="color: #b0b0b0; margin: 0;">Forever</p>
+        </div>
+        <ul style="list-style: none; padding: 0; margin: 1.5rem 0;">
+            <li style="padding: 0.5rem 0;">✅ 1 Device</li>
+            <li style="padding: 0.5rem 0;">✅ 5GB/month</li>
+            <li style="padding: 0.5rem 0;">✅ Basic Support</li>
+            <li style="padding: 0.5rem 0;">✅ All VPN Features</li>
+        </ul>
+        {% if current_tier == 'free' %}
+        <button class="btn btn-secondary" style="width: 100%;" disabled>Current Plan</button>
+        {% else %}
+        <a href="/api/subscription/set?tier=free" class="btn btn-secondary" style="width: 100%; display: block; text-align: center;">Downgrade</a>
+        {% endif %}
+    </div>
+    
+    <!-- Basic Tier -->
+    <div class="card" style="{% if current_tier == 'basic' %}border: 2px solid #4caf50;{% endif %}">
+        <div class="card-header" style="text-align: center;">
+            <h2 style="margin: 0; color: #4caf50;">Basic</h2>
+            <div style="font-size: 2rem; font-weight: bold; margin: 1rem 0;">$5</div>
+            <p style="color: #b0b0b0; margin: 0;">per month</p>
+            <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">$50/year (save $10)</p>
+        </div>
+        <ul style="list-style: none; padding: 0; margin: 1.5rem 0;">
+            <li style="padding: 0.5rem 0;">✅ 3 Devices</li>
+            <li style="padding: 0.5rem 0;">✅ 50GB/month</li>
+            <li style="padding: 0.5rem 0;">✅ Email Support</li>
+            <li style="padding: 0.5rem 0;">✅ All VPN Features</li>
+        </ul>
+        {% if current_tier == 'basic' %}
+        <button class="btn btn-success" style="width: 100%;" disabled>Current Plan</button>
+        {% else %}
+        <a href="/payment?tier=basic" class="btn btn-primary" style="width: 100%; display: block; text-align: center;">
+            {% if current_tier == 'free' %}Upgrade Now{% else %}Switch to Basic{% endif %}
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Pro Tier -->
+    <div class="card" style="{% if current_tier == 'pro' %}border: 2px solid #ff9800;{% endif %} position: relative;">
+        {% if current_tier != 'pro' %}
+        <div style="position: absolute; top: -10px; right: 20px; background: #ff9800; color: white; padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">POPULAR</div>
+        {% endif %}
+        <div class="card-header" style="text-align: center;">
+            <h2 style="margin: 0; color: #ff9800;">Pro</h2>
+            <div style="font-size: 2rem; font-weight: bold; margin: 1rem 0;">$10</div>
+            <p style="color: #b0b0b0; margin: 0;">per month</p>
+            <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">$100/year (save $20)</p>
+        </div>
+        <ul style="list-style: none; padding: 0; margin: 1.5rem 0;">
+            <li style="padding: 0.5rem 0;">✅ 10 Devices</li>
+            <li style="padding: 0.5rem 0;">✅ 200GB/month</li>
+            <li style="padding: 0.5rem 0;">✅ Priority Support</li>
+            <li style="padding: 0.5rem 0;">✅ All Locations</li>
+            <li style="padding: 0.5rem 0;">✅ All VPN Features</li>
+        </ul>
+        {% if current_tier == 'pro' %}
+        <button class="btn btn-success" style="width: 100%;" disabled>Current Plan</button>
+        {% else %}
+        <a href="/payment?tier=pro" class="btn btn-primary" style="width: 100%; display: block; text-align: center; background: #ff9800;">
+            {% if current_tier == 'free' or current_tier == 'basic' %}Upgrade Now{% else %}Switch to Pro{% endif %}
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Premium Tier -->
+    <div class="card" style="{% if current_tier == 'premium' %}border: 2px solid #9c27b0;{% endif %}">
+        <div class="card-header" style="text-align: center;">
+            <h2 style="margin: 0; color: #9c27b0;">Premium</h2>
+            <div style="font-size: 2rem; font-weight: bold; margin: 1rem 0;">$20</div>
+            <p style="color: #b0b0b0; margin: 0;">per month</p>
+            <p style="color: #666; font-size: 0.9rem; margin: 0.5rem 0;">$200/year (save $40)</p>
+        </div>
+        <ul style="list-style: none; padding: 0; margin: 1.5rem 0;">
+            <li style="padding: 0.5rem 0;">✅ Unlimited Devices</li>
+            <li style="padding: 0.5rem 0;">✅ Unlimited Bandwidth</li>
+            <li style="padding: 0.5rem 0;">✅ 24/7 Support</li>
+            <li style="padding: 0.5rem 0;">✅ All Locations</li>
+            <li style="padding: 0.5rem 0;">✅ Dedicated IP Option</li>
+        </ul>
+        {% if current_tier == 'premium' %}
+        <button class="btn btn-success" style="width: 100%;" disabled>Current Plan</button>
+        {% else %}
+        <a href="/payment?tier=premium" class="btn btn-primary" style="width: 100%; display: block; text-align: center; background: #9c27b0;">
+            Upgrade Now
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="background: #1a3a5a; border-color: #4a9eff; margin-top: 2rem;">
+    <div class="card-header" style="color: #4a9eff;">💡 Questions?</div>
+    <p style="margin: 0.5rem 0;">
+        All plans include full VPN access, secure encryption, and privacy protection.
+        You can upgrade, downgrade, or cancel anytime. No hidden fees.
+    </p>
+    <p style="margin: 0.5rem 0; color: #b0b0b0;">
+        Payment methods: Stripe (cards), PayPal, Crypto (coming soon)
+    </p>
+    <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        <h3 style="color: #4a9eff; margin-bottom: 1rem;">✅ 30-Day Money-Back Guarantee</h3>
+        <p style="color: #aaa; margin-bottom: 0.5rem;">Not satisfied? Get a full refund within 30 days. No questions asked.</p>
+        <h3 style="color: #4a9eff; margin: 1rem 0;">✅ Free Trial Available</h3>
+        <p style="color: #aaa;">Start with our free plan - no credit card required. Upgrade anytime.</p>
+    </div>
+</div>
+{% endblock %}
+

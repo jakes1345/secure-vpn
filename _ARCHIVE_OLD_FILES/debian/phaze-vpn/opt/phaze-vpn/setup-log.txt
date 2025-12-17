@@ -1,0 +1,11 @@
+==========================================
+🚀 Automated PhazeVPN VPS Setup
+==========================================
+
+VPS: ubuntu@15.204.11.19
+
+⚠️  sshpass not found. Installing...
+sudo: a terminal is required to read the password; either use the -S option to read from standard input or configure an askpass helper
+sudo: a password is required
+❌ Failed to install sshpass. Please install manually:
+   sudo apt install sshpass

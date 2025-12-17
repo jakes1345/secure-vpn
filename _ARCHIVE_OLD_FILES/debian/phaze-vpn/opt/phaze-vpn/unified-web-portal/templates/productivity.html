@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Productivity - PhazeVPN Platform{% endblock %}
+
+{% block content %}
+<div class="productivity-interface">
+    <div class="productivity-header">
+        <h1>Productivity</h1>
+        <div class="header-actions">
+            <button class="btn-secondary" id="newSheetBtn">📊 Spreadsheet</button>
+            <button class="btn-secondary" id="newSlideBtn">📽️ Presentation</button>
+            <button class="btn-primary" id="newDocBtn">📄 Document</button>
+        </div>
+    </div>
+
+    <div class="productivity-tabs">
+        <button class="tab-btn active" data-tab="docs">📄 Documents</button>
+        <button class="tab-btn" data-tab="sheets">📊 Spreadsheets</button>
+        <button class="tab-btn" data-tab="slides">📽️ Presentations</button>
+    </div>
+
+    <div class="productivity-content">
+        <div class="documents-grid" id="documentsGrid">
+            <div class="doc-item">
+                <div class="doc-icon">📄</div>
+                <div class="doc-name">Project Plan</div>
+                <div class="doc-meta">Modified 2 hours ago</div>
+            </div>
+            <div class="doc-item">
+                <div class="doc-icon">📄</div>
+                <div class="doc-name">Meeting Notes</div>
+                <div class="doc-meta">Modified yesterday</div>
+            </div>
+            <div class="doc-item">
+                <div class="doc-icon">📊</div>
+                <div class="doc-name">Budget 2024</div>
+                <div class="doc-meta">Modified 3 days ago</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.productivity-interface {
+    padding: 2rem;
+    height: 100%;
+}
+
+.productivity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.productivity-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.doc-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.doc-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px var(--shadow);
+    border-color: var(--primary);
+}
+
+.doc-icon {
+    font-size: 3rem;
+    margin-bottom: 0.75rem;
+}
+
+.doc-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.doc-meta {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+</style>
+{% endblock %}

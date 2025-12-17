@@ -1,0 +1,30 @@
+#!/bin/bash
+# PhazeVPN GUI Launcher
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Check Python
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "Error: python3 not found"
+    echo "Please install Python 3.6 or later"
+    exit 1
+fi
+
+# Check tkinter
+python3 -c "import tkinter" 2>/dev/null || {
+    echo "Error: tkinter not found"
+    echo "Install with:"
+    echo "  Ubuntu/Debian: sudo apt-get install python3-tk"
+    echo "  Fedora: sudo dnf install python3-tkinter"
+    echo "  Arch: sudo pacman -S tk"
+    exit 1
+}
+
+# Install dependencies if needed
+if [ -f requirements.txt ]; then
+    python3 -m pip install --user -r requirements.txt --quiet 2>/dev/null || true
+fi
+
+# Run GUI
+exec python3 vpn-gui.py "$@"

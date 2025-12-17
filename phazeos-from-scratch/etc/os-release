@@ -1,0 +1,8 @@
+NAME="PhazeOS"
+VERSION="1.0-alpha"
+ID=phazeos
+ID_LIKE=
+PRETTY_NAME="PhazeOS 1.0 Alpha"
+VERSION_ID="1.0"
+HOME_URL="https://phazeos.local"
+BUG_REPORT_URL="https://phazeos.local/bugs"

@@ -1,0 +1,87 @@
+#!/bin/bash
+# PhazeOS Installer - Install to Hard Drive
+# Usage: sudo install-phazeos
+
+set -e
+
+echo "========================================"
+echo "    💿 PhazeOS Installer 💿"
+echo "========================================"
+echo ""
+echo "Warning: This will FORMAT the target partition."
+echo "Please ensure you have backed up your data."
+echo ""
+
+# List disks
+echo "Available Partitions:"
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT | grep -v loop
+echo ""
+
+read -p "Enter target partition (e.g., /dev/sda2 or /dev/nvme0n1p3): " TARGET_PART
+if [ ! -b "$TARGET_PART" ]; then
+    echo "❌ Error: Device $TARGET_PART not found."
+    exit 1
+fi
+
+echo ""
+echo "🔥 TARGET: $TARGET_PART"
+read -p "Type 'YES' to confirm wiping and installing to $TARGET_PART: " CONFIRM
+if [ "$CONFIRM" != "YES" ]; then
+    echo "Aborted."
+    exit 1
+fi
+
+echo ""
+echo "1. Formatting $TARGET_PART to ext4..."
+mkfs.ext4 -F "$TARGET_PART"
+
+echo "2. Mounting target..."
+MOUNT_POINT="/mnt/phaze_install"
+mkdir -p "$MOUNT_POINT"
+mount "$TARGET_PART" "$MOUNT_POINT"
+
+echo "3. Copying system files (this may take a while)..."
+# We copy from the root /, excluding virtual filesystems
+# Since we are in an overlay/live env, / represents the full system state
+rsync -aAXv \
+    --exclude=/dev/* \
+    --exclude=/proc/* \
+    --exclude=/sys/* \
+    --exclude=/tmp/* \
+    --exclude=/run/* \
+    --exclude=/mnt/* \
+    --exclude=/media/* \
+    --exclude=/lost+found \
+    --exclude=/boot/grub/* \
+    / "$MOUNT_POINT/"
+
+echo "4. Setting up Bootloader (GRUB)..."
+mkdir -p "$MOUNT_POINT/dev" "$MOUNT_POINT/proc" "$MOUNT_POINT/sys"
+mount --bind /dev "$MOUNT_POINT/dev"
+mount --bind /proc "$MOUNT_POINT/proc"
+mount --bind /sys "$MOUNT_POINT/sys"
+
+# Determine disk from partition (e.g., /dev/sda2 -> /dev/sda)
+DISK_DEV=$(echo "$TARGET_PART" | sed 's/p[0-9]*$//;s/[0-9]*$//')
+
+echo "   Installing GRUB to disk: $DISK_DEV"
+echo "   Note: This may require UEFI mode or BIOS mode depending on your system."
+
+# Run grub-install inside chroot
+chroot "$MOUNT_POINT" grub-install --target=i386-pc --recheck "$DISK_DEV" || \
+chroot "$MOUNT_POINT" grub-install --target=x86_64-efi --efi-directory=/boot/efi --removable --recheck "$DISK_DEV" || \
+echo "⚠️  GRUB install failed. You may need to manually install bootloader."
+
+# Update GRUB Config
+chroot "$MOUNT_POINT" grub-mkconfig -o /boot/grub/grub.cfg
+
+echo "5. Cleaning up..."
+umount "$MOUNT_POINT/sys"
+umount "$MOUNT_POINT/proc"
+umount "$MOUNT_POINT/dev"
+umount "$MOUNT_POINT"
+
+echo ""
+echo "✅ Installation Complete!"
+echo "You can now reboot and select PhazeOS from your boot menu."
+echo "========================================"

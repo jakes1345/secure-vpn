@@ -1,0 +1,38 @@
+#!/bin/sh
+# PhazeOS Init - Proper Version
+
+# Print welcome
+clear
+echo "========================================"
+echo "  PhazeOS 1.0 Alpha - FROM SCRATCH!"
+echo "========================================"
+echo ""
+echo "Kernel: $(uname -r)"
+echo "Hostname: phazeos"
+echo ""
+
+# Create essential mounts
+/bin/mount -t proc proc /proc 2>/dev/null || true
+/bin/mount -t sysfs sysfs /sys 2>/dev/null || true
+/bin/mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+/bin/mount -t tmpfs tmpfs /tmp 2>/dev/null || true
+
+# Set hostname
+echo "phazeos" > /proc/sys/kernel/hostname 2>/dev/null || true
+
+# Print status
+echo "✅ System initialized!"
+echo ""
+echo "Available commands:"
+echo "  ls, cat, cp, mv, rm, mkdir, cd"
+echo "  ps, top, free, df, mount"
+echo "  vi, sh, bash"
+echo ""
+echo "Type 'help' for full BusyBox command list"
+echo ""
+echo "---"
+echo ""
+
+# Start shell with prompt
+export PS1='phazeos:$(pwd)# '
+exec /bin/sh

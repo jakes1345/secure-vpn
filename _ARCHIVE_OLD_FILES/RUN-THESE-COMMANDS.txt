@@ -1,0 +1,37 @@
+Run these commands ONE BY ONE in rescue mode:
+
+# Step 1: Create mount point
+mkdir -p /mnt/root
+
+# Step 2: Mount system disk
+mount /dev/sdb1 /mnt/root
+
+# Step 3: Create directories and mount filesystems
+mkdir -p /mnt/root/proc /mnt/root/sys /mnt/root/dev /mnt/root/dev/pts
+mount -t proc proc /mnt/root/proc
+mount -t sysfs sys /mnt/root/sys
+mount --bind /dev /mnt/root/dev
+mount --bind /dev/pts /mnt/root/dev/pts
+
+# Step 4: Set password (using single quotes to escape !)
+chroot /mnt/root bash -c 'echo "root:Jakes1328!@" | chpasswd'
+
+# Step 5: Set ubuntu password if user exists
+chroot /mnt/root bash -c 'id ubuntu >/dev/null 2>&1 && echo "ubuntu:Jakes1328!@" | chpasswd || echo "No ubuntu user"'
+
+# Step 6: Enable root SSH login
+chroot /mnt/root bash -c 'sed -i "s/^#*PermitRootLogin.*/PermitRootLogin yes/" /etc/ssh/sshd_config'
+chroot /mnt/root bash -c 'grep "^PermitRootLogin" /etc/ssh/sshd_config || echo "PermitRootLogin yes" >> /etc/ssh/sshd_config'
+
+# Step 7: Verify
+chroot /mnt/root bash -c 'grep "^root:" /etc/shadow | head -c 60'
+
+# Step 8: Unmount
+umount /mnt/root/dev/pts
+umount /mnt/root/dev
+umount /mnt/root/sys
+umount /mnt/root/proc
+umount /mnt/root
+
+echo "Done! Exit rescue mode and reboot."
+

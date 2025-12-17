@@ -1,0 +1,11 @@
+#!/bin/sh
+# Stage 1: System Boot
+echo "System Booting..."
+mount -t devtmpfs devtmpfs /dev
+mount -t proc proc /proc
+mount -t sysfs sysfs /sys
+mkdir -p /dev/pts
+mount -t devpts devpts /dev/pts
+mkdir -p /run/user
+touch /etc/runit/stopit
+chmod 0 /etc/runit/stopit

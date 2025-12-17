@@ -1,0 +1,23 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: Roboto Mono, monospace;
+    font-size: 13px;
+    min-height: 0;
+}
+window#waybar {
+    background: rgba(20, 20, 30, 0.9);
+    border-bottom: 2px solid rgba(100, 100, 200, 0.5);
+    color: #ffffff;
+}
+#custom-launcher {
+    background-color: #bd93f9;
+    color: #282a36;
+    padding: 0 10px;
+}
+#clock, #network, #battery, #tray {
+    padding: 0 10px;
+    margin: 0 4px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}

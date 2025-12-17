@@ -1,0 +1,7 @@
+{
+    "host": "localhost",
+    "user": "phazevpn",
+    "password": "PhazeVPN_DB_2874b988f3802f7bfef8871f",
+    "database": "phazevpn",
+    "port": 3306
+}

@@ -1,0 +1,4 @@
+#!/bin/sh
+echo "Connecting to network..."
+ifconfig eth0 up
+udhcpc -i eth0 -s /usr/share/udhcpc/default.script

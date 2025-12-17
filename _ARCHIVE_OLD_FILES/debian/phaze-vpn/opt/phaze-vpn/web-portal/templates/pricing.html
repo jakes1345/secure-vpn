@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}Pricing - PhazeVPN{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="hero" style="margin-bottom: 3rem;">
+        <h1>Choose Your Plan</h1>
+        <p>Start free, upgrade when you need more. All plans include strong security using audited protocols.</p>
+    </div>
+
+    {% if session.get('username') and session.get('current_tier') %}
+    <div class="alert alert-info" style="margin-bottom: 2rem;">
+        <strong>Your Current Plan:</strong> {{ session.get('current_tier', 'free')|title }} 
+        {% if session.get('current_tier') != 'premium' %}
+        <a href="#pricing" style="color: var(--primary-light); margin-left: 1rem; text-decoration: underline;">Upgrade now →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Pricing Cards -->
+    <div id="pricing" class="grid grid-3" style="margin-bottom: 3rem;">
+        <!-- Free Tier -->
+        <div class="card">
+            <div class="card-header text-center">
+                <h3 class="card-title">Free</h3>
+                <div style="font-size: 3rem; font-weight: bold; color: var(--text-secondary); margin: 1rem 0;">$0</div>
+                <p class="text-muted">Forever free</p>
+            </div>
+            <div class="card-body">
+                <ul style="list-style: none; padding: 0; margin: 1.5rem 0;">
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>1 Device</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Limited to one connection</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>10GB/month</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Basic usage only</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Standard Speed</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">May be slower during peak times</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Community Support</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Email support only</span>
+                    </li>
+                    <li style="padding: 0.75rem 0;">
+                        <strong>All Security Features</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Kill switch, encryption, etc.</span>
+                    </li>
+                </ul>
+                {% if session.get('current_tier') == 'free' %}
+                <button class="btn btn-secondary" style="width: 100%;" disabled>Current Plan</button>
+                {% else %}
+                <a href="{{ url_for('signup') }}" class="btn btn-secondary" style="width: 100%;">Get Started Free</a>
+                {% endif %}
+                <p class="text-muted text-center" style="margin-top: 1rem; font-size: 0.85rem;">
+                    ⚠️ Limited bandwidth • ⚠️ Single device • ⚠️ No priority support
+                </p>
+            </div>
+        </div>
+
+        <!-- Pro Tier - Most Popular -->
+        <div class="card" style="border: 2px solid var(--primary); transform: scale(1.05); position: relative; box-shadow: var(--shadow-xl);">
+            <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: 0.5rem 1.5rem; border-radius: 9999px; font-weight: 700; font-size: 0.9rem;">
+                ⭐ MOST POPULAR
+            </div>
+            <div class="card-header text-center">
+                <h3 class="card-title">Pro</h3>
+                <div style="font-size: 3rem; font-weight: bold; color: var(--primary); margin: 1rem 0;">$10</div>
+                <p class="text-muted">per month</p>
+                <div style="background: rgba(99, 102, 241, 0.1); padding: 0.75rem; border-radius: var(--border-radius-sm); margin-top: 1rem;">
+                    <strong style="color: var(--success);">Save $20/year</strong>
+                    <p class="text-muted" style="margin: 0.25rem 0 0 0; font-size: 0.9rem;">$100/year (2 months free!)</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <ul style="list-style: none; padding: 0; margin: 1.5rem 0;">
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>5 Devices</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Connect all your devices</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Unlimited Data</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">No bandwidth limits</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Maximum Speed</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Priority bandwidth allocation</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Priority Support</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Faster response times</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>All Server Locations</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Access to all VPN servers</span>
+                    </li>
+                    <li style="padding: 0.75rem 0;">
+                        <strong>All Security Features</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Plus advanced options</span>
+                    </li>
+                </ul>
+                {% if session.get('current_tier') == 'pro' %}
+                <button class="btn btn-primary" style="width: 100%;" disabled>Current Plan</button>
+                {% else %}
+                <a href="{{ url_for('payment') }}?tier=pro" class="btn btn-primary" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                    {% if session.get('current_tier') == 'free' %}Upgrade to Pro{% else %}Switch to Pro{% endif %}
+                </a>
+                {% endif %}
+                <p class="text-center" style="margin-top: 1rem; font-size: 0.85rem; color: var(--success);">
+                    ✅ Best value • ✅ Most popular • ✅ Recommended
+                </p>
+            </div>
+        </div>
+
+        <!-- Premium Tier -->
+        <div class="card">
+            <div class="card-header text-center">
+                <h3 class="card-title">Premium</h3>
+                <div style="font-size: 3rem; font-weight: bold; color: var(--secondary); margin: 1rem 0;">$20</div>
+                <p class="text-muted">per month</p>
+                <div style="background: rgba(16, 185, 129, 0.1); padding: 0.75rem; border-radius: var(--border-radius-sm); margin-top: 1rem;">
+                    <strong style="color: var(--success);">Save $40/year</strong>
+                    <p class="text-muted" style="margin: 0.25rem 0 0 0; font-size: 0.9rem;">$200/year (4 months free!)</p>
+                </div>
+            </div>
+            <div class="card-body">
+                <ul style="list-style: none; padding: 0; margin: 1.5rem 0;">
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Unlimited Devices</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Connect as many as you need</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Unlimited Bandwidth</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">No limits, ever</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Maximum Speed</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Highest priority bandwidth</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>24/7 Priority Support</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Instant response guarantee</span>
+                    </li>
+                    <li style="padding: 0.75rem 0; border-bottom: 1px solid var(--border-color);">
+                        <strong>Dedicated IP Option</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Your own private IP address</span>
+                    </li>
+                    <li style="padding: 0.75rem 0;">
+                        <strong>All Premium Features</strong>
+                        <span class="text-muted" style="display: block; font-size: 0.9rem;">Everything included</span>
+                    </li>
+                </ul>
+                {% if session.get('current_tier') == 'premium' %}
+                <button class="btn btn-success" style="width: 100%;" disabled>Current Plan</button>
+                {% else %}
+                <a href="{{ url_for('payment') }}?tier=premium" class="btn btn-success" style="width: 100%; font-size: 1.1rem; padding: 1rem;">
+                    Upgrade to Premium
+                </a>
+                {% endif %}
+                <p class="text-center" style="margin-top: 1rem; font-size: 0.85rem; color: var(--secondary);">
+                    ✅ Ultimate experience • ✅ Best for power users
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Comparison Table -->
+    <div class="card" style="margin-bottom: 3rem; overflow-x: auto;">
+        <div class="card-header">
+            <h2 class="card-title text-center">Compare Plans</h2>
+            <p class="text-muted text-center">See what's included in each plan</p>
+        </div>
+        <div class="card-body">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid var(--border-color);">
+                        <th style="padding: 1rem; text-align: left;">Feature</th>
+                        <th style="padding: 1rem; text-align: center;">Free</th>
+                        <th style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.1);">Pro</th>
+                        <th style="padding: 1rem; text-align: center;">Premium</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>Devices</strong></td>
+                        <td style="padding: 1rem; text-align: center; color: var(--text-muted);">1</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);"><strong>5</strong></td>
+                        <td style="padding: 1rem; text-align: center;"><strong>Unlimited</strong></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>Bandwidth</strong></td>
+                        <td style="padding: 1rem; text-align: center; color: var(--text-muted);">10GB/month</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);"><strong>Unlimited</strong></td>
+                        <td style="padding: 1rem; text-align: center;"><strong>Unlimited</strong></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>Speed</strong></td>
+                        <td style="padding: 1rem; text-align: center; color: var(--text-muted);">Standard</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);"><strong>Maximum</strong></td>
+                        <td style="padding: 1rem; text-align: center;"><strong>Maximum</strong></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>Support</strong></td>
+                        <td style="padding: 1rem; text-align: center; color: var(--text-muted);">Community</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);"><strong>Priority</strong></td>
+                        <td style="padding: 1rem; text-align: center;"><strong>24/7 Priority</strong></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>Server Locations</strong></td>
+                        <td style="padding: 1rem; text-align: center; color: var(--text-muted);">Limited</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);"><strong>All</strong></td>
+                        <td style="padding: 1rem; text-align: center;"><strong>All + Dedicated IP</strong></td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>Kill Switch</strong></td>
+                        <td style="padding: 1rem; text-align: center;">✅</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);">✅</td>
+                        <td style="padding: 1rem; text-align: center;">✅</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>DNS Leak Protection</strong></td>
+                        <td style="padding: 1rem; text-align: center;">✅</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);">✅</td>
+                        <td style="padding: 1rem; text-align: center;">✅</td>
+                    </tr>
+                    <tr style="border-bottom: 1px solid var(--border-color);">
+                        <td style="padding: 1rem;"><strong>Zero-Logs Policy</strong></td>
+                        <td style="padding: 1rem; text-align: center;">✅</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05);">✅</td>
+                        <td style="padding: 1rem; text-align: center;">✅</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 1rem;"><strong>Monthly Price</strong></td>
+                        <td style="padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold;">$0</td>
+                        <td style="padding: 1rem; text-align: center; background: rgba(99, 102, 241, 0.05); font-size: 1.5rem; font-weight: bold; color: var(--primary);">$10</td>
+                        <td style="padding: 1rem; text-align: center; font-size: 1.5rem; font-weight: bold; color: var(--secondary);">$20</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Why Upgrade Section -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(245, 158, 11, 0.1) 100%); border: 1px solid var(--danger); margin-bottom: 3rem;">
+        <div class="card-header">
+            <h2 class="card-title">⚠️ What You're Missing on Free Plan</h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-2" style="margin-top: 1rem;">
+                <div>
+                    <h3 style="color: var(--danger); margin-bottom: 1rem;">❌ Free Plan Limitations</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.5rem 0;">• Only 10GB per month (runs out fast!)</li>
+                        <li style="padding: 0.5rem 0;">• Single device (can't protect your phone + laptop)</li>
+                        <li style="padding: 0.5rem 0;">• Slower speeds during peak hours</li>
+                        <li style="padding: 0.5rem 0;">• Limited server locations</li>
+                        <li style="padding: 0.5rem 0;">• No priority support (wait days for help)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 style="color: var(--success); margin-bottom: 1rem;">✅ Pro Plan Benefits</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li style="padding: 0.5rem 0;">• <strong>Unlimited data</strong> - never worry about limits</li>
+                        <li style="padding: 0.5rem 0;">• <strong>5 devices</strong> - protect everything you own</li>
+                        <li style="padding: 0.5rem 0;">• <strong>Maximum speed</strong> - always fast, even during peak times</li>
+                        <li style="padding: 0.5rem 0;">• <strong>All servers</strong> - access to every location</li>
+                        <li style="padding: 0.5rem 0;">• <strong>Priority support</strong> - get help fast when you need it</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="{{ url_for('payment') }}?tier=pro" class="btn btn-primary btn-lg">Upgrade to Pro - Just $10/month</a>
+                <p class="text-muted" style="margin-top: 1rem;">Less than $0.33 per day for unlimited protection</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Value Proposition -->
+    <div class="card" style="background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); margin-bottom: 3rem;">
+        <div class="card-body text-center">
+            <h2 style="margin-bottom: 1rem; font-size: 2rem;">💡 Why Upgrade?</h2>
+            <div class="grid grid-3" style="margin-top: 2rem;">
+                <div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">💰</div>
+                    <h3>Incredible Value</h3>
+                    <p class="text-muted">Just $10/month for unlimited protection. That's less than a coffee per week!</p>
+                </div>
+                <div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <h3>No More Limits</h3>
+                    <p class="text-muted">Stop worrying about bandwidth. Stream, download, browse without restrictions.</p>
+                </div>
+                <div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+                    <h3>Protect Everything</h3>
+                    <p class="text-muted">Secure all your devices - phone, laptop, tablet, smart TV. All included.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guarantees -->
+    <div class="card" style="margin-bottom: 3rem;">
+        <div class="card-header text-center">
+            <h2 class="card-title">Risk-Free Guarantees</h2>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-2">
+                <div style="text-align: center; padding: 2rem; background: rgba(16, 185, 129, 0.1); border-radius: var(--border-radius-sm);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+                    <h3 style="color: var(--success); margin-bottom: 1rem;">30-Day Money-Back Guarantee</h3>
+                    <p class="text-muted">Not satisfied? Get a full refund within 30 days. No questions asked. We're confident you'll love it.</p>
+                </div>
+                <div style="text-align: center; padding: 2rem; background: rgba(99, 102, 241, 0.1); border-radius: var(--border-radius-sm);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🔄</div>
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">Cancel Anytime</h3>
+                    <p class="text-muted">No contracts, no commitments. Cancel anytime and keep using until the end of your billing period.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Final CTA -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%); text-align: center; border: 2px solid var(--primary);">
+        <div class="card-body">
+            <h2 style="margin-bottom: 1rem; font-size: 2.5rem;">Ready to Upgrade?</h2>
+            <p class="text-muted" style="margin-bottom: 2rem; font-size: 1.2rem;">
+                Join thousands of users who upgraded from free to Pro. Start protecting all your devices today.
+            </p>
+            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ url_for('payment') }}?tier=pro" class="btn btn-primary btn-lg">Upgrade to Pro - $10/month</a>
+                <a href="{{ url_for('payment') }}?tier=premium" class="btn btn-success btn-lg">Go Premium - $20/month</a>
+            </div>
+            <p class="text-muted" style="margin-top: 1.5rem; font-size: 0.9rem;">
+                💳 Secure payment via Stripe, PayPal, or manual payment • 🔒 Your data is safe
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

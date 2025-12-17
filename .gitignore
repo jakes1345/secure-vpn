@@ -1,0 +1,80 @@
+# Build artifacts
+phazeos-from-scratch/build/
+phazeos-from-scratch/iso-root/
+phazeos-from-scratch/iso-output/
+phazeos-from-scratch/boot-shim/
+phazeos-from-scratch/kernel/
+phazeos-from-scratch/toolchain/
+*.iso
+*.img
+*.vdi
+*.log
+
+# Compiled binaries
+*.o
+*.a
+*.so
+*.exe
+phazevpn-server
+phazevpn-client
+phazevpn-web
+
+# Go
+go.sum
+vendor/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.env
+
+# Node
+node_modules/
+package-lock.json
+
+# Sensitive files
+*.key
+*.pem
+*.crt
+*.p12
+*password*
+*secret*
+*token*
+.env
+config.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+*.bak
+*.old
+nohup.out
+
+# Large source archives (keep list, not files)
+phazeos-from-scratch/sources/*.tar.*
+phazeos-from-scratch/sources/*.tgz
+phazeos-from-scratch/sources/*.zip
+phazeos-from-scratch/sources/ollama-linux-amd64
+phazeos-from-scratch/sources/?product=*
+
+# Large archives
+_ARCHIVE_OLD_FILES/
+PhazeBrowser-*.tar.*
+
+# VPS deployment logs
+*upload*.log
+*deploy*.log
+*vps*.log
+phazeos-from-scratch/sources/ollama-linux-amd64
+_ARCHIVE_OLD_FILES/phaze-browser.zip

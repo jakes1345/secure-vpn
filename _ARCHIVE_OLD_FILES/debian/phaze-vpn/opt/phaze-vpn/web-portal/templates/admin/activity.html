@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Logs - SecureVPN{% endblock %}
+
+{% block content %}
+<h1>📋 Activity Logs & Connection History</h1>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+    
+    <div class="card">
+        <div class="card-header">
+            <span>🔍 Admin Activity</span>
+            <button class="btn btn-secondary" onclick="exportActivity()" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">📥 Export CSV</button>
+        </div>
+        <div style="max-height: 600px; overflow-y: auto;">
+            {% if activity_logs %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>User</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in activity_logs %}
+                    <tr>
+                        <td style="font-size: 0.85rem; color: #b0b0b0;">
+                            {{ log.split(']')[0][1:] if ']' in log else 'N/A' }}
+                        </td>
+                        <td>
+                            {% set parts = log.split(':') %}
+                            {% if parts|length > 1 %}
+                                <strong>{{ parts[1].split()[0] }}</strong>
+                            {% else %}
+                                <span class="text-muted">Unknown</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% set parts = log.split(':') %}
+                            {% if parts|length > 2 %}
+                                {{ parts[2:]|join(':') }}
+                            {% else %}
+                                {{ log }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-center text-muted" style="padding: 2rem;">No activity logs yet</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <span>🔌 Connection History</span>
+            <button class="btn btn-secondary" onclick="exportConnections()" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">📥 Export CSV</button>
+        </div>
+        <div style="max-height: 600px; overflow-y: auto;">
+            {% if connection_history %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Client</th>
+                        <th>Action</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in connection_history %}
+                    <tr>
+                        <td style="font-size: 0.85rem; color: #b0b0b0;">
+                            {{ event.timestamp[:19] if event.timestamp else 'N/A' }}
+                        </td>
+                        <td><strong>{{ event.name }}</strong></td>
+                        <td>
+                            {% if event.action == 'connected' %}
+                                <span style="color: #4caf50;">✓ Connected</span>
+                            {% else %}
+                                <span style="color: #f44336;">✗ Disconnected</span>
+                            {% endif %}
+                        </td>
+                        <td style="font-size: 0.9rem;">
+                            {% if event.virtual_ip %}
+                                {{ event.virtual_ip }}
+                            {% elif event.real_ip %}
+                                {{ event.real_ip }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p class="text-center text-muted" style="padding: 2rem;">No connection history yet</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+function exportActivity() {
+    fetch('/api/export/activity')
+        .then(res => res.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `activity-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Activity log exported', 'success');
+        })
+        .catch(() => showToast('Failed to export', 'error'));
+}
+
+function exportConnections() {
+    fetch('/api/export/connections')
+        .then(res => res.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `connections-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Connection history exported', 'success');
+        })
+        .catch(() => showToast('Failed to export', 'error'));
+}
+
+// Auto-refresh every 30 seconds
+setInterval(() => {
+    window.location.reload();
+}, 30000);
+</script>
+{% endblock %}
+

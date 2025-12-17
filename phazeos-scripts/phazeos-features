@@ -1,0 +1,131 @@
+#!/bin/bash
+# PhazeOS Features Launcher
+# Central hub for all unique PhazeOS features
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       PHAZEOS UNIQUE FEATURES"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "Select a mode:"
+echo ""
+echo "  1) 🔒 Phaze Mode    - Privacy Lockdown"
+echo "  2) 👻 Ghost Mode    - Tor Integration"
+echo "  3) 🎮 Gaming Mode   - Performance Boost"
+echo "  4) 💻 Dev Mode      - Development Environment"
+echo "  5) 🔴 Panic Mode    - Emergency Wipe"
+echo "  6) ℹ️  Status       - Check Current Mode"
+echo "  7) 🔄 Reset         - Deactivate All Modes"
+echo "  8) ❌ Exit"
+echo ""
+read -p "Enter choice [1-8]: " choice
+
+case $choice in
+    1)
+        echo ""
+        echo "🔒 Activating Phaze Mode..."
+        sudo /usr/local/bin/phaze-mode
+        ;;
+    2)
+        echo ""
+        echo "👻 Activating Ghost Mode..."
+        sudo /usr/local/bin/ghost-mode
+        ;;
+    3)
+        echo ""
+        echo "🎮 Activating Gaming Mode..."
+        sudo /usr/local/bin/gaming-mode
+        ;;
+    4)
+        echo ""
+        echo "💻 Activating Dev Mode..."
+        sudo /usr/local/bin/dev-mode
+        ;;
+    5)
+        echo ""
+        echo "🔴 WARNING: PANIC MODE WILL WIPE ALL DATA!"
+        read -p "Are you sure? Type 'PANIC' to confirm: " confirm
+        if [ "$confirm" = "PANIC" ]; then
+            sudo /usr/local/bin/panic
+        else
+            echo "❌ Cancelled"
+        fi
+        ;;
+    6)
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "       SYSTEM STATUS"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        # Check VPN
+        if pgrep -x "phazevpn-gui" > /dev/null; then
+            echo "🔐 VPN: CONNECTED"
+        else
+            echo "🔐 VPN: DISCONNECTED"
+        fi
+        
+        # Check Tor
+        if systemctl is-active --quiet tor; then
+            echo "👻 Tor: ACTIVE"
+        else
+            echo "👻 Tor: INACTIVE"
+        fi
+        
+        # Check CPU Governor
+        CPU_GOV=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 2>/dev/null)
+        if [ "$CPU_GOV" = "performance" ]; then
+            echo "🎮 Gaming Mode: ACTIVE"
+        else
+            echo "🎮 Gaming Mode: INACTIVE"
+        fi
+        
+        # Check Docker
+        if systemctl is-active --quiet docker; then
+            echo "💻 Dev Mode: ACTIVE"
+        else
+            echo "💻 Dev Mode: INACTIVE"
+        fi
+        
+        echo ""
+        ;;
+    7)
+        echo ""
+        echo "🔄 Resetting all modes..."
+        
+        # Stop VPN
+        pkill phazevpn-gui 2>/dev/null
+        
+        # Stop Tor
+        sudo systemctl stop tor 2>/dev/null
+        
+        # Reset firewall
+        sudo ufw --force reset > /dev/null 2>&1
+        sudo ufw default allow outgoing
+        sudo ufw default deny incoming
+        
+        # Reset CPU governor
+        CPU_COUNT=$(nproc)
+        for ((i=0; i<$CPU_COUNT; i++)); do
+            echo schedutil > /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor 2>/dev/null
+        done
+        
+        # Re-enable compositor
+        kwriteconfig5 --file kwinrc --group Compositing --key Enabled true 2>/dev/null
+        qdbus org.kde.KWin /Compositor resume 2>/dev/null
+        
+        # Stop Docker
+        sudo systemctl stop docker 2>/dev/null
+        
+        echo "✅ All modes deactivated"
+        ;;
+    8)
+        echo "👋 Goodbye!"
+        exit 0
+        ;;
+    *)
+        echo "❌ Invalid choice"
+        ;;
+esac
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

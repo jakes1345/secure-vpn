@@ -1,0 +1,119 @@
+#!/bin/bash
+# PhazeOS - Gaming Mode (Performance Boost)
+# Optimizes system for maximum gaming performance
+
+echo "🎮 ACTIVATING GAMING MODE..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "⚠️  This script needs root privileges."
+    echo "Please run: sudo gaming-mode"
+    exit 1
+fi
+
+# Get the actual user
+ACTUAL_USER=${SUDO_USER:-$USER}
+
+# 1. Kill Background Processes
+echo "🔪 [1/6] Killing background processes..."
+KILLED_COUNT=0
+
+# Kill non-essential services
+for service in bluetooth cups docker; do
+    if systemctl is-active --quiet $service; then
+        systemctl stop $service
+        ((KILLED_COUNT++))
+    fi
+done
+
+# Kill resource-heavy processes
+for proc in baloo_file akonadi_control; do
+    pkill -9 $proc 2>/dev/null && ((KILLED_COUNT++))
+done
+
+echo "✅ Killed $KILLED_COUNT background processes"
+
+# 2. Set CPU Governor to Performance
+echo "⚡ [2/6] Setting CPU to performance mode..."
+CPU_COUNT=$(nproc)
+for ((i=0; i<$CPU_COUNT; i++)); do
+    echo performance > /sys/devices/system/cpu/cpu$i/cpufreq/scaling_governor 2>/dev/null
+done
+echo "✅ CPU governor set to performance"
+
+# 3. Disable Compositor (for lower latency)
+echo "🖥️  [3/6] Disabling compositor..."
+if command -v kwriteconfig5 &> /dev/null; then
+    sudo -u $ACTUAL_USER kwriteconfig5 --file kwinrc --group Compositing --key Enabled false
+    sudo -u $ACTUAL_USER qdbus org.kde.KWin /Compositor suspend
+    echo "✅ Compositor disabled"
+else
+    echo "⚠️  KDE not detected, skipping compositor"
+fi
+
+# 4. Set I/O Scheduler to Performance
+echo "💾 [4/6] Optimizing disk I/O..."
+for disk in /sys/block/sd*/queue/scheduler; do
+    if [ -f "$disk" ]; then
+        echo "none" > "$disk" 2>/dev/null || echo "mq-deadline" > "$disk" 2>/dev/null
+    fi
+done
+echo "✅ I/O scheduler optimized"
+
+# 5. Increase File Descriptor Limits
+echo "📁 [5/6] Increasing file descriptor limits..."
+ulimit -n 524288
+echo "✅ File descriptor limit increased"
+
+# 6. Enable GameMode (if installed)
+echo "🎯 [6/6] Enabling GameMode..."
+if command -v gamemoded &> /dev/null; then
+    systemctl --user start gamemoded
+    echo "✅ GameMode service started"
+else
+    echo "⚠️  GameMode not installed"
+fi
+
+# Optional: GPU Overclocking (NVIDIA)
+if command -v nvidia-smi &> /dev/null; then
+    echo ""
+    read -p "🔥 Overclock NVIDIA GPU? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        nvidia-settings -a "[gpu:0]/GPUPowerMizerMode=1"
+        nvidia-settings -a "[gpu:0]/GPUGraphicsClockOffset[3]=100"
+        nvidia-settings -a "[gpu:0]/GPUMemoryTransferRateOffset[3]=200"
+        echo "✅ GPU overclocked (+100 core, +200 memory)"
+    fi
+fi
+
+# Optional: GPU Overclocking (AMD)
+if command -v rocm-smi &> /dev/null; then
+    echo ""
+    read -p "🔥 Overclock AMD GPU? (y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "performance" > /sys/class/drm/card0/device/power_dpm_force_performance_level
+        echo "✅ AMD GPU set to performance mode"
+    fi
+fi
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ GAMING MODE ACTIVATED!"
+echo ""
+echo "Performance Optimizations:"
+echo "  🔪 Background Processes: KILLED"
+echo "  ⚡ CPU Governor: PERFORMANCE"
+echo "  🖥️  Compositor: DISABLED"
+echo "  💾 I/O Scheduler: OPTIMIZED"
+echo "  📁 File Descriptors: INCREASED"
+echo "  🎯 GameMode: ENABLED"
+echo ""
+echo "Tips:"
+echo "  • Launch games with: gamemoderun <game>"
+echo "  • Monitor FPS with: mangohud <game>"
+echo "  • Check temps with: watch -n1 sensors"
+echo ""
+echo "To deactivate: sudo gaming-mode-off"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

@@ -1,0 +1,26 @@
+QUICK STEPS - Copy/Paste This:
+
+1. Go to: https://portal.azure.com
+2. Sign in: phazevpn@outlook.com / TrashyPanda23!@
+3. Search: "App registrations"
+4. Click: "New registration"
+5. Name: PhazeVPN Email
+6. Account types: "Accounts in any organizational directory and personal Microsoft accounts"
+7. Redirect URI: Web / http://localhost:8080/callback
+8. Click: "Register"
+9. Copy: "Application (client) ID" → Send to me
+10. Click: "Certificates & secrets"
+11. Click: "New client secret"
+12. Description: PhazeVPN SMTP
+13. Expires: 24 months
+14. Click: "Add"
+15. Copy: The "Value" → Send to me
+16. Click: "API permissions"
+17. Click: "Add a permission"
+18. Select: "Microsoft Graph" → "Delegated permissions"
+19. Add: Mail.Send, offline_access, openid, User.Read
+20. Click: "Add permissions"
+21. Click: "Grant admin consent" (if available)
+
+DONE! Send me the Client ID and Secret.
+

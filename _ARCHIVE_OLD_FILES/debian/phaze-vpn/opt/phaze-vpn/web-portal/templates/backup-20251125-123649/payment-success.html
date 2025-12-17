@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Successful - SecureVPN{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 2rem auto; text-align: center;">
+    {% if success %}
+    <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
+    <h1 style="color: #10b981; margin-bottom: 1rem;">Payment Successful!</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+        Your subscription has been activated. Welcome to {{ tier|title }}!
+    </p>
+    
+    <div class="card" style="margin: 2rem 0;">
+        <div style="padding: 1.5rem;">
+            <h3>Subscription Details</h3>
+            <p><strong>Plan:</strong> {{ tier|title }}</p>
+            <p><strong>Amount:</strong> ${{ "%.2f"|format(amount) }}</p>
+            <p><strong>Status:</strong> <span style="color: #10b981;">Active</span></p>
+        </div>
+    </div>
+    
+    <div style="margin-top: 2rem;">
+        <a href="/dashboard" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+            Go to Dashboard →
+        </a>
+    </div>
+    
+    {% else %}
+    <div style="font-size: 4rem; margin-bottom: 1rem;">❌</div>
+    <h1 style="color: #ef4444; margin-bottom: 1rem;">Payment Failed</h1>
+    <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+        We couldn't verify your payment. Please try again or contact support.
+    </p>
+    
+    <div style="margin-top: 2rem;">
+        <a href="/pricing" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+            Try Again →
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

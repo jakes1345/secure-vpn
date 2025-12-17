@@ -1,0 +1,201 @@
+#!/bin/bash
+# PhazeOS Privacy Guardian - Package Manager Hooks
+# Warns users before installing tracking software
+
+echo "🛡️  INSTALLING PRIVACY GUARDIAN..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "⚠️  This script needs root privileges."
+    echo "Please run: sudo phazeos-install-privacy-guardian"
+    exit 1
+fi
+
+# 1. Create tracking software database
+echo "🔧 [1/3] Creating tracking software database..."
+
+mkdir -p /etc/phazeos
+cat > /etc/phazeos/tracking-software.conf << 'EOF'
+# PhazeOS Tracking Software Database
+# Format: package_name|alternative|reason
+
+# Browsers
+google-chrome|phazebrowser|Chrome tracks everything you do. PhazeBrowser is faster and private.
+chromium|phazebrowser|Chromium phones home to Google. Use PhazeBrowser instead.
+opera|phazebrowser|Opera is owned by a Chinese company and tracks users.
+vivaldi|phazebrowser|Vivaldi has telemetry. PhazeBrowser is better.
+brave-bin|phazebrowser|Brave has crypto tracking. PhazeBrowser is cleaner.
+
+# Communication
+discord|element-desktop|Discord tracks all messages and sells data. Use Element (Matrix).
+slack-desktop|element-desktop|Slack tracks everything. Use Element or Mattermost.
+zoom|jitsi-meet|Zoom is a privacy nightmare. Use Jitsi Meet.
+skype|jitsi-meet|Skype (Microsoft) tracks calls. Use Jitsi Meet.
+microsoft-teams|jitsi-meet|Microsoft Teams tracks everything. Use Jitsi Meet.
+
+# Cloud Storage
+dropbox|syncthing|Dropbox scans your files. Use Syncthing (peer-to-peer).
+google-drive|syncthing|Google Drive scans everything. Use Syncthing or Nextcloud.
+onedrive|syncthing|OneDrive (Microsoft) tracks files. Use Syncthing.
+
+# Office
+microsoft-office|libreoffice-fresh|Microsoft Office tracks usage. LibreOffice is free and private.
+
+# Development
+github-desktop|git|GitHub Desktop tracks usage. Use git command line.
+vscode-bin|code|VS Code (Microsoft) has telemetry. Use VSCodium or the OSS version.
+
+# Social Media
+spotify|spotify-adblock|Regular Spotify tracks listening. Use modded version or alternatives.
+
+# System
+teamviewer|rustdesk|TeamViewer tracks connections. Use RustDesk (open source).
+anydesk|rustdesk|AnyDesk tracks sessions. Use RustDesk.
+EOF
+
+echo "✅ Database created"
+
+# 2. Create pacman hook
+echo "🔧 [2/3] Creating pacman hook..."
+
+mkdir -p /etc/pacman.d/hooks
+cat > /etc/pacman.d/hooks/phazeos-privacy-warning.hook << 'EOF'
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = *
+
+[Action]
+Description = Checking for tracking software...
+When = PreTransaction
+Exec = /usr/local/bin/phazeos-privacy-check
+EOF
+
+echo "✅ Pacman hook created"
+
+# 3. Create privacy check script
+cat > /usr/local/bin/phazeos-privacy-check << 'EOF'
+#!/bin/bash
+# Check if user is installing tracking software
+
+# Get packages being installed
+PACKAGES="$@"
+
+if [ -z "$PACKAGES" ]; then
+    # Get from stdin (pacman hook)
+    PACKAGES=$(cat)
+fi
+
+# Check each package
+while IFS='|' read -r package alternative reason; do
+    # Skip comments and empty lines
+    [[ "$package" =~ ^#.*$ ]] && continue
+    [[ -z "$package" ]] && continue
+    
+    # Check if this package is being installed
+    if echo "$PACKAGES" | grep -qw "$package"; then
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo "⚠️  PRIVACY WARNING: $package"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "❌ $reason"
+        echo ""
+        echo "✅ Recommended alternative: $alternative"
+        echo ""
+        echo "Install alternative instead:"
+        echo "  sudo pacman -S $alternative"
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        # Ask user if they want to continue
+        read -p "Continue installing $package anyway? [y/N]: " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            echo "❌ Installation cancelled. Install $alternative instead!"
+            exit 1
+        fi
+    fi
+done < /etc/phazeos/tracking-software.conf
+
+exit 0
+EOF
+
+chmod +x /usr/local/bin/phazeos-privacy-check
+
+echo "✅ Privacy check script created"
+
+# 4. Create AUR helper wrapper (for yay/paru)
+cat > /usr/local/bin/phazeos-yay << 'EOF'
+#!/bin/bash
+# Wrapper for yay that checks privacy
+
+# Check packages before installing
+if [[ "$1" == "-S" ]] || [[ "$1" == "install" ]]; then
+    shift
+    /usr/local/bin/phazeos-privacy-check "$@"
+    if [ $? -ne 0 ]; then
+        exit 1
+    fi
+fi
+
+# Run actual yay
+/usr/bin/yay "$@"
+EOF
+
+chmod +x /usr/local/bin/phazeos-yay
+
+# Create alias
+cat >> /etc/bash.bashrc << 'EOF'
+
+# PhazeOS Privacy Guardian
+alias yay='phazeos-yay'
+alias paru='phazeos-yay'
+EOF
+
+cat >> /etc/fish/config.fish << 'EOF'
+
+# PhazeOS Privacy Guardian
+alias yay='phazeos-yay'
+alias paru='phazeos-yay'
+EOF
+
+echo "✅ AUR wrapper created"
+
+# 5. Create desktop notification service
+cat > /usr/local/bin/phazeos-privacy-notify << 'EOF'
+#!/bin/bash
+# Notify user about privacy issues
+
+USER=$(who | awk '{print $1}' | head -n1)
+if [ -z "$USER" ]; then
+    exit 0
+fi
+
+export DISPLAY=:0
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u $USER)/bus"
+
+sudo -u $USER notify-send -u critical -i dialog-warning "Privacy Warning" "$1"
+EOF
+
+chmod +x /usr/local/bin/phazeos-privacy-notify
+
+echo "✅ Notification service created"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ PRIVACY GUARDIAN INSTALLED!"
+echo ""
+echo "Features:"
+echo "  ✅ Warns before installing tracking software"
+echo "  ✅ Suggests privacy-friendly alternatives"
+echo "  ✅ Works with pacman and AUR helpers"
+echo "  ✅ Desktop notifications"
+echo ""
+echo "Try installing Chrome to test:"
+echo "  yay -S google-chrome"
+echo ""
+echo "You'll get a warning and alternative suggestion!"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

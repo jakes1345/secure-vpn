@@ -1,0 +1,11 @@
+prefix=/usr
+includedir=${prefix}/include
+libdir=${prefix}/lib
+
+Name: harfbuzz
+Description: HarfBuzz text shaping library
+Version: 8.3.0
+Requires.private: freetype2
+Libs: -L${libdir} -lharfbuzz
+Libs.private: -pthread -lm
+Cflags: -I${includedir}/harfbuzz

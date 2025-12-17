@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Account Settings - SecureVPN{% endblock %}
+
+{% block content %}
+<h1>⚙️ Account Settings</h1>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+    
+    <div class="card">
+        <div class="card-header">📝 Profile Information</div>
+        <form id="profile-form">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b0b0b0;">Username</label>
+                <input type="text" id="username" value="{{ user.username }}" readonly 
+                       style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #e0e0e0;">
+                <small style="color: #666;">Username cannot be changed</small>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b0b0b0;">Email (Optional)</label>
+                <input type="email" id="email" value="{{ user.get('email', '') }}" 
+                       placeholder="For account recovery"
+                       style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #e0e0e0;">
+                <small style="color: #666;">Optional - for account recovery only (no emails sent)</small>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b0b0b0;">Role</label>
+                <input type="text" value="{{ user.get('role', 'user')|title }}" readonly 
+                       style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #b0b0b0;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">💾 Save Changes</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">🔒 Change Password</div>
+        <form id="password-form">
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b0b0b0;">Current Password</label>
+                <input type="password" id="current_password" required
+                       style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #e0e0e0;">
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b0b0b0;">New Password</label>
+                <input type="password" id="new_password" required minlength="6"
+                       style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #e0e0e0;">
+                <small style="color: #666;">Minimum 6 characters</small>
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: #b0b0b0;">Confirm New Password</label>
+                <input type="password" id="confirm_password" required
+                       style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #e0e0e0;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">🔐 Change Password</button>
+        </form>
+    </div>
+    
+    {% if user_clients %}
+    <div class="card" style="grid-column: 1 / -1;">
+        <div class="card-header">💻 Your VPN Clients</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Client Name</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for client in user_clients %}
+                <tr>
+                    <td>{{ client.name }}</td>
+                    <td>{{ client.created[:10] }}</td>
+                    <td>
+                        <a href="/download/{{ client.name }}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">⬇️ Download</a>
+                        <a href="/qr/{{ client.name }}" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-left: 0.25rem;">📱 QR</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Update profile
+document.getElementById('profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    setLoading(btn, true);
+    
+    const email = document.getElementById('email').value;
+    
+    try {
+        const data = await safeFetch('/api/profile', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email})
+        });
+        
+        if (data.success) {
+            showToast(data.message || 'Profile updated successfully', 'success');
+        }
+    } catch (err) {
+        // Error already shown by safeFetch
+    } finally {
+        setLoading(btn, false);
+    }
+});
+
+// Change password
+document.getElementById('password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button');
+    setLoading(btn, true);
+    
+    const current = document.getElementById('current_password').value;
+    const newPass = document.getElementById('new_password').value;
+    const confirm = document.getElementById('confirm_password').value;
+    
+    if (newPass !== confirm) {
+        showToast('Passwords do not match', 'error');
+        setLoading(btn, false);
+        return;
+    }
+    
+    if (newPass.length < 6) {
+        showToast('Password must be at least 6 characters', 'error');
+        setLoading(btn, false);
+        return;
+    }
+    
+    try {
+        const data = await safeFetch('/api/profile/password', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({current_password: current, new_password: newPass})
+        });
+        
+        if (data.success) {
+            showToast(data.message || 'Password changed successfully', 'success');
+            e.target.reset();
+        }
+    } catch (err) {
+        // Error already shown by safeFetch
+    } finally {
+        setLoading(btn, false);
+    }
+});
+</script>
+{% endblock %}
+

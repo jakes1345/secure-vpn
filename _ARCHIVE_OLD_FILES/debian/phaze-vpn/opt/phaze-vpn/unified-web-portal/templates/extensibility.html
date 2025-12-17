@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+
+{% block title %}Extensibility - PhazeVPN Platform{% endblock %}
+
+{% block content %}
+<div class="extensibility-interface">
+    <div class="extensibility-header">
+        <h1>Build Your Own Apps</h1>
+        <p class="subtitle">Create plugins, APIs, webhooks, and more</p>
+    </div>
+
+    <div class="extensibility-tabs">
+        <button class="tab-btn active" data-tab="plugins">🔌 Plugins</button>
+        <button class="tab-btn" data-tab="api-builder">🔧 API Builder</button>
+        <button class="tab-btn" data-tab="webhooks">🪝 Webhooks</button>
+        <button class="tab-btn" data-tab="marketplace">🏪 Marketplace</button>
+    </div>
+
+    <!-- Plugins Tab -->
+    <div class="tab-content active" id="plugins-tab">
+        <div class="section-header">
+            <h2>My Plugins</h2>
+            <button class="btn-primary" id="createPluginBtn">➕ Create Plugin</button>
+        </div>
+        
+        <div class="plugins-grid" id="pluginsGrid">
+            <div class="plugin-card">
+                <div class="plugin-icon">🔌</div>
+                <div class="plugin-name">Email Auto-Reply</div>
+                <div class="plugin-description">Automatically reply to emails</div>
+                <div class="plugin-status active">Active</div>
+                <div class="plugin-actions">
+                    <button class="action-btn">Edit</button>
+                    <button class="action-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Builder Tab -->
+    <div class="tab-content" id="api-builder-tab">
+        <div class="section-header">
+            <h2>Custom API Endpoints</h2>
+            <button class="btn-primary" id="createEndpointBtn">➕ Create Endpoint</button>
+        </div>
+        
+        <div class="endpoints-list" id="endpointsList">
+            <div class="endpoint-item">
+                <div class="endpoint-info">
+                    <div class="endpoint-name">Custom Data Processor</div>
+                    <div class="endpoint-path">GET /api/v1/extensibility/custom/process</div>
+                </div>
+                <div class="endpoint-actions">
+                    <button class="action-btn">Test</button>
+                    <button class="action-btn">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Webhooks Tab -->
+    <div class="tab-content" id="webhooks-tab">
+        <div class="section-header">
+            <h2>Webhooks</h2>
+            <button class="btn-primary" id="createWebhookBtn">➕ Create Webhook</button>
+        </div>
+        
+        <div class="webhooks-list" id="webhooksList">
+            <div class="webhook-item">
+                <div class="webhook-info">
+                    <div class="webhook-name">Email Notification</div>
+                    <div class="webhook-url">https://example.com/webhook</div>
+                    <div class="webhook-event">email.received</div>
+                </div>
+                <div class="webhook-status active">Active</div>
+                <div class="webhook-actions">
+                    <button class="action-btn">Test</button>
+                    <button class="action-btn">Edit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marketplace Tab -->
+    <div class="tab-content" id="marketplace-tab">
+        <div class="section-header">
+            <h2>Marketplace</h2>
+            <div class="marketplace-filters">
+                <select class="filter-select">
+                    <option>All Categories</option>
+                    <option>Productivity</option>
+                    <option>Automation</option>
+                    <option>Integration</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="marketplace-grid" id="marketplaceGrid">
+            <div class="marketplace-item">
+                <div class="app-icon">📧</div>
+                <div class="app-name">Email Scheduler</div>
+                <div class="app-author">By @user123</div>
+                <div class="app-rating">⭐⭐⭐⭐⭐ 4.8</div>
+                <div class="app-downloads">1.2k downloads</div>
+                <button class="btn-primary">Install</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.extensibility-interface {
+    padding: 2rem;
+    height: 100%;
+}
+
+.extensibility-header {
+    margin-bottom: 2rem;
+}
+
+.extensibility-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--text-muted);
+    font-size: 1.125rem;
+}
+
+.extensibility-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1rem;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.plugins-grid,
+.marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+.plugin-card,
+.marketplace-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.2s;
+}
+
+.plugin-card:hover,
+.marketplace-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px var(--shadow);
+    border-color: var(--primary);
+}
+
+.plugin-icon,
+.app-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.plugin-name,
+.app-name {
+    font-weight: 600;
+    font-size: 1.125rem;
+    margin-bottom: 0.5rem;
+}
+
+.plugin-description {
+    color: var(--text-muted);
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.plugin-status {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.plugin-status.active {
+    background: var(--success);
+    color: white;
+}
+
+.plugin-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    padding: 0.5rem 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+}
+
+.action-btn:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.endpoints-list,
+.webhooks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.endpoint-item,
+.webhook-item {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.endpoint-info,
+.webhook-info {
+    flex: 1;
+}
+
+.endpoint-name,
+.webhook-name {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.endpoint-path,
+.webhook-url {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+.webhook-event {
+    font-size: 0.875rem;
+    color: var(--primary);
+    margin-top: 0.25rem;
+}
+
+.app-author {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.app-rating {
+    margin-bottom: 0.5rem;
+}
+
+.app-downloads {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+</style>
+
+<script>
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const tab = this.dataset.tab;
+        
+        // Update buttons
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        
+        // Update content
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById(`${tab}-tab`).classList.add('active');
+    });
+});
+</script>
+{% endblock %}

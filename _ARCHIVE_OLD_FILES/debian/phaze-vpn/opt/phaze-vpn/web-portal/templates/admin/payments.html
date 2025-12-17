@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Management - SecureVPN{% endblock %}
+
+{% block content %}
+<h1>💳 Payment Management</h1>
+
+<div class="card" style="margin: 2rem 0;">
+    <div class="card-header">Payment Settings</div>
+    <div style="padding: 1.5rem;">
+        <p style="margin-bottom: 1rem;">Configure your payment method usernames:</p>
+        
+        <form id="paymentSettingsForm">
+            <div style="margin-bottom: 1rem;">
+                <label for="venmo_username" style="display: block; margin-bottom: 0.5rem;">Venmo Username:</label>
+                <input type="text" id="venmo_username" value="{{ settings.get('venmo_username', '') }}" 
+                       placeholder="@yourvenmo" style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #e0e0e0;">
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label for="cashapp_username" style="display: block; margin-bottom: 0.5rem;">CashApp Username:</label>
+                <input type="text" id="cashapp_username" value="{{ settings.get('cashapp_username', '') }}" 
+                       placeholder="$yourcashapp" style="width: 100%; padding: 0.5rem; background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 4px; color: #e0e0e0;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary">💾 Save Settings</button>
+        </form>
+        
+        <div id="settingsResult" style="margin-top: 1rem; display: none;"></div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Payment Requests</div>
+    {% if payment_requests %}
+    <table>
+        <thead>
+            <tr>
+                <th>Payment ID</th>
+                <th>User</th>
+                <th>Tier</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Method</th>
+                <th>Transaction ID</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for payment in payment_requests %}
+            <tr>
+                <td><code>{{ payment.payment_id }}</code></td>
+                <td><strong>{{ payment.username }}</strong></td>
+                <td><span class="badge badge-{{ 'success' if payment.tier != 'free' else 'secondary' }}">{{ payment.tier|title }}</span></td>
+                <td>${{ "%.2f"|format(payment.amount) }}</td>
+                <td>
+                    {% if payment.status == 'pending' %}
+                        <span class="badge" style="background: #ff9800;">Pending</span>
+                    {% elif payment.status == 'approved' %}
+                        <span class="badge" style="background: #4caf50;">Approved</span>
+                    {% elif payment.status == 'denied' %}
+                        <span class="badge" style="background: #f44336;">Denied</span>
+                    {% endif %}
+                </td>
+                <td>{{ payment.payment_method or 'N/A' }}</td>
+                <td>{{ payment.transaction_id or 'N/A' }}</td>
+                <td>{{ payment.created[:10] }}</td>
+                <td>
+                    {% if payment.status == 'pending' %}
+                        <button onclick="approvePayment('{{ payment.payment_id }}')" class="btn btn-success" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">✅ Approve</button>
+                    {% else %}
+                        <span style="color: #666;">-</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p style="text-align: center; color: #b0b0b0; padding: 2rem;">
+        No payment requests yet.
+    </p>
+    {% endif %}
+</div>
+
+<script>
+// Save payment settings
+document.getElementById('paymentSettingsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const venmo_username = document.getElementById('venmo_username').value.trim();
+    const cashapp_username = document.getElementById('cashapp_username').value.trim();
+    
+    const btn = e.target.querySelector('button[type="submit"]');
+    setLoading(btn, true);
+    
+    try {
+        const response = await fetch('/api/payments/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                venmo_username: venmo_username,
+                cashapp_username: cashapp_username
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('settingsResult').innerHTML = `
+                <div class="alert alert-success">✅ Settings saved successfully!</div>
+            `;
+            document.getElementById('settingsResult').style.display = 'block';
+            showToast('Payment settings saved', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(data.error || 'Failed to save settings', 'error');
+        }
+    } catch (error) {
+        showToast('Error saving settings', 'error');
+    } finally {
+        setLoading(btn, false);
+    }
+});
+
+// Approve payment
+async function approvePayment(payment_id) {
+    if (!confirm(`Approve payment ${payment_id}? This will upgrade the user's subscription.`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/payments/${payment_id}/approve`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showToast(data.message || 'Payment approved!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showToast(data.error || 'Failed to approve payment', 'error');
+        }
+    } catch (error) {
+        showToast('Error approving payment', 'error');
+    }
+}
+</script>
+{% endblock %}
+

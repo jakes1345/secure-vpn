@@ -1,0 +1,22 @@
+#!/bin/sh
+# PhazeOS Simple Package Manager
+DB_DIR="/var/lib/phazepkg"
+
+case "$1" in
+    install)
+        PKG="$2"
+        if [ -z "$PKG" ]; then echo "Usage: phazepkg install <package.tar.gz>"; exit 1; fi
+        echo "Installing $PKG..."
+        tar -C / -xf "$PKG"
+        NAME=$(basename "$PKG")
+        date > "$DB_DIR/$NAME.installed"
+        echo "✅ Installed $NAME"
+        ;;
+    list)
+        ls "$DB_DIR"
+        ;;
+    *)
+        echo "Usage: phazepkg {install|list}"
+        exit 1
+        ;;
+esac

@@ -1,0 +1,18 @@
+PhazeOS Custom Kernel Information
+==================================
+Version: 6.7.4-phazeos
+Build Date: Sat Dec 13 13:33:39 CST 2025
+Configuration:
+- Gaming optimizations (1000 Hz, PREEMPT)
+- Security hardening (AppArmor, YAMA)
+- Privacy features (Seccomp, Landlock)
+- VPN support (WireGuard, OpenVPN)
+- Full hardware support
+
+Files:
+- Kernel: /boot/vmlinuz-6.7.4-phazeos
+- Initramfs: /boot/initramfs-6.7.4-phazeos.img
+- System.map: /boot/System.map-6.7.4-phazeos
+- Config: /boot/config-6.7.4-phazeos
+
+Modules installed to: /lib/modules/6.7.4-phazeos/

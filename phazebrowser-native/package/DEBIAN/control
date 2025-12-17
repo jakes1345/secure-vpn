@@ -1,0 +1,10 @@
+Package: phazebrowser
+Version: 2.0.0
+Section: web
+Priority: optional
+Architecture: amd64
+Depends: libc6, libstdc++6, libqt6webengine6, libqt6widgets6, libqt6core6, libqt6gui6, libqt6network6
+Maintainer: PhazeVPN <support@phazevpn.com>
+Description: PhazeBrowser Native
+ High-performance, privacy-focused web browser built with C++ and Qt6.
+ Native replacement for the Python prototype.

@@ -1,0 +1,16 @@
+#!/bin/sh
+# PhazeOS Simple Init - No mount needed for basic boot
+
+echo "========================================"
+echo "  Welcome to PhazeOS 1.0 Alpha!"
+echo "========================================"
+echo ""
+echo "Kernel: $(uname -r)"
+echo "Architecture: $(uname -m)"
+echo ""
+echo "Type 'ls' to list files"
+echo "Type 'help' for BusyBox commands"
+echo ""
+
+# Drop to shell
+exec /bin/sh

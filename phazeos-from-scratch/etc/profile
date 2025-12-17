@@ -1,0 +1,15 @@
+# PhazeOS System Profile
+
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+export PS1='\u@\h:\w\$ '
+export EDITOR=vi
+export PAGER=less
+
+alias ls='ls --color=auto'
+alias ll='ls -lh'
+alias la='ls -lha'
+alias grep='grep --color=auto'
+
+echo "Welcome to PhazeOS!"
+echo "Kernel: $(uname -r)"
+echo ""

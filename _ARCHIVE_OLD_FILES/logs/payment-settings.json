@@ -1,0 +1,9 @@
+{
+  "venmo_username": "@jakes1328",
+  "cashapp_username": "$jakes1328",
+  "cashapp_tag": "$jakes1328",
+  "stripe_enabled": true,
+  "stripe_publishable_key": "pk_live_51RuicO0VrYrqUK2QujhpNXosg4Y7b9ZXCW3zuT8wVgV2Y1Uvil5mUWvQm3QuD8EMcRYuOkoPwgfetairsnMCNE9J00wy2dNEqk",
+  "stripe_secret_key": "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"
+}
+

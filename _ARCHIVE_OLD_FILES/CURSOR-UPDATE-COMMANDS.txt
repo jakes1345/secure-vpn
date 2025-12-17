@@ -1,0 +1,17 @@
+╔══════════════════════════════════════════════════════════════╗
+║     QUICK CURSOR UPDATE COMMANDS                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+Copy and paste these commands one at a time:
+
+1. Update package list:
+   sudo apt update
+
+2. Upgrade Cursor:
+   sudo apt upgrade cursor
+
+OR use the automated script:
+   ./update-cursor.sh
+
+Current version: 2.0.77
+

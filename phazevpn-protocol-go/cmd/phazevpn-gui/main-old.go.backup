@@ -1,0 +1,323 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"image/color"
+	"log"
+	"math/rand"
+	"net/http"
+	"os/exec"
+	"runtime"
+	"time"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
+
+	"phazevpn-server/internal/client"
+)
+
+const (
+	CURRENT_VERSION = "2.0.0"
+	UPDATE_URL      = "https://phazevpn.com/api/version"
+)
+
+// Custom colors
+var (
+	PhazeColor  = color.NRGBA{R: 102, G: 126, B: 234, A: 255} // #667eea
+	CyanColor   = color.NRGBA{R: 0, G: 255, B: 136, A: 255}   // #00ff88
+	PurpleColor = color.NRGBA{R: 118, G: 75, B: 162, A: 255}  // #764ba2
+)
+
+type UpdateResponse struct {
+	Version string `json:"version"`
+	URL     string `json:"url"`
+}
+
+func checkForUpdates(w fyne.Window) {
+	go func() {
+		resp, err := http.Get(UPDATE_URL)
+		if err != nil {
+			return
+		}
+		defer resp.Body.Close()
+
+		var update UpdateResponse
+		if err := json.NewDecoder(resp.Body).Decode(&update); err != nil {
+			return
+		}
+
+		if update.Version > CURRENT_VERSION {
+			dialog.ShowConfirm("Update Available",
+				"A new version ("+update.Version+") is available.\nWould you like to download it?",
+				func(download bool) {
+					if download {
+						openBrowser(update.URL)
+					}
+				}, w)
+		}
+	}()
+}
+
+func openBrowser(url string) {
+	var err error
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = exec.Command("xdg-open", url).Start()
+	}
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func main() {
+	a := app.NewWithID("com.phazevpn.client")
+	a.Settings().SetTheme(theme.DarkTheme())
+
+	w := a.NewWindow("PhazeVPN - Secure Connection")
+	w.Resize(fyne.NewSize(450, 700))
+	w.SetFixedSize(true)
+
+	// --- Header with Logo ---
+	headerLabel := widget.NewLabel("⚡ PHAZE VPN")
+	headerLabel.TextStyle = fyne.TextStyle{Bold: true, Monospace: true}
+	headerLabel.Alignment = fyne.TextAlignCenter
+
+	versionLabel := widget.NewLabel("v" + CURRENT_VERSION + " • Zero-Knowledge")
+	versionLabel.Alignment = fyne.TextAlignCenter
+	versionLabel.TextStyle = fyne.TextStyle{Italic: true}
+
+	// --- Status with animated dot ---
+	statusDot := canvas.NewCircle(color.NRGBA{R: 255, G: 0, B: 0, A: 255}) // Red = disconnected
+	statusDot.Resize(fyne.NewSize(12, 12))
+
+	statusLabel := widget.NewLabel("Disconnected")
+	statusLabel.Alignment = fyne.TextAlignCenter
+	statusLabel.TextStyle = fyne.TextStyle{Bold: true}
+
+	statusContainer := container.NewHBox(
+		layout.NewSpacer(),
+		statusDot,
+		statusLabel,
+		layout.NewSpacer(),
+	)
+
+	// --- IP Display ---
+	ipLabel := widget.NewLabel("Your IP: ---.---.---.---")
+	ipLabel.Alignment = fyne.TextAlignCenter
+
+	vpnIPLabel := widget.NewLabel("VPN IP: Not Connected")
+	vpnIPLabel.Alignment = fyne.TextAlignCenter
+
+	// --- Connection Time ---
+	timeLabel := widget.NewLabel("Duration: --:--:--")
+	timeLabel.Alignment = fyne.TextAlignCenter
+
+	// --- Stats ---
+	downloadLabel := widget.NewLabelWithStyle("↓ 0.0 MB", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	uploadLabel := widget.NewLabelWithStyle("↑ 0.0 MB", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+
+	statsContainer := container.NewGridWithColumns(2,
+		container.NewVBox(widget.NewLabelWithStyle("DOWNLOAD", fyne.TextAlignCenter, fyne.TextStyle{}), downloadLabel),
+		container.NewVBox(widget.NewLabelWithStyle("UPLOAD", fyne.TextAlignCenter, fyne.TextStyle{}), uploadLabel),
+	)
+
+	// --- Quick Modes ---
+	modeLabel := widget.NewLabel("Quick Modes")
+	modeLabel.Alignment = fyne.TextAlignCenter
+
+	btnPrivacy := widget.NewButton("🔒 Privacy", func() {
+		dialog.ShowInformation("Privacy Mode", "Maximum privacy settings activated:\n• Kill switch enabled\n• DNS leak protection\n• WebRTC blocking", w)
+	})
+
+	btnGaming := widget.NewButton("🎮 Gaming", func() {
+		dialog.ShowInformation("Gaming Mode", "Low-latency settings activated:\n• Fastest server selected\n• UDP prioritized\n• QoS enabled", w)
+	})
+
+	btnGhost := widget.NewButton("👻 Ghost", func() {
+		dialog.ShowInformation("Ghost Mode", "Maximum anonymity activated:\n• Multi-hop routing\n• Tor integration\n• No logs", w)
+	})
+
+	modesContainer := container.NewGridWithColumns(3, btnPrivacy, btnGaming, btnGhost)
+
+	// --- Protocol Selection ---
+	protocols := []string{"PhazeVPN (Fastest)", "WireGuard", "OpenVPN"}
+	protocolSelect := widget.NewSelect(protocols, func(selected string) {
+		log.Println("Selected protocol:", selected)
+	})
+	protocolSelect.SetSelected("PhazeVPN (Fastest)")
+
+	// --- Connect Button ---
+	var btnConnect *widget.Button
+	var isConnected bool
+	var vpnClient *client.PhazeVPNClient
+	var connectTime time.Time
+
+	btnConnect = widget.NewButton("⚡ CONNECT", func() {
+		if isConnected {
+			if vpnClient != nil {
+				vpnClient.Disconnect()
+				vpnClient = nil
+			}
+			isConnected = false
+			btnConnect.SetText("⚡ CONNECT")
+			btnConnect.Importance = widget.HighImportance
+			statusLabel.SetText("Disconnected")
+			statusDot.FillColor = color.NRGBA{R: 255, G: 0, B: 0, A: 255} // Red
+			statusDot.Refresh()
+			vpnIPLabel.SetText("VPN IP: Not Connected")
+			timeLabel.SetText("Duration: --:--:--")
+			a.SendNotification(fyne.NewNotification("PhazeVPN", "Disconnected"))
+			return
+		}
+
+		btnConnect.Disable()
+		btnConnect.SetText("CONNECTING...")
+		statusLabel.SetText("Handshaking...")
+		statusDot.FillColor = color.NRGBA{R: 255, G: 165, B: 0, A: 255} // Orange
+		statusDot.Refresh()
+
+		go func() {
+			serverAddr := "15.204.11.19" // Example server address
+			serverPort := 51821          // PhazeVPN port
+			vpnNetwork := "10.9.0.0/24"  // Example VPN network CIDR
+			clientIP := fmt.Sprintf("10.9.0.%d", 2+rand.Intn(253))
+
+			c, err := client.NewPhazeVPNClient(serverAddr, serverPort, vpnNetwork, clientIP)
+			if err != nil {
+				fyne.Do(func() {
+					statusLabel.SetText("Error: " + err.Error())
+					statusDot.FillColor = color.NRGBA{R: 255, G: 0, B: 0, A: 255}
+					statusDot.Refresh()
+					btnConnect.Enable()
+					btnConnect.SetText("⚡ CONNECT")
+				})
+				return
+			}
+
+			if err := c.Connect(); err != nil {
+				fyne.Do(func() {
+					statusLabel.SetText("Connection Failed")
+					statusDot.FillColor = color.NRGBA{R: 255, G: 0, B: 0, A: 255}
+					statusDot.Refresh()
+					btnConnect.Enable()
+					btnConnect.SetText("⚡ CONNECT")
+				})
+				return
+			}
+
+			vpnClient = c
+			isConnected = true
+			connectTime = time.Now()
+
+			fyne.Do(func() {
+				btnConnect.Enable()
+				btnConnect.SetText("🔌 DISCONNECT")
+				btnConnect.Importance = widget.DangerImportance
+				statusLabel.SetText("Connected • Secured")
+				statusDot.FillColor = CyanColor // Green/Cyan
+				statusDot.Refresh()
+				vpnIPLabel.SetText(fmt.Sprintf("VPN IP: %s", clientIP))
+				a.SendNotification(fyne.NewNotification("PhazeVPN", "🔒 Secure Connection Established"))
+			})
+
+			// Stats & Time Loop
+			go func() {
+				ticker := time.NewTicker(1 * time.Second)
+				for isConnected {
+					<-ticker.C
+					duration := time.Since(connectTime)
+					fyne.Do(func() {
+						timeLabel.SetText(fmt.Sprintf("Duration: %02d:%02d:%02d",
+							int(duration.Hours()),
+							int(duration.Minutes())%60,
+							int(duration.Seconds())%60))
+					})
+					// TODO: Hook up real stats from client
+				}
+			}()
+		}()
+	})
+	btnConnect.Importance = widget.HighImportance
+
+	// Settings Button
+	btnSettings := widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
+		dialog.ShowInformation("Settings",
+			"⚙️ PhazeVPN Settings\n\n"+
+				"Kill Switch: ✅ ON\n"+
+				"Auto-Connect: ❌ OFF\n"+
+				"DNS Leak Protection: ✅ ON\n"+
+				"IPv6 Blocking: ✅ ON", w)
+	})
+
+	// --- Layout ---
+	hero := container.NewVBox(
+		layout.NewSpacer(),
+		headerLabel,
+		versionLabel,
+		layout.NewSpacer(),
+		widget.NewCard("", "", container.NewPadded(
+			container.NewVBox(
+				statusContainer,
+				widget.NewSeparator(),
+				ipLabel,
+				vpnIPLabel,
+				timeLabel,
+				widget.NewSeparator(),
+				statsContainer,
+			),
+		)),
+	)
+
+	controls := container.NewVBox(
+		modeLabel,
+		modesContainer,
+		widget.NewSeparator(),
+		widget.NewLabel("Protocol"),
+		protocolSelect,
+		layout.NewSpacer(),
+		btnConnect,
+	)
+
+	content := container.NewBorder(
+		nil,
+		container.NewHBox(layout.NewSpacer(), btnSettings),
+		nil,
+		nil,
+		container.NewVBox(
+			hero,
+			layout.NewSpacer(),
+			controls,
+		),
+	)
+
+	w.SetContent(container.NewPadded(content))
+
+	// Get real IP on startup
+	go func() {
+		resp, err := http.Get("https://api.ipify.org?format=text")
+		if err == nil {
+			defer resp.Body.Close()
+			var ip string
+			fmt.Fscanf(resp.Body, "%s", &ip)
+			fyne.Do(func() {
+				ipLabel.SetText(fmt.Sprintf("Your IP: %s", ip))
+			})
+		}
+	}()
+
+	checkForUpdates(w)
+	w.ShowAndRun()
+}

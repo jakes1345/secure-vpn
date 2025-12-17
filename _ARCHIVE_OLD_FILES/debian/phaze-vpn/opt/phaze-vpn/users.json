@@ -1,0 +1,87 @@
+{
+  "users": {
+    "admin": {
+      "password": "admin123",
+      "role": "admin",
+      "created": "2025-11-19"
+    },
+    "moderator": {
+      "password": "mod123",
+      "role": "moderator",
+      "created": "2025-11-19"
+    },
+    "user": {
+      "password": "user123",
+      "role": "user",
+      "created": "2025-11-19"
+    },
+    "premium": {
+      "password": "premium123",
+      "role": "premium",
+      "created": "2025-11-19"
+    }
+  },
+  "roles": {
+    "admin": {
+      "can_start_stop_vpn": true,
+      "can_edit_server_config": true,
+      "can_manage_clients": true,
+      "can_view_logs": true,
+      "can_view_statistics": true,
+      "can_export_configs": true,
+      "can_backup": true,
+      "can_disconnect_clients": true,
+      "can_revoke_clients": true,
+      "can_add_clients": true,
+      "can_edit_clients": true,
+      "can_start_download_server": true,
+      "can_manage_users": true
+    },
+    "moderator": {
+      "can_start_stop_vpn": false,
+      "can_edit_server_config": false,
+      "can_manage_clients": true,
+      "can_view_logs": true,
+      "can_view_statistics": true,
+      "can_export_configs": true,
+      "can_backup": false,
+      "can_disconnect_clients": true,
+      "can_revoke_clients": false,
+      "can_add_clients": true,
+      "can_edit_clients": true,
+      "can_start_download_server": true,
+      "can_manage_users": false
+    },
+    "premium": {
+      "can_start_stop_vpn": false,
+      "can_edit_server_config": false,
+      "can_manage_clients": false,
+      "can_view_logs": true,
+      "can_view_statistics": true,
+      "can_export_configs": true,
+      "can_backup": false,
+      "can_disconnect_clients": false,
+      "can_revoke_clients": false,
+      "can_add_clients": false,
+      "can_edit_clients": false,
+      "can_start_download_server": false,
+      "can_manage_users": false
+    },
+    "user": {
+      "can_start_stop_vpn": false,
+      "can_edit_server_config": false,
+      "can_manage_clients": false,
+      "can_view_logs": false,
+      "can_view_statistics": true,
+      "can_export_configs": false,
+      "can_backup": false,
+      "can_disconnect_clients": false,
+      "can_revoke_clients": false,
+      "can_add_clients": false,
+      "can_edit_clients": false,
+      "can_start_download_server": false,
+      "can_manage_users": false
+    }
+  }
+}
+

@@ -1,0 +1,54 @@
+# ============================================
+# RUN THESE COMMANDS ON THE VPS TO CHECK MORE
+# ============================================
+
+echo "=== OPENVPN DETAILED STATUS ==="
+systemctl status openvpn@server 2>&1 || systemctl status openvpn 2>&1
+echo ""
+
+echo "=== OPENVPN PROCESSES ==="
+ps aux | grep openvpn | grep -v grep
+echo ""
+
+echo "=== OPENVPN CONFIG FILES ==="
+ls -la /etc/openvpn/*.conf 2>/dev/null || echo "No .conf files in /etc/openvpn/"
+echo ""
+
+echo "=== VPN CONFIG FILES ==="
+ls -la /opt/secure-vpn/config/
+echo ""
+
+echo "=== CERTIFICATES ==="
+ls -la /opt/secure-vpn/certs/ | head -15
+echo ""
+
+echo "=== WEB PORTAL PROCESS ==="
+ps aux | grep -E 'python|flask|app.py' | grep -v grep
+echo ""
+
+echo "=== NGINX CONFIG ==="
+ls -la /etc/nginx/sites-enabled/
+echo ""
+
+echo "=== DNS RESOLUTION TEST ==="
+resolvectl status 2>/dev/null | head -20
+echo "Testing DNS:"
+nslookup google.com 2>/dev/null || echo "DNS test failed"
+echo ""
+
+echo "=== UFW RULES (NUMBERED) ==="
+ufw status numbered
+echo ""
+
+echo "=== IPTABLES FULL ==="
+iptables -L -n -v | head -40
+echo ""
+
+echo "=== CHECK WEB PORTAL FILES ==="
+ls -la /opt/secure-vpn/web-portal/ 2>/dev/null | head -10 || echo "No web-portal directory"
+echo ""
+
+echo "=== CHECK USERS ==="
+cat /opt/secure-vpn/users.json 2>/dev/null | head -20 || echo "No users.json found"
+echo ""
+

@@ -1,0 +1,9 @@
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/phazebrowser.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/edit_cache.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/rebuild_cache.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/list_install_components.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/install.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/install/local.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/install/strip.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/phazebrowser_autogen_timestamp_deps.dir
+/media/jack/Liunux/secure-vpn/phazebrowser-native/build/CMakeFiles/phazebrowser_autogen.dir

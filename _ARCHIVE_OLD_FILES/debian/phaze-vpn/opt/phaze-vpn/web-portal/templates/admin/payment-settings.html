@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Settings - Admin{% endblock %}
+
+{% block content %}
+<h1>💳 Payment Settings</h1>
+<p>Configure payment methods for your VPN service</p>
+
+<div class="card">
+    <div class="card-header">Payment Configuration</div>
+    <div style="padding: 1.5rem;">
+        <form id="paymentSettingsForm">
+            
+            <h3 style="margin-top: 0; color: #4a9eff;">Venmo</h3>
+            <div style="margin-bottom: 1.5rem;">
+                <label>Venmo Username:</label>
+                <input type="text" id="venmo_username" name="venmo_username" 
+                       value="@jakes1328" 
+                       placeholder="@yourusername"
+                       style="width: 100%; padding: 0.5rem; margin-top: 0.5rem;">
+                <small style="color: #888;">Users will send payments to this Venmo account</small>
+            </div>
+            
+            <h3 style="color: #00D632;">CashApp</h3>
+            <div style="margin-bottom: 1.5rem;">
+                <label>CashApp Username/Tag:</label>
+                <input type="text" id="cashapp_username" name="cashapp_username" 
+                       value="$jakes1328"
+                       placeholder="$yourusername"
+                       style="width: 100%; padding: 0.5rem; margin-top: 0.5rem;">
+                <small style="color: #888;">Users will send payments to this CashApp account</small>
+            </div>
+            
+            <h3 style="color: #6366f1;">Stripe (Credit/Debit Cards)</h3>
+            <div style="margin-bottom: 1.5rem;">
+                <label>
+                    <input type="checkbox" id="stripe_enabled" name="stripe_enabled" checked>
+                    Enable Stripe Payments
+                </label>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label>Stripe Publishable Key:</label>
+                <input type="text" id="stripe_publishable_key" name="stripe_publishable_key" 
+                       value="pk_live_51RuicO0VrYrqUK2QujhpNXosg4Y7b9ZXCW3zuT8wVgV2Y1Uvil5mUWvQm3QuD8EMcRYuOkoPwgfetairsnMCNE9J00wy2dNEqk"
+                       placeholder="pk_live_..."
+                       style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; font-family: monospace;">
+                <small style="color: #888;">Safe to share - used on frontend</small>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label>Stripe Secret Key:</label>
+                <input type="password" id="stripe_secret_key" name="stripe_secret_key" 
+                       placeholder="sk_live_..."
+                       style="width: 100%; padding: 0.5rem; margin-top: 0.5rem; font-family: monospace;">
+                <small style="color: #ff4444;">⚠️ KEEP SECRET - Used for backend payment processing</small>
+                <br><small style="color: #888;">Get it from: https://dashboard.stripe.com/apikeys</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                💾 Save Payment Settings
+            </button>
+        </form>
+        
+        <div id="saveResult" style="margin-top: 1rem; display: none;"></div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">ℹ️ Important Notes</div>
+    <div style="padding: 1.5rem;">
+        <ul style="line-height: 2;">
+            <li><strong>Venmo/CashApp:</strong> Payments require manual approval by admin</li>
+            <li><strong>Stripe:</strong> Payments are instant and automatic</li>
+            <li><strong>Secret Key:</strong> Never share this publicly - it's for backend only</li>
+            <li><strong>Webhook:</strong> Setup Stripe webhook at: <code>/payment/stripe/webhook</code></li>
+        </ul>
+    </div>
+</div>
+
+<script>
+document.getElementById('paymentSettingsForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        venmo_username: document.getElementById('venmo_username').value,
+        cashapp_username: document.getElementById('cashapp_username').value,
+        stripe_enabled: document.getElementById('stripe_enabled').checked,
+        stripe_publishable_key: document.getElementById('stripe_publishable_key').value,
+        stripe_secret_key: document.getElementById('stripe_secret_key').value
+    };
+    
+    // Don't send empty secret key if user didn't change it
+    if (!formData.stripe_secret_key) {
+        delete formData.stripe_secret_key;
+    }
+    
+    const btn = e.target.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    
+    try {
+        const response = await fetch('/api/payments/settings', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            document.getElementById('saveResult').innerHTML = `
+                <div class="alert alert-success">
+                    ✅ ${data.message}
+                </div>
+            `;
+            document.getElementById('saveResult').style.display = 'block';
+            showToast('Payment settings saved successfully!', 'success');
+            
+            // Clear password field if saved
+            if (formData.stripe_secret_key) {
+                document.getElementById('stripe_secret_key').value = '';
+            }
+        } else {
+            showToast(data.error || 'Failed to save settings', 'error');
+        }
+    } catch (error) {
+        showToast('Error saving settings', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = '💾 Save Payment Settings';
+    }
+});
+
+// Load current settings
+fetch('/api/payments/settings')
+    .then(r => r.json())
+    .then(data => {
+        if (data.success && data.settings) {
+            const s = data.settings;
+            if (s.venmo_username) document.getElementById('venmo_username').value = s.venmo_username;
+            if (s.cashapp_username) document.getElementById('cashapp_username').value = s.cashapp_username;
+            if (s.stripe_enabled !== undefined) document.getElementById('stripe_enabled').checked = s.stripe_enabled;
+            if (s.stripe_publishable_key) document.getElementById('stripe_publishable_key').value = s.stripe_publishable_key;
+            // Don't load secret key for security
+        }
+    });
+</script>
+{% endblock %}
+

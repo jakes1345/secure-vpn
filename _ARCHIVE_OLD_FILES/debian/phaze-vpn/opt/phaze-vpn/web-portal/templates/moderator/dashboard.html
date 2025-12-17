@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Moderator Dashboard - SecureVPN{% endblock %}
+
+{% block content %}
+<h1>🛡️ Moderator Dashboard</h1>
+<p>Welcome, <strong>{{ username }}</strong>!</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+    <div class="card">
+        <div class="card-header">VPN Clients</div>
+        <div style="font-size: 2rem; font-weight: bold;">{{ clients|length }}</div>
+        <p style="color: #b0b0b0;">Total clients</p>
+        <button class="btn btn-primary" onclick="addClient()" style="margin-top: 1rem;">➕ Add Client</button>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">Support Tickets</div>
+        <div id="ticket-count" style="font-size: 2rem; font-weight: bold;">Loading...</div>
+        <p style="color: #b0b0b0;">Open tickets</p>
+        <a href="/tickets" class="btn btn-primary" style="margin-top: 1rem;">Manage Tickets</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">VPN Clients ({{ clients|length }})</div>
+    <table>
+        <thead>
+            <tr>
+                <th>Client Name</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if clients %}
+            {% for client in clients %}
+            <tr>
+                <td>{{ client.name }}</td>
+                <td>{{ client.created[:10] }}</td>
+                <td>
+                    <a href="/download/{{ client.name }}" class="btn btn-primary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="3" style="text-align: center; color: #b0b0b0;">No clients found</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+// Update ticket count
+function updateTicketCount() {
+    fetch('/api/tickets')
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const openTickets = data.tickets.filter(t => t.status === 'open' || t.status === 'in_progress').length;
+                document.getElementById('ticket-count').textContent = openTickets;
+            }
+        })
+        .catch(err => console.error('Failed to load ticket count:', err));
+}
+
+function addClient() {
+    const name = prompt('Enter client name:');
+    if (!name) return;
+    
+    fetch('/api/clients', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: name})
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + (data.error || 'Failed to create client'));
+        }
+    });
+}
+
+// Update ticket count on load and every 10 seconds
+updateTicketCount();
+setInterval(updateTicketCount, 10000);
+</script>
+{% endblock %}
+
