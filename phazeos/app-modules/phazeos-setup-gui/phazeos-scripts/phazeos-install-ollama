@@ -1,0 +1,116 @@
+#!/bin/bash
+# PhazeOS - Install Ollama (Local AI)
+# Downloads and configures Ollama with Llama 3.2 model
+
+echo "🤖 INSTALLING PHAZEOS AI ASSISTANT..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "⚠️  This script needs root privileges."
+    echo "Please run: sudo phazeos-install-ollama"
+    exit 1
+fi
+
+# Get the actual user
+ACTUAL_USER=${SUDO_USER:-$USER}
+USER_HOME=$(eval echo ~$ACTUAL_USER)
+
+# 1. Install Ollama
+echo "📦 [1/4] Installing Ollama..."
+if command -v ollama &> /dev/null; then
+    echo "✅ Ollama already installed"
+else
+    curl -fsSL https://ollama.com/install.sh | sh
+    if [ $? -eq 0 ]; then
+        echo "✅ Ollama installed successfully"
+    else
+        echo "❌ Failed to install Ollama"
+        exit 1
+    fi
+fi
+
+# 2. Start Ollama service
+echo "🚀 [2/4] Starting Ollama service..."
+systemctl enable ollama
+systemctl start ollama
+sleep 2
+
+if systemctl is-active --quiet ollama; then
+    echo "✅ Ollama service running"
+else
+    echo "⚠️  Ollama service not running, trying manual start..."
+    sudo -u $ACTUAL_USER ollama serve &
+    sleep 3
+fi
+
+# 3. Download Llama 3.2 3B model
+echo "⬇️  [3/4] Downloading Llama 3.2 3B model..."
+echo "   (This may take a few minutes...)"
+sudo -u $ACTUAL_USER ollama pull llama3.2:3b
+
+if [ $? -eq 0 ]; then
+    echo "✅ Model downloaded successfully"
+else
+    echo "❌ Failed to download model"
+    exit 1
+fi
+
+# 4. Create phaze-ai command wrapper
+echo "🔧 [4/4] Creating phaze-ai command..."
+cat > /usr/local/bin/phaze-ai << 'EOF'
+#!/bin/bash
+# PhazeOS AI Assistant
+# Usage: phaze-ai "your question"
+
+if [ -z "$1" ]; then
+    echo "🤖 PhazeAI - Your Local AI Assistant"
+    echo ""
+    echo "Usage:"
+    echo "  phaze-ai \"your question\""
+    echo ""
+    echo "Examples:"
+    echo "  phaze-ai \"How do I install a package?\""
+    echo "  phaze-ai \"What is my IP address?\""
+    echo "  phaze-ai \"Explain quantum computing\""
+    echo ""
+    echo "Interactive mode:"
+    echo "  ollama run llama3.2:3b"
+    exit 0
+fi
+
+# Run query through Ollama
+ollama run llama3.2:3b "$@"
+EOF
+
+chmod +x /usr/local/bin/phaze-ai
+
+# 5. Create Fish alias
+if [ -f "$USER_HOME/.config/fish/config.fish" ]; then
+    if ! grep -q "alias ai=" "$USER_HOME/.config/fish/config.fish"; then
+        echo "alias ai='phaze-ai'" >> "$USER_HOME/.config/fish/config.fish"
+    fi
+fi
+
+# 6. Create Bash alias
+if [ -f "$USER_HOME/.bashrc" ]; then
+    if ! grep -q "alias ai=" "$USER_HOME/.bashrc"; then
+        echo "alias ai='phaze-ai'" >> "$USER_HOME/.bashrc"
+    fi
+fi
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ PHAZEOS AI ASSISTANT INSTALLED!"
+echo ""
+echo "Usage:"
+echo "  phaze-ai \"your question\"    - Ask a question"
+echo "  ai \"your question\"          - Shortcut alias"
+echo "  ollama run llama3.2:3b       - Interactive mode"
+echo ""
+echo "Examples:"
+echo "  phaze-ai \"How do I update my system?\""
+echo "  ai \"What is the meaning of life?\""
+echo "  ai \"Write a Python script to sort a list\""
+echo ""
+echo "Model: Llama 3.2 3B (Runs locally, 100% private)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

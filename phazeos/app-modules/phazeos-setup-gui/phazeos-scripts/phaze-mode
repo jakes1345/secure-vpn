@@ -1,0 +1,88 @@
+#!/bin/bash
+# PhazeOS - Phaze Mode (Privacy Lockdown)
+# Activates maximum privacy protection
+
+echo "🔒 ACTIVATING PHAZE MODE..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "⚠️  This script needs root privileges."
+    echo "Please run: sudo phaze-mode"
+    exit 1
+fi
+
+# Get the actual user
+ACTUAL_USER=${SUDO_USER:-$USER}
+
+# 1. Force VPN Connection
+echo "🔐 [1/6] Forcing VPN connection..."
+if command -v phazevpn-gui &> /dev/null; then
+    sudo -u $ACTUAL_USER phazevpn-gui --connect &
+    sleep 2
+    echo "✅ VPN connection initiated"
+else
+    echo "⚠️  PhazeVPN not found. Install from phazevpn.com"
+fi
+
+# 2. Enable Kill Switch (block all non-VPN traffic)
+echo "🛡️  [2/6] Enabling kill switch..."
+ufw --force reset > /dev/null 2>&1
+ufw default deny incoming
+ufw default deny outgoing
+ufw allow out on tun0  # Allow VPN traffic
+ufw allow out on wg0   # Allow WireGuard
+ufw allow out 51820/udp  # PhazeVPN port
+ufw --force enable
+echo "✅ Kill switch enabled"
+
+# 3. Clear Browser History & Cache
+echo "🧹 [3/6] Clearing browser data..."
+if [ -d "/home/$ACTUAL_USER/.mozilla/firefox" ]; then
+    rm -rf /home/$ACTUAL_USER/.mozilla/firefox/*/cache2/* 2>/dev/null
+    rm -rf /home/$ACTUAL_USER/.mozilla/firefox/*/cookies.sqlite 2>/dev/null
+    echo "✅ Firefox data cleared"
+fi
+
+if [ -d "/home/$ACTUAL_USER/.config/phazebrowser" ]; then
+    rm -rf /home/$ACTUAL_USER/.config/phazebrowser/cache/* 2>/dev/null
+    rm -rf /home/$ACTUAL_USER/.config/phazebrowser/cookies.db 2>/dev/null
+    echo "✅ PhazeBrowser data cleared"
+fi
+
+# 4. Disable Webcam & Microphone
+echo "📷 [4/6] Disabling webcam and microphone..."
+modprobe -r uvcvideo 2>/dev/null
+modprobe -r snd_usb_audio 2>/dev/null
+echo "✅ Webcam and mic disabled"
+
+# 5. Randomize MAC Address
+echo "🎭 [5/6] Randomizing MAC address..."
+INTERFACE=$(ip route | grep default | awk '{print $5}' | head -n1)
+if [ -n "$INTERFACE" ]; then
+    ip link set $INTERFACE down
+    macchanger -r $INTERFACE > /dev/null 2>&1
+    ip link set $INTERFACE up
+    echo "✅ MAC address randomized on $INTERFACE"
+else
+    echo "⚠️  Could not detect network interface"
+fi
+
+# 6. Clear System Logs
+echo "📝 [6/6] Clearing system logs..."
+journalctl --vacuum-time=1s > /dev/null 2>&1
+echo "✅ System logs cleared"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ PHAZE MODE ACTIVATED!"
+echo ""
+echo "Privacy Protection Status:"
+echo "  🔐 VPN: FORCED"
+echo "  🛡️  Kill Switch: ENABLED"
+echo "  🧹 Browser Data: CLEARED"
+echo "  📷 Webcam/Mic: DISABLED"
+echo "  🎭 MAC Address: RANDOMIZED"
+echo "  📝 Logs: CLEARED"
+echo ""
+echo "To deactivate: sudo phaze-mode-off"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

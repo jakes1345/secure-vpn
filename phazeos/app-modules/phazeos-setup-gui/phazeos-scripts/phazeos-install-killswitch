@@ -1,0 +1,251 @@
+#!/bin/bash
+# PhazeOS VPN Kill Switch - System-Level Enforcement
+# Ensures ALL traffic goes through VPN, blocks everything else
+
+echo "🛡️  INSTALLING PHAZEOS VPN KILL SWITCH..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then 
+    echo "⚠️  This script needs root privileges."
+    echo "Please run: sudo phazeos-install-killswitch"
+    exit 1
+fi
+
+# 1. Create VPN Kill Switch Service
+echo "🔧 [1/5] Creating kill switch service..."
+
+cat > /etc/systemd/system/phazevpn-killswitch.service << 'EOF'
+[Unit]
+Description=PhazeVPN Kill Switch - Block non-VPN traffic
+After=network.target
+Before=NetworkManager.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/phazevpn-killswitch-enable
+ExecStop=/usr/local/bin/phazevpn-killswitch-disable
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 2. Create Enable Script
+cat > /usr/local/bin/phazevpn-killswitch-enable << 'EOF'
+#!/bin/bash
+# Enable VPN Kill Switch
+
+echo "🛡️  Enabling VPN Kill Switch..."
+
+# Flush existing rules
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+
+# Default policies: DENY everything
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT DROP
+
+# Allow loopback
+iptables -A INPUT -i lo -j ACCEPT
+iptables -A OUTPUT -o lo -j ACCEPT
+
+# Allow established connections
+iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+
+# Allow VPN connection (WireGuard/OpenVPN)
+iptables -A OUTPUT -p udp --dport 51820 -j ACCEPT  # WireGuard
+iptables -A OUTPUT -p udp --dport 1194 -j ACCEPT   # OpenVPN
+iptables -A OUTPUT -p tcp --dport 1194 -j ACCEPT   # OpenVPN TCP
+
+# Allow DNS to VPN server (before VPN is up)
+iptables -A OUTPUT -p udp --dport 53 -d 1.1.1.1 -j ACCEPT
+iptables -A OUTPUT -p udp --dport 53 -d 8.8.8.8 -j ACCEPT
+
+# Allow traffic on VPN interfaces
+iptables -A INPUT -i tun+ -j ACCEPT
+iptables -A OUTPUT -o tun+ -j ACCEPT
+iptables -A INPUT -i wg+ -j ACCEPT
+iptables -A OUTPUT -o wg+ -j ACCEPT
+
+# Allow LAN traffic (optional - comment out for max security)
+iptables -A INPUT -s 192.168.0.0/16 -j ACCEPT
+iptables -A OUTPUT -d 192.168.0.0/16 -j ACCEPT
+iptables -A INPUT -s 10.0.0.0/8 -j ACCEPT
+iptables -A OUTPUT -d 10.0.0.0/8 -j ACCEPT
+
+# Log dropped packets (for debugging)
+iptables -A OUTPUT -j LOG --log-prefix "VPN-KILLSWITCH-BLOCK: " --log-level 4
+
+echo "✅ VPN Kill Switch enabled - All non-VPN traffic blocked!"
+EOF
+
+# 3. Create Disable Script
+cat > /usr/local/bin/phazevpn-killswitch-disable << 'EOF'
+#!/bin/bash
+# Disable VPN Kill Switch
+
+echo "🔓 Disabling VPN Kill Switch..."
+
+# Flush all rules
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+
+# Reset to default ACCEPT
+iptables -P INPUT ACCEPT
+iptables -P FORWARD ACCEPT
+iptables -P OUTPUT ACCEPT
+
+echo "✅ VPN Kill Switch disabled - Normal traffic allowed"
+EOF
+
+# 4. Create Status Check Script
+cat > /usr/local/bin/phazevpn-killswitch-status << 'EOF'
+#!/bin/bash
+# Check VPN Kill Switch Status
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "       VPN KILL SWITCH STATUS"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+
+# Check if service is running
+if systemctl is-active --quiet phazevpn-killswitch; then
+    echo "🛡️  Kill Switch: ENABLED"
+else
+    echo "⚠️  Kill Switch: DISABLED"
+fi
+
+echo ""
+echo "Firewall Rules:"
+iptables -L -n | head -20
+
+echo ""
+echo "VPN Interfaces:"
+ip addr show | grep -E "tun|wg" || echo "  No VPN interfaces found"
+
+echo ""
+echo "Current IP:"
+CURRENT_IP=$(curl -s --max-time 5 https://api.ipify.org 2>/dev/null)
+if [ -n "$CURRENT_IP" ]; then
+    echo "  $CURRENT_IP"
+else
+    echo "  ⚠️  No internet connection (Kill switch may be blocking)"
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+EOF
+
+# 5. Make scripts executable
+chmod +x /usr/local/bin/phazevpn-killswitch-enable
+chmod +x /usr/local/bin/phazevpn-killswitch-disable
+chmod +x /usr/local/bin/phazevpn-killswitch-status
+
+echo "✅ Scripts created"
+
+# 6. Enable service
+echo "🔧 [2/5] Enabling kill switch service..."
+systemctl daemon-reload
+systemctl enable phazevpn-killswitch.service
+
+# 7. Create NetworkManager dispatcher script (auto-reconnect VPN)
+echo "🔧 [3/5] Creating auto-reconnect script..."
+mkdir -p /etc/NetworkManager/dispatcher.d
+
+cat > /etc/NetworkManager/dispatcher.d/99-phazevpn-reconnect << 'EOF'
+#!/bin/bash
+# Auto-reconnect VPN when network changes
+
+INTERFACE=$1
+STATUS=$2
+
+if [ "$STATUS" = "up" ]; then
+    # Network is up, check if VPN is connected
+    sleep 2
+    if ! ip addr show | grep -q "tun\|wg"; then
+        # VPN not connected, try to reconnect
+        logger "PhazeVPN: Network up, reconnecting VPN..."
+        
+        # Try to connect via GUI client
+        if command -v phazevpn-gui &> /dev/null; then
+            sudo -u $(who | awk '{print $1}' | head -n1) phazevpn-gui --connect &
+        fi
+    fi
+fi
+EOF
+
+chmod +x /etc/NetworkManager/dispatcher.d/99-phazevpn-reconnect
+
+echo "✅ Auto-reconnect configured"
+
+# 8. Create notification script
+echo "🔧 [4/5] Creating notification system..."
+
+cat > /usr/local/bin/phazevpn-notify << 'EOF'
+#!/bin/bash
+# Notify user about VPN status
+
+USER=$(who | awk '{print $1}' | head -n1)
+
+if [ -z "$USER" ]; then
+    exit 0
+fi
+
+export DISPLAY=:0
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$(id -u $USER)/bus"
+
+case "$1" in
+    connected)
+        sudo -u $USER notify-send -u normal -i network-vpn "PhazeVPN Connected" "Your connection is now secure"
+        ;;
+    disconnected)
+        sudo -u $USER notify-send -u critical -i network-vpn-disconnected "PhazeVPN Disconnected" "⚠️ Kill switch is blocking internet!"
+        ;;
+    blocked)
+        sudo -u $USER notify-send -u critical -i dialog-warning "Internet Blocked" "VPN is not connected. Kill switch is active."
+        ;;
+esac
+EOF
+
+chmod +x /usr/local/bin/phazevpn-notify
+
+echo "✅ Notifications configured"
+
+# 9. Create desktop shortcut
+echo "🔧 [5/5] Creating desktop shortcuts..."
+
+cat > /usr/share/applications/phazevpn-killswitch.desktop << 'EOF'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=VPN Kill Switch
+Comment=Manage VPN kill switch
+Exec=konsole -e sudo phazevpn-killswitch-status
+Icon=security-high
+Terminal=false
+Categories=Network;Security;
+EOF
+
+echo "✅ Desktop shortcut created"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "✅ VPN KILL SWITCH INSTALLED!"
+echo ""
+echo "Commands:"
+echo "  sudo systemctl start phazevpn-killswitch   - Enable kill switch"
+echo "  sudo systemctl stop phazevpn-killswitch    - Disable kill switch"
+echo "  phazevpn-killswitch-status                 - Check status"
+echo ""
+echo "⚠️  WARNING: Kill switch is NOT enabled yet!"
+echo "   Connect to VPN first, then enable kill switch."
+echo ""
+echo "To enable on boot:"
+echo "  sudo systemctl enable phazevpn-killswitch"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
