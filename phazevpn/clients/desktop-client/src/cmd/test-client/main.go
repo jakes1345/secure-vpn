@@ -17,8 +17,11 @@ func main() {
 	fmt.Println(strings.Repeat("=", 70))
 	fmt.Println()
 
-	// Hardcoded for testing
-	serverHost := "15.204.11.19"
+	// Use environment variable or default to localhost
+	serverHost := os.Getenv("VPN_SERVER_HOST")
+	if serverHost == "" {
+		serverHost = "localhost"
+	}
 	serverPort := 51820
 	clientIP := "10.9.0.100"
 
@@ -27,7 +30,7 @@ func main() {
 	fmt.Println()
 
 	// Create client
-	c, err := client.NewPhazeVPNClient("15.204.11.19", 51821, "10.9.0.0/24", "10.9.0.2")
+	c, err := client.NewPhazeVPNClient(serverHost, 51821, "10.9.0.0/24", "10.9.0.2")
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}

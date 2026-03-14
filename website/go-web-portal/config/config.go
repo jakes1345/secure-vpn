@@ -137,7 +137,7 @@ func LoadConfig() *Config {
 		SessionLifetime:     getEnvDuration("SESSION_LIFETIME", 8*time.Hour),
 
 		// VPN Server Configuration
-		VpnServerIP:         getEnv("VPN_SERVER_IP", "phazevpn.com"),
+		VpnServerIP:         getEnv("VPN_SERVER_IP", "localhost"),
 		VpnServerPort:       getEnvInt("VPN_SERVER_PORT", 1194),
 
 		// Database Configuration

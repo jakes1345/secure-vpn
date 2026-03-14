@@ -21,7 +21,7 @@ A complete native Android VPN app with:
 
 2. **Open Project**
    - Launch Android Studio
-   - File → Open → Select `/media/jack/Liunux/secure-vpn/android-app`
+   - File → Open → Select `./android-app`
 
 3. **Sync Gradle**
    - Wait for Gradle sync to complete
@@ -39,7 +39,7 @@ A complete native Android VPN app with:
 ### Option 2: Using Command Line
 
 ```bash
-cd /media/jack/Liunux/secure-vpn/android-app
+cd ./android-app
 
 # Build debug APK (for testing)
 ./gradlew assembleDebug
@@ -56,7 +56,7 @@ cd /media/jack/Liunux/secure-vpn/android-app
 
 ```bash
 #!/bin/bash
-cd /media/jack/Liunux/secure-vpn/android-app
+cd ./android-app
 
 # Clean previous builds
 ./gradlew clean
@@ -84,7 +84,7 @@ ls -lh app/build/outputs/apk/release/
 ```bash
 # Upload to VPS
 scp app/build/outputs/apk/release/app-release.apk \
-  root@15.204.11.19:/opt/phazevpn/web-portal/static/downloads/PhazeVPN.apk
+  root@$VPN_SERVER_HOST:/opt/phazevpn/web-portal/static/downloads/PhazeVPN.apk
 
 # Users download from:
 # https://phazevpn.com/download/client/android
@@ -171,7 +171,7 @@ zipalign -v -p 4 \
 2. **Stats are simulated** - Random numbers for demo
    - TODO: Hook up real traffic counters
 
-3. **No server selection** - Hardcoded to 15.204.11.19
+3. **No server selection** - Configured via settings
    - TODO: Add server picker
 
 ## 🔧 Next Steps

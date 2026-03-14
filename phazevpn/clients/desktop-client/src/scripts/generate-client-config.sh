@@ -5,7 +5,7 @@
 set -e
 
 CLIENT_NAME=${1:-"client"}
-SERVER_IP=${2:-"15.204.11.19"}
+SERVER_IP=${2:-${VPN_SERVER_HOST:-"localhost"}}
 SERVER_PORT=${3:-"51821"}
 
 echo "=========================================="

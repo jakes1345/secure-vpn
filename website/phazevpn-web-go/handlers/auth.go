@@ -1,14 +1,38 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 	"phazevpn-web/database"
 	"phazevpn-web/middleware"
 	"phazevpn-web/models"
 )
 
 var templates *template.Template
+
+// startupSecret is generated once at startup as a per-process fallback.
+var startupSecret = mustGenerateRandomToken(32)
+
+func mustGenerateRandomToken(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		log.Fatalf("FATAL: crypto/rand unavailable: %v", err)
+	}
+	return hex.EncodeToString(b)
+}
+
+func generateRandomToken(length int) string {
+	b := make([]byte, length)
+	if _, err := rand.Read(b); err != nil {
+		log.Printf("WARNING: crypto/rand failed, using startup fallback token")
+		return startupSecret
+	}
+	return hex.EncodeToString(b)
+}
 
 func init() {
 	// Create custom functions for templates (Python/Jinja2 compatibility)
@@ -20,10 +44,17 @@ func init() {
 			return "/" + endpoint
 		},
 		"secret": func() string {
-			return "PLACEHOLDER_SECRET"
+			if s := os.Getenv("APP_SECRET"); s != "" {
+				return s
+			}
+			log.Println("WARNING: APP_SECRET not set, using generated fallback")
+			return generateRandomToken(32)
 		},
 		"csrf_token": func() string {
-			return "csrf_token_placeholder"
+			// TODO: For full CSRF protection, store this token in the user's
+			// session and validate it on form submission. This requires a
+			// session management system.
+			return generateRandomToken(32)
 		},
 		"get_flashed_messages": func() []string {
 			return []string{}
@@ -43,13 +74,19 @@ func init() {
 
 // Home renders the home page
 func Home(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "home.html", nil)
+	if err := templates.ExecuteTemplate(w, "home.html", nil); err != nil {
+		log.Printf("Template error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // Login handles login page and authentication
 func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "login.html", nil)
+		if err := templates.ExecuteTemplate(w, "login.html", nil); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -60,17 +97,23 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	// Get user from database
 	user, err := models.GetUserByUsername(database.DB, username)
 	if err != nil {
-		templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		if err := templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
 			"Error": "Invalid username or password",
-		})
+		}); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
 	// Check password
 	if !models.CheckPassword(password, user.PasswordHash) {
-		templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		if err := templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
 			"Error": "Invalid username or password",
-		})
+		}); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -91,7 +134,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 // Signup handles user registration
 func Signup(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "signup.html", nil)
+		if err := templates.ExecuteTemplate(w, "signup.html", nil); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -102,18 +148,24 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 	// Validate input
 	if username == "" || email == "" || password == "" {
-		templates.ExecuteTemplate(w, "signup.html", map[string]interface{}{
+		if err := templates.ExecuteTemplate(w, "signup.html", map[string]interface{}{
 			"Error": "All fields are required",
-		})
+		}); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
 	// Create user
 	user, err := models.CreateUser(database.DB, username, email, password)
 	if err != nil {
-		templates.ExecuteTemplate(w, "signup.html", map[string]interface{}{
+		if err := templates.ExecuteTemplate(w, "signup.html", map[string]interface{}{
 			"Error": "Username or email already exists",
-		})
+		}); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -160,7 +212,10 @@ func Dashboard(w http.ResponseWriter, r *http.Request) {
 		"Subscription": subscription,
 	}
 
-	templates.ExecuteTemplate(w, "dashboard.html", data)
+	if err := templates.ExecuteTemplate(w, "dashboard.html", data); err != nil {
+		log.Printf("Template error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // Profile renders the user profile page
@@ -171,13 +226,19 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 		"Username": username,
 	}
 
-	templates.ExecuteTemplate(w, "profile.html", data)
+	if err := templates.ExecuteTemplate(w, "profile.html", data); err != nil {
+		log.Printf("Template error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // ForgotPassword handles password reset request
 func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "forgot-password.html", nil)
+		if err := templates.ExecuteTemplate(w, "forgot-password.html", nil); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -187,10 +248,12 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	// TODO: Generate reset token and send email
 	_ = email // Use variable to avoid unused error
 
-	templates.ExecuteTemplate(w, "forgot-password.html", map[string]interface{}{
+	if err := templates.ExecuteTemplate(w, "forgot-password.html", map[string]interface{}{
 		"Success": "If that email exists, we've sent a password reset link",
-	})
-
+	}); err != nil {
+		log.Printf("Template error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
 }
 
 // ResetPassword handles password reset
@@ -198,9 +261,12 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "reset-password.html", map[string]interface{}{
+		if err := templates.ExecuteTemplate(w, "reset-password.html", map[string]interface{}{
 			"Token": token,
-		})
+		}); err != nil {
+			log.Printf("Template error: %v", err)
+			http.Error(w, "Internal server error", http.StatusInternalServerError)
+		}
 		return
 	}
 

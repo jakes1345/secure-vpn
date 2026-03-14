@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"phazevpn-web/database"
 	"phazevpn-web/models"
 	"strconv"
@@ -118,10 +120,18 @@ func DownloadConfig(w http.ResponseWriter, r *http.Request) {
 
 // generateOpenVPNConfig generates OpenVPN config
 func generateOpenVPNConfig(client models.Client) string {
-	return `client
+	serverHost := os.Getenv("VPN_SERVER_HOST")
+	if serverHost == "" {
+		serverHost = "localhost"
+	}
+	openvpnEndpoint := os.Getenv("VPN_OPENVPN_ENDPOINT")
+	if openvpnEndpoint == "" {
+		openvpnEndpoint = fmt.Sprintf("%s 1194", serverHost)
+	}
+	return fmt.Sprintf(`client
 dev tun
 proto udp
-remote phazevpn.com 1194
+remote %s
 resolv-retry infinite
 nobind
 persist-key
@@ -146,33 +156,49 @@ verb 3
 <tls-auth>
 # TLS auth key here
 </tls-auth>
-`
+`, openvpnEndpoint)
 }
 
 // generateWireGuardConfig generates WireGuard config
 func generateWireGuardConfig(client models.Client) string {
-	return `[Interface]
+	serverEndpoint := os.Getenv("VPN_SERVER_ENDPOINT")
+	if serverEndpoint == "" {
+		serverEndpoint = "localhost:51820"
+	}
+	dnsServers := os.Getenv("VPN_DNS_SERVERS")
+	if dnsServers == "" {
+		dnsServers = "1.1.1.1"
+	}
+	return fmt.Sprintf(`[Interface]
 PrivateKey = <client-private-key>
 Address = 10.7.0.2/24
-DNS = 1.1.1.1
+DNS = %s
 
 [Peer]
 PublicKey = <server-public-key>
-Endpoint = phazevpn.com:51820
+Endpoint = %s
 AllowedIPs = 0.0.0.0/0
 PersistentKeepalive = 25
-`
+`, dnsServers, serverEndpoint)
 }
 
 // generatePhazeVPNConfig generates PhazeVPN config
 func generatePhazeVPNConfig(client models.Client) string {
-	return `[server]
-address = phazevpn.com
+	serverHost := os.Getenv("VPN_SERVER_HOST")
+	if serverHost == "" {
+		serverHost = "localhost"
+	}
+	dnsServers := os.Getenv("VPN_DNS_SERVERS")
+	if dnsServers == "" {
+		dnsServers = "1.1.1.1,1.0.0.1"
+	}
+	return fmt.Sprintf(`[server]
+address = %s
 port = 51821
 
 [network]
 client_ip = 10.9.0.2/24
-dns = 1.1.1.1,1.0.0.1
+dns = %s
 
 [security]
 encryption = chacha20-poly1305
@@ -182,7 +208,7 @@ hash = sha512
 kill_switch = true
 obfuscation = true
 reconnect = true
-`
+`, serverHost, dnsServers)
 }
 
 // API Handlers

@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -24,8 +25,15 @@ import (
 
 const (
 	CURRENT_VERSION = "2.0.0"
-	API_BASE_URL    = "https://phazevpn.com"
 )
+
+// getAPIBaseURL returns the API base URL from env var or defaults to localhost
+func getAPIBaseURL() string {
+	if u := os.Getenv("VPN_API_URL"); u != "" {
+		return u
+	}
+	return "http://localhost:5000"
+}
 
 // Custom colors
 var (
@@ -68,7 +76,7 @@ func loginToAPI(username, password string) (*LoginResponse, error) {
 	}
 
 	jsonData, _ := json.Marshal(loginData)
-	resp, err := http.Post(API_BASE_URL+"/api/login", "application/json", bytes.NewBuffer(jsonData))
+	resp, err := http.Post(getAPIBaseURL()+"/api/login", "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +96,7 @@ func loginToAPI(username, password string) (*LoginResponse, error) {
 
 // Fetch VPN keys from API
 func fetchVPNKeys(token string) (*VPNKeysResponse, error) {
-	req, _ := http.NewRequest("GET", API_BASE_URL+"/api/vpn/keys", nil)
+	req, _ := http.NewRequest("GET", getAPIBaseURL()+"/api/vpn/keys", nil)
 	req.AddCookie(&http.Cookie{
 		Name:  "session_token",
 		Value: token,
@@ -177,7 +185,7 @@ func showLoginWindow(a fyne.App) (*LoginResponse, error) {
 		// Open browser to signup page
 		// For now just show message
 		dialog.ShowInformation("Sign Up",
-			"Please visit https://phazevpn.com/signup to create an account",
+			"Please visit the server signup page to create an account",
 			loginWin)
 	})
 	signupBtn.Importance = widget.LowImportance

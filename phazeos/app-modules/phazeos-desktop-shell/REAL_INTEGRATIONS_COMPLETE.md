@@ -111,7 +111,7 @@ MemoryUsage: "2.3 GB / 8 GB",  // HARDCODED
 ```
 
 **What it does:**
-- Calls `https://phazevpn.com/api/emails`
+- Calls `${VPN_SERVER_HOST}/api/emails (configurable via VPN_SERVER_HOST env var)`
 - Falls back to local API if VPS unavailable
 - Parses JSON response
 - Forwards send requests to web portal
@@ -162,8 +162,8 @@ phazeos-desktop-shell/
 - `~/.local/share/applications/*.desktop`
 
 ### **Email:**
-- `https://phazevpn.com/api/emails`
-- `https://51.91.121.135/api/emails`
+- `${VPN_SERVER_HOST}/api/emails (configurable via VPN_SERVER_HOST env var)`
+- `${VPN_SERVER_HOST}/api/emails`
 - `http://localhost:5000/api/emails`
 
 ---

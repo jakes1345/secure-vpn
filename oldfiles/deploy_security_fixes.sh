@@ -6,7 +6,7 @@ set -e
 
 VPS_IP="15.204.11.19"
 VPS_USER="root"
-VPS_PASS="PhazeVPN_57dd69f3ec20_2025"
+VPS_PASS="<VPS_PASSWORD_REMOVED>"
 
 echo "========================================"
 echo "🚀 Deploying Critical Security Fixes"

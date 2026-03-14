@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -44,25 +45,41 @@ func GeneratePhazeVPNKey() (string, error) {
 
 // CreateWireGuardConfig creates a WireGuard client config
 func CreateWireGuardConfig(privateKey, serverPublicKey, clientIP string) string {
+	dnsServers := os.Getenv("VPN_DNS_SERVERS")
+	if dnsServers == "" {
+		dnsServers = "1.1.1.1, 1.0.0.1"
+	}
+	serverEndpoint := os.Getenv("VPN_SERVER_ENDPOINT")
+	if serverEndpoint == "" {
+		serverEndpoint = "localhost:51820"
+	}
 	return fmt.Sprintf(`[Interface]
 PrivateKey = %s
 Address = %s/24
-DNS = 1.1.1.1, 1.0.0.1
+DNS = %s
 
 [Peer]
-PublicKey = C0PyFZkqPkyeHPVrnpjYnoG6J+ddhAtr8Et85cwZoXM=
-Endpoint = phazevpn.com:51820
+PublicKey = %s
+Endpoint = %s
 AllowedIPs = 0.0.0.0/0, ::/0
 PersistentKeepalive = 25
-`, privateKey, clientIP)
+`, privateKey, clientIP, dnsServers, serverPublicKey, serverEndpoint)
 }
 
 // CreateOpenVPNConfig creates an OpenVPN client config
 func CreateOpenVPNConfig(username string) string {
+	serverEndpoint := os.Getenv("VPN_SERVER_HOST")
+	if serverEndpoint == "" {
+		serverEndpoint = "localhost"
+	}
+	openvpnEndpoint := os.Getenv("VPN_OPENVPN_ENDPOINT")
+	if openvpnEndpoint == "" {
+		openvpnEndpoint = serverEndpoint + " 1194"
+	}
 	return fmt.Sprintf(`client
 dev tun
 proto udp
-remote phazevpn.com 1194
+remote %s
 resolv-retry infinite
 nobind
 persist-key
@@ -90,16 +107,24 @@ auth-user-pass
 <tls-auth>
 # TLS auth key
 </tls-auth>
-`, username)
+`, openvpnEndpoint, username)
 }
 
 // CreatePhazeVPNConfig creates a PhazeVPN client config
 func CreatePhazeVPNConfig(username, phazeKey string) string {
+	serverHost := os.Getenv("VPN_SERVER_HOST")
+	if serverHost == "" {
+		serverHost = "localhost"
+	}
+	dnsServers := os.Getenv("VPN_DNS_SERVERS")
+	if dnsServers == "" {
+		dnsServers = "1.1.1.1,1.0.0.1"
+	}
 	return fmt.Sprintf(`# PhazeVPN Configuration
 # User: %s
 
 [connection]
-server = phazevpn.com
+server = %s
 port = 51821
 protocol = phaze
 
@@ -114,10 +139,10 @@ forward_secrecy = true
 [privacy]
 leak_protection = true
 kill_switch = true
-dns = 1.1.1.1,1.0.0.1
+dns = %s
 
 [performance]
 mtu = 1420
 keepalive = 25
-`, username, username, phazeKey)
+`, username, serverHost, username, phazeKey, dnsServers)
 }

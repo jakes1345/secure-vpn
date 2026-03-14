@@ -19,7 +19,7 @@ deactivate
 
 # 3. Setup MySQL database
 echo "3. Setting up database..."
-mysql -u root -pJakes1328!@ << 'EOSQL'
+mysql -u root -p<VPS_PASSWORD_REMOVED> << 'EOSQL'
 CREATE DATABASE IF NOT EXISTS phazevpn_db;
 USE phazevpn_db;
 

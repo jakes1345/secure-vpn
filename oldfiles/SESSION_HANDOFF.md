@@ -11,7 +11,7 @@ Building PhazeOS - an all-in-one operating system with gaming, hacking, AI/ML, a
 ```
 IP: 15.204.11.19
 User: root
-Password: PhazeVPN_57dd69f3ec20_2025
+Password: <VPS_PASSWORD_REMOVED>
 Domain: phazevpn.com
 ```
 
@@ -24,7 +24,7 @@ Domain: phazevpn.com
 **Recent Security Fix:**
 - Removed crypto miners (xmrig) and AnyDesk backdoor
 - Blocked hacker IP: 165.154.152.199
-- Changed root password from `Jakes1328!@` to `PhazeVPN_57dd69f3ec20_2025`
+- Changed root password from `<VPS_PASSWORD_REMOVED>` to `<VPS_PASSWORD_REMOVED>`
 
 ---
 
@@ -99,7 +99,7 @@ cd /media/jack/Liunux/secure-vpn
 
 **SSH to VPS:**
 ```bash
-sshpass -p 'PhazeVPN_57dd69f3ec20_2025' ssh root@15.204.11.19
+sshpass -p '<VPS_PASSWORD_REMOVED>' ssh root@15.204.11.19
 ```
 
 ---
@@ -107,9 +107,9 @@ sshpass -p 'PhazeVPN_57dd69f3ec20_2025' ssh root@15.204.11.19
 ## CREDENTIALS
 
 ```
-VPS Root: PhazeVPN_57dd69f3ec20_2025
-MySQL Root: Jakes1328!@
-Local sudo: Jakes1328!@
+VPS Root: <VPS_PASSWORD_REMOVED>
+MySQL Root: <VPS_PASSWORD_REMOVED>
+Local sudo: <VPS_PASSWORD_REMOVED>
 ```
 
 ---
@@ -161,7 +161,7 @@ sudo rm -rf phazeos-build/work phazeos-build/out
 
 **Check VPS services:**
 ```bash
-sshpass -p 'PhazeVPN_57dd69f3ec20_2025' ssh root@15.204.11.19 "systemctl status nginx"
+sshpass -p '<VPS_PASSWORD_REMOVED>' ssh root@15.204.11.19 "systemctl status nginx"
 ```
 
 ---

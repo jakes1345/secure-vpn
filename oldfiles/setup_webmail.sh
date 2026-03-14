@@ -1,7 +1,7 @@
 #!/bin/bash
 # PhazeVPN Webmail Installer (Roundcube)
 
-DB_PASS="Jakes1328!@"
+DB_PASS="<VPS_PASSWORD_REMOVED>"
 DOMAIN="phazevpn.com"
 
 echo "📧 Installing Roundcube Webmail..."

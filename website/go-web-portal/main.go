@@ -8,7 +8,7 @@ import (
 	"secure-vpn/web-portal/config"
 	"secure-vpn/web-portal/models"
 	"secure-vpn/web-portal/utils"
-
+	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -37,7 +37,9 @@ func LoginHandler(c *gin.Context) {
 	if user == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
-	}	// Authentication successful
+	}
+
+	// Authentication successful
 	models.UpdateUserLastLogin(user.Username) // Update last login time (ignoring error for now)
 
 	token, err := utils.GenerateToken(32)
@@ -47,7 +49,7 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-		// In a real app, you would set a secure session cookie or return a JWT
+	// In a real app, you would set a secure session cookie or return a JWT
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"user":    user.Username,
@@ -57,6 +59,7 @@ func LoginHandler(c *gin.Context) {
 }
 
 // SetupRouter sets up the Gin router with all routes.
+
 // GetClientConfigHandler handles requests for client configuration files.
 func GetClientConfigHandler(c *gin.Context) {
 	// --- Placeholder Authentication/Authorization ---
@@ -70,9 +73,20 @@ func GetClientConfigHandler(c *gin.Context) {
 		return
 	}
 
-	// --- Placeholder Validation ---
-	// In a real app, you would validate the protocol and check if the user owns the clientID
-	
+	// Validate protocol
+	allowedProtocols := map[string]bool{"wireguard": true, "openvpn": true, "phazevpn": true}
+	if !allowedProtocols[protocol] {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid protocol. Must be wireguard, openvpn, or phazevpn"})
+		return
+	}
+
+	// Validate username and clientID (no path traversal)
+	if strings.Contains(username, "..") || strings.ContainsAny(username, "/\\") ||
+		strings.Contains(clientID, "..") || strings.ContainsAny(clientID, "/\\") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid characters in username or client_id"})
+		return
+	}
+
 	configData, err := models.GetClientConfig(username, clientID, protocol)
 	if err != nil {
 		log.Printf("Error getting client config for %s/%s: %v", username, clientID, err)

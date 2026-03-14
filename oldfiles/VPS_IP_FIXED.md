@@ -16,7 +16,7 @@ cd /media/jack/Liunux/secure-vpn
 - IP: 15.204.11.19
 - Hostname: vps-80f05cc8.vps.ovh.us
 - Username: root
-- Password: Jakes1328!@
+- Password: <VPS_PASSWORD_REMOVED>
 
 ---
 

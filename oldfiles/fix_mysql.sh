@@ -15,7 +15,7 @@ sleep 5
 # Reset root password
 sudo mysql -u root << 'EOF'
 FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'Jakes1328!@';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '<VPS_PASSWORD_REMOVED>';
 FLUSH PRIVILEGES;
 EOF
 
@@ -28,6 +28,6 @@ sudo systemctl start mysql
 sleep 2
 
 # Create database and tables
-sudo mysql -u root -pJakes1328!@ < /tmp/setup_database.sql
+sudo mysql -u root -p<VPS_PASSWORD_REMOVED> < /tmp/setup_database.sql
 
 echo "✅ MySQL fixed and database created!"

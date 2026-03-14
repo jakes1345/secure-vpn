@@ -3,20 +3,34 @@ package main
 import (
 	"fmt"
 	"net/smtp"
+	"os"
 )
 
-const (
-	SMTP_HOST     = "localhost" // Use local Postfix server
-	SMTP_PORT     = "25"        // Standard SMTP port
-	SMTP_USER     = ""          // No auth needed for local
-	SMTP_PASSWORD = ""          // No auth needed for local
-	FROM_EMAIL    = "noreply@phazevpn.com"
-	FROM_NAME     = "PhazeVPN"
-)
+// getEmailConfig returns SMTP configuration from environment variables
+func getEmailConfig() (host, port, user, password, fromEmail string) {
+	host = os.Getenv("SMTP_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	port = os.Getenv("SMTP_PORT")
+	if port == "" {
+		port = "25"
+	}
+	user = os.Getenv("SMTP_USER")
+	password = os.Getenv("SMTP_PASSWORD")
+	fromEmail = os.Getenv("SMTP_FROM_EMAIL")
+	if fromEmail == "" {
+		fromEmail = "noreply@" + getServerHost()
+	}
+	return
+}
 
-// SendEmail sends an email using local Postfix server
+const FROM_NAME = "PhazeVPN"
+
+// SendEmail sends an email using configured SMTP server
 func SendEmail(to, subject, body string) error {
-	from := fmt.Sprintf("%s <%s>", FROM_NAME, FROM_EMAIL)
+	smtpHost, smtpPort, _, _, fromEmail := getEmailConfig()
+	from := fmt.Sprintf("%s <%s>", FROM_NAME, fromEmail)
 
 	// Setup headers
 	headers := make(map[string]string)
@@ -33,15 +47,15 @@ func SendEmail(to, subject, body string) error {
 	}
 	message += "\r\n" + body
 
-	// Connect to local SMTP server (no auth needed)
-	c, err := smtp.Dial(SMTP_HOST + ":" + SMTP_PORT)
+	// Connect to SMTP server
+	c, err := smtp.Dial(smtpHost + ":" + smtpPort)
 	if err != nil {
 		return err
 	}
 	defer c.Quit()
 
 	// Set sender
-	if err = c.Mail(FROM_EMAIL); err != nil {
+	if err = c.Mail(fromEmail); err != nil {
 		return err
 	}
 
@@ -72,6 +86,7 @@ func SendEmail(to, subject, body string) error {
 // SendVerificationEmail sends account verification email
 func SendVerificationEmail(to, username, token string) error {
 	subject := "Verify Your PhazeVPN Account"
+	baseURL := "https://" + getServerHost()
 
 	body := fmt.Sprintf(`
 <!DOCTYPE html>
@@ -94,21 +109,21 @@ func SendVerificationEmail(to, username, token string) error {
 		<h2>Welcome to PhazeVPN, %s!</h2>
 		<p>Thank you for signing up for PhazeVPN. Please verify your email address to activate your account.</p>
 		<p style="text-align: center;">
-			<a href="https://phazevpn.com/verify?token=%s" class="button">Verify Email Address</a>
+			<a href="%s/verify?token=%s" class="button">Verify Email Address</a>
 		</p>
 		<p>Or copy this link into your browser:</p>
 		<p style="background: #0a0e27; padding: 10px; border-radius: 5px; word-break: break-all;">
-			https://phazevpn.com/verify?token=%s
+			%s/verify?token=%s
 		</p>
 		<p>This link will expire in 24 hours.</p>
 		<div class="footer">
-			<p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+			<p>&copy; 2026 PhazeVPN. Zero Logs. Maximum Privacy.</p>
 			<p>If you didn't create this account, please ignore this email.</p>
 		</div>
 	</div>
 </body>
 </html>
-`, username, token, token)
+`, username, baseURL, token, baseURL, token)
 
 	return SendEmail(to, subject, body)
 }
@@ -116,6 +131,7 @@ func SendVerificationEmail(to, username, token string) error {
 // SendWelcomeEmail sends welcome email after verification
 func SendWelcomeEmail(to, username string) error {
 	subject := "Welcome to PhazeVPN!"
+	baseURL := "https://" + getServerHost()
 
 	body := fmt.Sprintf(`
 <!DOCTYPE html>
@@ -149,7 +165,7 @@ func SendWelcomeEmail(to, username string) error {
 		</div>
 
 		<p style="text-align: center;">
-			<a href="https://phazevpn.com/dashboard" class="button">Go to Dashboard</a>
+			<a href="%s/dashboard" class="button">Go to Dashboard</a>
 		</p>
 
 		<h3>What You Get:</h3>
@@ -161,13 +177,13 @@ func SendWelcomeEmail(to, username string) error {
 		</ul>
 
 		<div class="footer" style="text-align: center; margin-top: 30px; color: #888; font-size: 12px;">
-			<p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
-			<p>Need help? Visit <a href="https://phazevpn.com/contact" style="color: #00d4ff;">our support page</a></p>
+			<p>&copy; 2026 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+			<p>Need help? Visit <a href="%s/contact" style="color: #00d4ff;">our support page</a></p>
 		</div>
 	</div>
 </body>
 </html>
-`, username)
+`, username, baseURL, baseURL)
 
 	return SendEmail(to, subject, body)
 }
@@ -175,6 +191,7 @@ func SendWelcomeEmail(to, username string) error {
 // SendPasswordResetEmail sends password reset email
 func SendPasswordResetEmail(to, username, token string) error {
 	subject := "Reset Your PhazeVPN Password"
+	baseURL := "https://" + getServerHost()
 
 	body := fmt.Sprintf(`
 <!DOCTYPE html>
@@ -198,18 +215,18 @@ func SendPasswordResetEmail(to, username, token string) error {
 		<p>Hi %s,</p>
 		<p>We received a request to reset your PhazeVPN password. Click the button below to create a new password:</p>
 		<p style="text-align: center;">
-			<a href="https://phazevpn.com/reset-password?token=%s" class="button">Reset Password</a>
+			<a href="%s/reset-password?token=%s" class="button">Reset Password</a>
 		</p>
 		<p>Or copy this link into your browser:</p>
 		<p style="background: #0a0e27; padding: 10px; border-radius: 5px; word-break: break-all;">
-			https://phazevpn.com/reset-password?token=%s
+			%s/reset-password?token=%s
 		</p>
 		<div class="warning">
 			<strong>⚠️ Security Notice:</strong>
 			<p>This link will expire in 1 hour. If you didn't request a password reset, please ignore this email and your password will remain unchanged.</p>
 		</div>
 		<div class="footer" style="text-align: center; margin-top: 30px; color: #888; font-size: 12px;">
-			<p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+			<p>&copy; 2026 PhazeVPN. Zero Logs. Maximum Privacy.</p>
 		</div>
 	</div>
 </body>

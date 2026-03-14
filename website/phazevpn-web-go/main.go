@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -98,6 +99,14 @@ func migrateDB() {
 	if err != nil && !strings.Contains(err.Error(), "duplicate column") {
 		log.Println("Migration warning (reset_token_expires):", err)
 	}
+}
+
+// getServerHost returns the VPN server hostname from env var or defaults to localhost
+func getServerHost() string {
+	if h := os.Getenv("VPN_SERVER_HOST"); h != "" {
+		return h
+	}
+	return "localhost"
 }
 
 func main() {
@@ -632,7 +641,7 @@ func apiGetVPNKeysHandler(w http.ResponseWriter, r *http.Request) {
 			"client_ip": fmt.Sprintf("10.9.0.%d", userID+10),
 		},
 		"server": map[string]interface{}{
-			"address":        "phazevpn.com",
+			"address":        getServerHost(),
 			"wireguard_port": 51820,
 			"openvpn_port":   1194,
 			"phazevpn_port":  51821,
