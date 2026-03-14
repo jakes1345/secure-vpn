@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /media/jack/Liunux/secure-vpn/phazevpn-web-go/templates
+cd "$(dirname "$0")/templates"
 
 # Pricing Page
 cat > pricing.html << 'EOF'

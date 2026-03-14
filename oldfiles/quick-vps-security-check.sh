@@ -12,7 +12,7 @@ echo ""
 
 # 1. Check what's running on VPS
 echo "=== SERVICES ON VPS ==="
-sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no root@$VPS << 'EOFVPS'
+sshpass -p "$PASS" ssh -o StrictHostKeyChecking=accept-new root@$VPS << 'EOFVPS'
 echo "📊 Running Services:"
 systemctl list-units --type=service --state=running | grep -E "(phazevpn|nginx|mysql|apache|email|postfix|dovecot)" || echo "No PhazeVPN services found"
 

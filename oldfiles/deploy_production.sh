@@ -26,7 +26,7 @@ VPS_IP="15.204.11.19"  # Correct OVH VPS IP
 LOCAL_DIR="/media/jack/Liunux/secure-vpn"
 REMOTE_DIR="/opt/phazevpn"
 WEB_PORTAL_DIR="$REMOTE_DIR/web-portal"
-SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=10 -o ServerAliveInterval=30"
+SSH_OPTS="-o StrictHostKeyChecking=accept-new -o ConnectTimeout=10 -o ServerAliveInterval=30"
 
 echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${BLUE}║   PhazeVPN Production Deployment Script                   ║${NC}"

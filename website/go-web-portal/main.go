@@ -5,13 +5,24 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"secure-vpn/web-portal/config"
 	"secure-vpn/web-portal/models"
 	"secure-vpn/web-portal/utils"
 
-
 	"github.com/gin-gonic/gin"
 )
+
+// allowedProtocols is the set of valid VPN protocol names accepted by GetClientConfigHandler.
+var allowedProtocols = map[string]bool{
+	"wireguard": true,
+	"openvpn":   true,
+	"phazevpn":  true,
+}
+
+// safeIdentifier matches strings that are safe for use as filename components
+// (alphanumeric, hyphens, underscores only — no path separators or special chars).
+var safeIdentifier = regexp.MustCompile(`^[a-zA-Z0-9_\-]+$`)
 
 // LoginRequest defines the structure for the login request body.
 type LoginRequest struct {
@@ -37,7 +48,8 @@ func LoginHandler(c *gin.Context) {
 	if user == nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid username or password"})
 		return
-	}	// Authentication successful
+	}
+	// Authentication successful
 	models.UpdateUserLastLogin(user.Username) // Update last login time (ignoring error for now)
 
 	token, err := utils.GenerateToken(32)
@@ -47,20 +59,21 @@ func LoginHandler(c *gin.Context) {
 		return
 	}
 
-		// In a real app, you would set a secure session cookie or return a JWT
+	// In a real app, you would set a secure session cookie or return a JWT
 	c.JSON(http.StatusOK, gin.H{
 		"message": "Login successful",
 		"user":    user.Username,
 		"role":    user.Role,
-		"token":   token, // Placeholder token
+		"token":   token,
 	})
 }
 
-// SetupRouter sets up the Gin router with all routes.
 // GetClientConfigHandler handles requests for client configuration files.
 func GetClientConfigHandler(c *gin.Context) {
-	// --- Placeholder Authentication/Authorization ---
-	// In a real app, this would check for a valid session or API key
+	// TODO: implement proper token-based authentication before serving configs.
+	// WARNING: this endpoint is currently unauthenticated.
+	log.Println("WARNING: GetClientConfigHandler called without authentication")
+
 	username := c.Query("username")
 	clientID := c.Query("client_id")
 	protocol := c.Query("protocol")
@@ -70,9 +83,18 @@ func GetClientConfigHandler(c *gin.Context) {
 		return
 	}
 
-	// --- Placeholder Validation ---
-	// In a real app, you would validate the protocol and check if the user owns the clientID
-	
+	// Validate protocol against allowlist to prevent injection.
+	if !allowedProtocols[protocol] {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid protocol; must be one of: wireguard, openvpn, phazevpn"})
+		return
+	}
+
+	// Validate username and client_id to prevent path traversal or header injection.
+	if !safeIdentifier.MatchString(username) || !safeIdentifier.MatchString(clientID) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid characters in username or client_id"})
+		return
+	}
+
 	configData, err := models.GetClientConfig(username, clientID, protocol)
 	if err != nil {
 		log.Printf("Error getting client config for %s/%s: %v", username, clientID, err)
@@ -80,12 +102,14 @@ func GetClientConfigHandler(c *gin.Context) {
 		return
 	}
 
-	// Set headers for file download
+	// Set headers for file download — filename is safe because both components
+	// were validated against safeIdentifier above.
 	filename := fmt.Sprintf("%s_%s.%s", username, clientID, protocol)
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", filename))
 	c.Data(http.StatusOK, "application/octet-stream", configData)
 }
 
+// SetupRouter sets up the Gin router with all routes.
 func SetupRouter() *gin.Engine {
 	router := gin.Default()
 

@@ -1,8 +1,12 @@
 package handlers
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"html/template"
+	"log"
 	"net/http"
+	"os"
 	"phazevpn-web/database"
 	"phazevpn-web/middleware"
 	"phazevpn-web/models"
@@ -10,7 +14,17 @@ import (
 
 var templates *template.Template
 
+// appSecret is loaded once at startup from the APP_SECRET environment variable.
+var appSecret string
+
 func init() {
+	// Load app secret from environment variable; warn loudly if missing.
+	appSecret = os.Getenv("APP_SECRET")
+	if appSecret == "" {
+		log.Println("WARNING: APP_SECRET environment variable is not set. Set it to a strong random value in production.")
+		appSecret = mustGenerateRandomBase64(32)
+	}
+
 	// Create custom functions for templates (Python/Jinja2 compatibility)
 	funcMap := template.FuncMap{
 		"qr_image": func(data string) string {
@@ -19,11 +33,18 @@ func init() {
 		"url_for": func(endpoint string, args ...interface{}) string {
 			return "/" + endpoint
 		},
+		// secret returns the application secret loaded from APP_SECRET env var.
 		"secret": func() string {
-			return "PLACEHOLDER_SECRET"
+			return appSecret
 		},
+		// csrf_token generates a cryptographically random per-request CSRF token.
 		"csrf_token": func() string {
-			return "csrf_token_placeholder"
+			token, err := generateRandomBase64(32)
+			if err != nil {
+				log.Printf("WARNING: failed to generate CSRF token: %v", err)
+				return ""
+			}
+			return token
 		},
 		"get_flashed_messages": func() []string {
 			return []string{}
@@ -41,15 +62,41 @@ func init() {
 	template.Must(templates.ParseGlob("templates/**/*.html"))
 }
 
+// generateRandomBase64 returns n random bytes encoded as URL-safe base64.
+func generateRandomBase64(n int) (string, error) {
+	b := make([]byte, n)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return base64.URLEncoding.EncodeToString(b), nil
+}
+
+// mustGenerateRandomBase64 is like generateRandomBase64 but panics on error.
+func mustGenerateRandomBase64(n int) string {
+	s, err := generateRandomBase64(n)
+	if err != nil {
+		panic("failed to generate random secret: " + err.Error())
+	}
+	return s
+}
+
+// renderTemplate executes a named template and logs any error.
+func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
+	if err := templates.ExecuteTemplate(w, name, data); err != nil {
+		log.Printf("ERROR: failed to render template %q: %v", name, err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+	}
+}
+
 // Home renders the home page
 func Home(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "home.html", nil)
+	renderTemplate(w, "home.html", nil)
 }
 
 // Login handles login page and authentication
 func Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "login.html", nil)
+		renderTemplate(w, "login.html", nil)
 		return
 	}
 
@@ -60,7 +107,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	// Get user from database
 	user, err := models.GetUserByUsername(database.DB, username)
 	if err != nil {
-		templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		renderTemplate(w, "login.html", map[string]interface{}{
 			"Error": "Invalid username or password",
 		})
 		return
@@ -68,7 +115,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	// Check password
 	if !models.CheckPassword(password, user.PasswordHash) {
-		templates.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		renderTemplate(w, "login.html", map[string]interface{}{
 			"Error": "Invalid username or password",
 		})
 		return
@@ -91,7 +138,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 // Signup handles user registration
 func Signup(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "signup.html", nil)
+		renderTemplate(w, "signup.html", nil)
 		return
 	}
 
@@ -102,7 +149,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 	// Validate input
 	if username == "" || email == "" || password == "" {
-		templates.ExecuteTemplate(w, "signup.html", map[string]interface{}{
+		renderTemplate(w, "signup.html", map[string]interface{}{
 			"Error": "All fields are required",
 		})
 		return
@@ -111,7 +158,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	// Create user
 	user, err := models.CreateUser(database.DB, username, email, password)
 	if err != nil {
-		templates.ExecuteTemplate(w, "signup.html", map[string]interface{}{
+		renderTemplate(w, "signup.html", map[string]interface{}{
 			"Error": "Username or email already exists",
 		})
 		return
@@ -160,7 +207,7 @@ func Dashboard(w http.ResponseWriter, r *http.Request) {
 		"Subscription": subscription,
 	}
 
-	templates.ExecuteTemplate(w, "dashboard.html", data)
+	renderTemplate(w, "dashboard.html", data)
 }
 
 // Profile renders the user profile page
@@ -171,13 +218,13 @@ func Profile(w http.ResponseWriter, r *http.Request) {
 		"Username": username,
 	}
 
-	templates.ExecuteTemplate(w, "profile.html", data)
+	renderTemplate(w, "profile.html", data)
 }
 
 // ForgotPassword handles password reset request
 func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "forgot-password.html", nil)
+		renderTemplate(w, "forgot-password.html", nil)
 		return
 	}
 
@@ -187,7 +234,7 @@ func ForgotPassword(w http.ResponseWriter, r *http.Request) {
 	// TODO: Generate reset token and send email
 	_ = email // Use variable to avoid unused error
 
-	templates.ExecuteTemplate(w, "forgot-password.html", map[string]interface{}{
+	renderTemplate(w, "forgot-password.html", map[string]interface{}{
 		"Success": "If that email exists, we've sent a password reset link",
 	})
 
@@ -198,7 +245,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
 
 	if r.Method == "GET" {
-		templates.ExecuteTemplate(w, "reset-password.html", map[string]interface{}{
+		renderTemplate(w, "reset-password.html", map[string]interface{}{
 			"Token": token,
 		})
 		return

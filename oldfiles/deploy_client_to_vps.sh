@@ -13,7 +13,7 @@ fi
 
 VPS_HOST="${VPS_HOST:-phazevpn.com}"
 VPS_USER="${VPS_USER:-root}"
-SSH_OPTS="${SSH_OPTS:--o StrictHostKeyChecking=no -o ConnectTimeout=10}"
+SSH_OPTS="${SSH_OPTS:--o StrictHostKeyChecking=accept-new -o ConnectTimeout=10}"
 DOWNLOAD_DIR="/opt/phazevpn/web-portal/static/downloads"
 
 require_sshpass_if_needed() {
