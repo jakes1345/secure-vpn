@@ -127,7 +127,7 @@ Your GitHub token was also exposed: `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`
 - Generate a new one if needed
 
 ### VPS Password
-Also exposed: `PhazeVPN_57dd69f3ec20_2025`
+Also exposed: `<redacted - rotate immediately>`
 - Consider changing it via your VPS provider
 
 ## 📁 Output Location

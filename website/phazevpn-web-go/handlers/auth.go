@@ -38,6 +38,9 @@ func init() {
 			return appSecret
 		},
 		// csrf_token generates a cryptographically random per-request CSRF token.
+		// NOTE: this token is embedded in the rendered form. For full CSRF protection,
+		// a validation middleware must also verify the submitted token against a
+		// server-side session store on every state-changing POST request.
 		"csrf_token": func() string {
 			token, err := generateRandomBase64(32)
 			if err != nil {

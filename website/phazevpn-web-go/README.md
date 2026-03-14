@@ -29,7 +29,7 @@ The PhazeVPN ecosystem has been completely rebuilt from Python to a high-perform
   - Windows/Mac: Requires cross-compilation with CGO (use `build-gui-clients.sh` variants).
 
 ### **3. Infrastructure**
-- **VPS:** 15.204.11.19
+- **VPS:** phazevpn.com
 - **Web Server:** Nginx (Reverse Proxy to Go port 5000)
 - **VPN Servers:**
   - WireGuard: Port 51820

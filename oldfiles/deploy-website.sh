@@ -9,7 +9,7 @@ echo "=========================================="
 echo ""
 
 VPS="15.204.11.19"
-PASS="PhazeVPN_57dd69f3ec20_2025"
+PASS="${VPS_PASS:-}"
 
 # Step 1: Build Go backend
 echo "📦 Building Go backend..."

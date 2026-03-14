@@ -104,7 +104,7 @@
 - IP: 15.204.11.19
 - Hostname: vps-80f05cc8.vps.ovh.us
 - User: root
-- Password: PhazeVPN_57dd69f3ec20_2025
+- Password: <redacted - rotate immediately>
 
 ---
 

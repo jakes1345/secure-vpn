@@ -103,9 +103,10 @@ func GetClientConfigHandler(c *gin.Context) {
 	}
 
 	// Set headers for file download — filename is safe because both components
-	// were validated against safeIdentifier above.
+	// were validated against safeIdentifier above (alphanumeric, hyphens, underscores).
+	// RFC 6266: use "filename=<quoted-string>" with double quotes.
 	filename := fmt.Sprintf("%s_%s.%s", username, clientID, protocol)
-	c.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%q", filename))
+	c.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	c.Data(http.StatusOK, "application/octet-stream", configData)
 }
 

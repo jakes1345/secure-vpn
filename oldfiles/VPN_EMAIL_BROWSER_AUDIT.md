@@ -131,7 +131,7 @@ What's Missing:
 #### **What We Have:**
 ```
 ✅ SMTP Server: mail.privateemail.com:465
-✅ Credentials: admin@phazevpn.com / TrashyPanther343!@
+✅ Credentials: admin@phazevpn.com / <redacted - rotate immediately>
 ✅ Web Portal Email API: /web-portal/email_api.py
 ✅ Email sending functional
 ✅ Email receiving functional
