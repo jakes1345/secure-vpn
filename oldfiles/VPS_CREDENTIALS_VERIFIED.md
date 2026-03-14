@@ -7,7 +7,7 @@
 Domain:   phazevpn.com
 IP:       15.204.11.19
 User:     root
-Password: PhazeVPN_57dd69f3ec20_2025
+Password: <VPS_PASSWORD_REMOVED>
 ```
 
 ### **Connection Test Results:**
@@ -24,31 +24,31 @@ All active deployment scripts are configured correctly:
 ### ✅ **check_vps_status.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<VPS_PASSWORD_REMOVED>`
 - **Status:** Ready to run
 
 ### ✅ **fix_vps_issues.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<VPS_PASSWORD_REMOVED>`
 - **Status:** Ready to run
 
 ### ✅ **deploy_all_to_vps.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<VPS_PASSWORD_REMOVED>`
 - **Status:** Ready to run
 
 ### ✅ **deploy_client_to_vps.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<VPS_PASSWORD_REMOVED>`
 - **Status:** Ready to run
 
 ### ✅ **upload_iso_to_vps.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<VPS_PASSWORD_REMOVED>`
 - **Status:** Ready to run
 
 ---
@@ -57,9 +57,9 @@ All active deployment scripts are configured correctly:
 
 These are in `_ARCHIVE_OLD_FILES/` and are **NOT** being used:
 
-❌ Old Password 1: `Jakes1328!@` (OVH default)  
+❌ Old Password 1: `<VPS_PASSWORD_REMOVED>` (OVH default)  
 ❌ Old Password 2: `QwX8MJJH3fSE` (previous)  
-❌ Old Password 3: `96EAkcN3Dw4c` (previous)
+❌ Old Password 3: `<PASSWORD_REMOVED>` (previous)
 
 **These are outdated and archived - ignore them.**
 
@@ -73,7 +73,7 @@ These are in `_ARCHIVE_OLD_FILES/` and are **NOT** being used:
 ```bash
 # Test connection manually
 ssh root@phazevpn.com
-# Password: PhazeVPN_57dd69f3ec20_2025
+# Password: <VPS_PASSWORD_REMOVED>
 
 # Or run the diagnostic
 ./check_vps_status.sh

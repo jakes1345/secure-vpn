@@ -18,7 +18,7 @@ ps aux | grep "python3 app.py" | grep email-service | grep -v grep || echo "  �
 
 # 2. Check Database
 echo -e "\n2. DATABASE STATUS:"
-mysql -u root -pJakes1328!@ -e "SHOW DATABASES;" 2>/dev/null | grep -E "phaze|vpn" || echo "  ⚠️  No PhazeVPN database found"
+mysql -u root -p<VPS_PASSWORD_REMOVED> -e "SHOW DATABASES;" 2>/dev/null | grep -E "phaze|vpn" || echo "  ⚠️  No PhazeVPN database found"
 
 # 3. Check Python Environment
 echo -e "\n3. PYTHON ENVIRONMENT:"
@@ -49,7 +49,7 @@ tail -20 /var/log/phazevpn.log 2>/dev/null | grep -i error | tail -3 || echo "  
 
 # 7. Check Database Tables
 echo -e "\n7. DATABASE TABLES:"
-mysql -u root -pJakes1328!@ -e "USE phazevpn_db; SHOW TABLES;" 2>/dev/null || echo "  ⚠️  Cannot access database"
+mysql -u root -p<VPS_PASSWORD_REMOVED> -e "USE phazevpn_db; SHOW TABLES;" 2>/dev/null || echo "  ⚠️  Cannot access database"
 
 echo -e "\n=========================================="
 echo "  Diagnostic Complete"

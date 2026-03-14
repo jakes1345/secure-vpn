@@ -42,7 +42,7 @@ authentication:
   login_url: "https://phazevpn.com/login"
   credentials:
     username: "admin@phazevpn.com"
-    password: "TrashyPanther343!@"
+    password: "<SMTP_PASSWORD_REMOVED>"
   login_flow:
     - "Type $username into the email field"
     - "Type $password into the password field"  

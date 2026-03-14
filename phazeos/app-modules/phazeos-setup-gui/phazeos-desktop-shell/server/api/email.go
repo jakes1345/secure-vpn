@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -34,10 +35,13 @@ func GetEmails(w http.ResponseWriter, r *http.Request) {
 		Timeout: 5 * time.Second,
 	}
 
-	// Try multiple endpoints
+	// Build endpoint from environment variable
+	serverHost := os.Getenv("VPN_SERVER_HOST")
+	if serverHost == "" {
+		serverHost = "localhost:5000"
+	}
 	endpoints := []string{
-		"https://phazevpn.com/api/emails",
-		"https://51.91.121.135/api/emails",
+		"http://" + serverHost + "/api/emails",
 		"http://localhost:5000/api/emails",
 	}
 
@@ -113,15 +117,19 @@ func SendEmail(w http.ResponseWriter, r *http.Request) {
 
 	jsonData, _ := json.Marshal(req)
 
-	endpoints := []string{
-		"https://phazevpn.com/api/send_email",
-		"https://51.91.121.135/api/send_email",
+	serverHost2 := os.Getenv("VPN_SERVER_HOST")
+	if serverHost2 == "" {
+		serverHost2 = "localhost:5000"
+	}
+	endpoints2 := []string{
+		"http://" + serverHost2 + "/api/send_email",
+		"http://localhost:5000/api/send_email",
 	}
 
 	var resp *http.Response
 	var err error
 
-	for _, endpoint := range endpoints {
+	for _, endpoint := range endpoints2 {
 		resp, err = client.Post(endpoint, "application/json", strings.NewReader(string(jsonData)))
 		if err == nil && resp.StatusCode == 200 {
 			break

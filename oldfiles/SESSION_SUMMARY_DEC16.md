@@ -20,7 +20,7 @@ Created:
 
 Integrated: client.go modified, server rebuilt
 Security: 4/10 → 8/10
-VPS: root@15.204.11.19 (password: PhazeVPN_57dd69f3ec20_2025)
+VPS: root@15.204.11.19 (password: <VPS_PASSWORD_REMOVED>)
 ```
 
 ### **2. Go Web Server** ✅
@@ -146,7 +146,7 @@ Files:
 ### **VPN Security Fixes:**
 ```
 VPS: root@15.204.11.19
-Password: PhazeVPN_57dd69f3ec20_2025
+Password: <VPS_PASSWORD_REMOVED>
 
 Deployed:
 - /opt/phazevpn/phazevpn-protocol-go/internal/dns/leak_protection.go

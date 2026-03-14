@@ -22,7 +22,7 @@ sleep 10
 echo "Resetting root password..."
 mysql -u root <<EOF
 FLUSH PRIVILEGES;
-ALTER USER 'root'@'localhost' IDENTIFIED BY 'Jakes1328!@';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '<VPS_PASSWORD_REMOVED>';
 FLUSH PRIVILEGES;
 EOF
 
@@ -42,6 +42,6 @@ systemctl status mysql --no-pager
 
 # Run database setup
 echo "Running database setup..."
-mysql -u root -pJakes1328!@ < /tmp/setup_database.sql
+mysql -u root -p<VPS_PASSWORD_REMOVED> < /tmp/setup_database.sql
 
 echo "✅ MySQL Fix Complete"

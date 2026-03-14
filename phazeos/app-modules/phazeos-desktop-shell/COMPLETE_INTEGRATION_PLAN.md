@@ -32,7 +32,7 @@
 └─ Email Service
    ├─ SMTP: mail.privateemail.com:465
    ├─ User: admin@phazevpn.com
-   ├─ Password: TrashyPanther343!@
+   ├─ Password: <set via SMTP_PASSWORD environment variable>
    └─ API: /web-portal/email_api.py
 ```
 

@@ -6,7 +6,7 @@ echo "📊 PhazeOS VPS Build Status"
 echo "=========================================="
 echo ""
 
-sshpass -p 'PhazeVPN_57dd69f3ec20_2025' ssh root@15.204.11.19 'bash -s' << 'EOFREMOTE'
+sshpass -p '<VPS_PASSWORD_REMOVED>' ssh root@15.204.11.19 'bash -s' << 'EOFREMOTE'
 
 # Check if build is running
 if ps aux | grep -q "[b]uild-robust.sh"; then

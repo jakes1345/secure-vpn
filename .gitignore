@@ -78,3 +78,21 @@ PhazeBrowser-*.tar.*
 *vps*.log
 phazeos-from-scratch/sources/ollama-linux-amd64
 _ARCHIVE_OLD_FILES/phaze-browser.zip
+
+# Credentials & secrets
+*_creds*
+vps_creds*
+!.env.example
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Build artifacts
+phazevpn-web
+phazevpn-web-linux
+phazevpn-server
+
+# Additional OS files
+Thumbs.db

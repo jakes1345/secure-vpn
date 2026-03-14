@@ -67,7 +67,7 @@ echo ""
 # 7. Service Enumeration
 echo "=== 7. RUNNING SERVICES ==="
 echo "Connecting to VPS to check services..."
-sshpass -p 'PhazeVPN_57dd69f3ec20_2025' ssh -o StrictHostKeyChecking=no root@$VPS << 'EOFREMOTE'
+sshpass -p '<VPS_PASSWORD_REMOVED>' ssh -o StrictHostKeyChecking=no root@$VPS << 'EOFREMOTE'
 echo "Active services:"
 systemctl list-units --type=service --state=running | grep -E "(phazevpn|nginx|mysql|email|mail)"
 

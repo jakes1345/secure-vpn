@@ -71,7 +71,7 @@ Let me check what's actually running on your VPS:
 - **File:** `deploy_all_to_vps.sh`
 - **VPS:** `phazevpn.com`
 - **User:** `root`
-- **Password:** `PhazeVPN_57dd69f3ec20_2025`
+- **Password:** `<VPS_PASSWORD_REMOVED>`
 
 ### What It Does:
 1. ✅ Uploads web-portal to `/opt/phazevpn/web-portal/`

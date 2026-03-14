@@ -36,8 +36,8 @@ CREATE TABLE IF NOT EXISTS sessions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Create default admin user (password: Jakes1328!@)
--- Password hash for 'Jakes1328!@' using werkzeug
+-- Create default admin user (password: <VPS_PASSWORD_REMOVED>)
+-- Password hash for '<VPS_PASSWORD_REMOVED>' using werkzeug
 INSERT IGNORE INTO users (username, email, password_hash, subscription_tier) 
 VALUES ('admin', 'admin@phazevpn.com', 'pbkdf2:sha256:260000$randomsalt$hashedpassword', 'premium');
 

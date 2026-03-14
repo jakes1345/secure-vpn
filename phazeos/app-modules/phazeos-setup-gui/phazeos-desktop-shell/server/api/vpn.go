@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -43,9 +44,13 @@ func GetVPNStatus(w http.ResponseWriter, r *http.Request) {
 		status.Connected = true
 
 		// Parse server location from config
+		serverHost := os.Getenv("VPN_SERVER_HOST")
+		if serverHost == "" {
+			serverHost = "localhost"
+		}
 		configData, _ := ioutil.ReadFile("/etc/wireguard/wg0.conf")
-		if strings.Contains(string(configData), "51.91.121.135") {
-			status.Server = "France (OVH)"
+		if strings.Contains(string(configData), serverHost) {
+			status.Server = "PhazeVPN Server (" + serverHost + ")"
 		} else {
 			status.Server = "PhazeVPN Server"
 		}
@@ -59,7 +64,7 @@ func GetVPNStatus(w http.ResponseWriter, r *http.Request) {
 		status.Bandwidth.Upload = bandwidth.Upload
 
 		// Get latency
-		status.Latency = getLatency("51.91.121.135")
+		status.Latency = getLatency(serverHost)
 
 		// Parse uptime from wg output
 		status.Uptime = parseWGUptime(string(output))

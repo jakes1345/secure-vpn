@@ -3,7 +3,7 @@
 
 VPS="15.204.11.19"
 DOMAIN="phazevpn.com"
-PASS="PhazeVPN_57dd69f3ec20_2025"
+PASS="<VPS_PASSWORD_REMOVED>"
 
 echo "=========================================="
 echo "🔒 PhazeVPN VPS Quick Security Check"

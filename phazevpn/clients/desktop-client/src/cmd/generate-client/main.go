@@ -24,7 +24,7 @@ func main() {
 	if *serverHost == "" {
 		fmt.Println("❌ Error: --server is required")
 		fmt.Println("\nUsage:")
-		fmt.Println("  generate-client --server=15.204.11.19 --server-key=<key> [options]")
+		fmt.Println("  generate-client --server=your-server.com --server-key=<key> [options]")
 		fmt.Println("\nOptions:")
 		flag.PrintDefaults()
 		os.Exit(1)

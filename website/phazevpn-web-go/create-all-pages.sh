@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /media/jack/Liunux/secure-vpn/phazevpn-web-go/templates
+cd "$(dirname "$0")/templates"
 
 # Pricing Page
 cat > pricing.html << 'EOF'
@@ -64,7 +64,7 @@ cat > pricing.html << 'EOF'
         </div>
     </main>
     <footer>
-        <p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+        <p>&copy; 2026 PhazeVPN. Zero Logs. Maximum Privacy.</p>
     </footer>
 </body>
 </html>
@@ -113,7 +113,7 @@ cat > faq.html << 'EOF'
         </div>
     </main>
     <footer>
-        <p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+        <p>&copy; 2026 PhazeVPN. Zero Logs. Maximum Privacy.</p>
     </footer>
 </body>
 </html>
@@ -153,7 +153,7 @@ cat > contact.html << 'EOF'
         </div>
     </main>
     <footer>
-        <p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+        <p>&copy; 2026 PhazeVPN. Zero Logs. Maximum Privacy.</p>
     </footer>
 </body>
 </html>
@@ -189,7 +189,7 @@ for page in terms privacy transparency phazebrowser os blog testimonials; do
         </div>
     </main>
     <footer>
-        <p>&copy; 2025 PhazeVPN. Zero Logs. Maximum Privacy.</p>
+        <p>&copy; 2026 PhazeVPN. Zero Logs. Maximum Privacy.</p>
     </footer>
 </body>
 </html>
