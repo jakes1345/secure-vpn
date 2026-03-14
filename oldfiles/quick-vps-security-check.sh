@@ -3,7 +3,7 @@
 
 VPS="15.204.11.19"
 DOMAIN="phazevpn.com"
-PASS="PhazeVPN_57dd69f3ec20_2025"
+PASS="${VPS_PASS:-}"
 
 echo "=========================================="
 echo "🔒 PhazeVPN VPS Quick Security Check"
@@ -12,7 +12,7 @@ echo ""
 
 # 1. Check what's running on VPS
 echo "=== SERVICES ON VPS ==="
-sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no root@$VPS << 'EOFVPS'
+sshpass -p "$PASS" ssh -o StrictHostKeyChecking=accept-new root@$VPS << 'EOFVPS'
 echo "📊 Running Services:"
 systemctl list-units --type=service --state=running | grep -E "(phazevpn|nginx|mysql|apache|email|postfix|dovecot)" || echo "No PhazeVPN services found"
 

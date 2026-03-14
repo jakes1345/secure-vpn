@@ -13,7 +13,7 @@ fi
 VPS_HOST="${VPS_HOST:-phazevpn.com}"
 VPS_IP="${VPS_IP:-$VPS_HOST}"
 VPS_USER="${VPS_USER:-root}"
-SSH_OPTS="${SSH_OPTS:--o StrictHostKeyChecking=no -o ConnectTimeout=10}"
+SSH_OPTS="${SSH_OPTS:--o StrictHostKeyChecking=accept-new -o ConnectTimeout=10}"
 
 MYSQL_ROOT_PASS="${MYSQL_ROOT_PASS:-}"
 if [ -z "$MYSQL_ROOT_PASS" ]; then

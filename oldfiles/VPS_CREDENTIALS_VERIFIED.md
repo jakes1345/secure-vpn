@@ -7,7 +7,7 @@
 Domain:   phazevpn.com
 IP:       15.204.11.19
 User:     root
-Password: PhazeVPN_57dd69f3ec20_2025
+Password: <redacted - rotate immediately>
 ```
 
 ### **Connection Test Results:**
@@ -24,31 +24,31 @@ All active deployment scripts are configured correctly:
 ### ✅ **check_vps_status.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<redacted - rotate immediately>`
 - **Status:** Ready to run
 
 ### ✅ **fix_vps_issues.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<redacted - rotate immediately>`
 - **Status:** Ready to run
 
 ### ✅ **deploy_all_to_vps.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<redacted - rotate immediately>`
 - **Status:** Ready to run
 
 ### ✅ **deploy_client_to_vps.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<redacted - rotate immediately>`
 - **Status:** Ready to run
 
 ### ✅ **upload_iso_to_vps.sh**
 - VPS_IP: `phazevpn.com`
 - VPS_USER: `root`
-- VPS_PASS: `PhazeVPN_57dd69f3ec20_2025`
+- VPS_PASS: `<redacted - rotate immediately>`
 - **Status:** Ready to run
 
 ---
@@ -73,7 +73,7 @@ These are in `_ARCHIVE_OLD_FILES/` and are **NOT** being used:
 ```bash
 # Test connection manually
 ssh root@phazevpn.com
-# Password: PhazeVPN_57dd69f3ec20_2025
+# Password: <redacted - rotate immediately>
 
 # Or run the diagnostic
 ./check_vps_status.sh

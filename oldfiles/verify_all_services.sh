@@ -16,7 +16,7 @@ fi
 VPS_HOST="${VPS_HOST:-phazevpn.com}"
 VPS_IP="${VPS_IP:-$VPS_HOST}"
 VPS_USER="${VPS_USER:-root}"
-SSH_OPTS="${SSH_OPTS:--o StrictHostKeyChecking=no -o ConnectTimeout=10}"
+SSH_OPTS="${SSH_OPTS:--o StrictHostKeyChecking=accept-new -o ConnectTimeout=10}"
 
 require_sshpass_if_needed() {
     if [ -n "${VPS_PASS:-}" ] && ! command -v sshpass &> /dev/null; then

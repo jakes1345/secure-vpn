@@ -55,7 +55,7 @@ dpkg-deb --build $BUILD_DIR $OUTPUT_DEB
 # 6. Upload
 if [ -n "$SSHPASS" ]; then
     echo "☁️  Uploading to VPS..."
-    sshpass -e scp -o StrictHostKeyChecking=no $OUTPUT_DEB root@15.204.11.19:/opt/phaze-vpn/web-portal/static/downloads/
-    sshpass -e ssh -o StrictHostKeyChecking=no root@15.204.11.19 "ln -sf /opt/phaze-vpn/web-portal/static/downloads/$OUTPUT_DEB /opt/phaze-vpn/web-portal/static/downloads/phazebrowser-latest.deb"
+    sshpass -e scp -o StrictHostKeyChecking=accept-new $OUTPUT_DEB root@15.204.11.19:/opt/phaze-vpn/web-portal/static/downloads/
+    sshpass -e ssh -o StrictHostKeyChecking=accept-new root@15.204.11.19 "ln -sf /opt/phaze-vpn/web-portal/static/downloads/$OUTPUT_DEB /opt/phaze-vpn/web-portal/static/downloads/phazebrowser-latest.deb"
     echo "✅ Published to phazevpn.com"
 fi

@@ -12,15 +12,15 @@ echo "🔧 Fixing Nginx configuration..."
 
 # Upload the correct Nginx config
 echo "  Uploading nginx_phazevpn.conf..."
-scp -o StrictHostKeyChecking=no nginx_phazevpn.conf $VPS_USER@$VPS_IP:/etc/nginx/sites-available/phazevpn
+scp -o StrictHostKeyChecking=accept-new nginx_phazevpn.conf $VPS_USER@$VPS_IP:/etc/nginx/sites-available/phazevpn
 
 # Test Nginx config
 echo "  Testing Nginx configuration..."
-ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP "nginx -t"
+ssh -o StrictHostKeyChecking=accept-new $VPS_USER@$VPS_IP "nginx -t"
 
 # Reload Nginx
 echo "  Reloading Nginx..."
-ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP "systemctl reload nginx"
+ssh -o StrictHostKeyChecking=accept-new $VPS_USER@$VPS_IP "systemctl reload nginx"
 
 echo "✅ Nginx fixed!"
 echo ""
@@ -30,7 +30,7 @@ echo "🚀 Continuing deployment..."
 
 # Install fail2ban
 echo "[5/8] Installing fail2ban..."
-ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP << 'EOF'
+ssh -o StrictHostKeyChecking=accept-new $VPS_USER@$VPS_IP << 'EOF'
 apt-get update -qq && apt-get install -y fail2ban -qq
 
 # Create fail2ban jail
@@ -69,7 +69,7 @@ EOF
 
 # Install Redis
 echo "[6/8] Installing Redis..."
-ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP << 'EOF'
+ssh -o StrictHostKeyChecking=accept-new $VPS_USER@$VPS_IP << 'EOF'
 apt-get install -y redis-server -qq
 systemctl enable redis-server
 systemctl start redis-server
@@ -78,7 +78,7 @@ EOF
 
 # Start services
 echo "[7/8] Starting services..."
-ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP << 'EOF'
+ssh -o StrictHostKeyChecking=accept-new $VPS_USER@$VPS_IP << 'EOF'
 # Stop old processes
 pkill -f 'python3 app.py' || true
 sleep 2
@@ -95,7 +95,7 @@ EOF
 
 # Setup backups
 echo "[8/8] Setting up backups..."
-ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP << 'EOF'
+ssh -o StrictHostKeyChecking=accept-new $VPS_USER@$VPS_IP << 'EOF'
 cat > /opt/phazevpn/backup.sh << 'EOFBACKUP'
 #!/bin/bash
 BACKUP_DIR="/opt/phazevpn/backups"
@@ -129,6 +129,6 @@ echo "║   ✅ DEPLOYMENT COMPLETE!                                 ║"
 echo "╚════════════════════════════════════════════════════════════╝"
 echo ""
 echo "Checking service status..."
-ssh -o StrictHostKeyChecking=no $VPS_USER@$VPS_IP "systemctl status phazevpn-web --no-pager -l | head -10"
+ssh -o StrictHostKeyChecking=accept-new $VPS_USER@$VPS_IP "systemctl status phazevpn-web --no-pager -l | head -10"
 echo ""
 echo "✅ All done! Visit https://phazevpn.com to test"

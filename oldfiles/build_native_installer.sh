@@ -75,8 +75,8 @@ echo "============================================"
 # 5. Upload to VPS
 if [ -n "$SSHPASS" ]; then
     echo "4. Uploading to VPS Web Portal..."
-    sshpass -e scp -o StrictHostKeyChecking=no $OUTPUT_DEB root@15.204.11.19:/opt/phaze-vpn/web-portal/static/downloads/
-    sshpass -e ssh -o StrictHostKeyChecking=no root@15.204.11.19 "ln -sf /opt/phaze-vpn/web-portal/static/downloads/$OUTPUT_DEB /opt/phaze-vpn/web-portal/static/downloads/phazevpn-client-latest.deb"
+    sshpass -e scp -o StrictHostKeyChecking=accept-new $OUTPUT_DEB root@15.204.11.19:/opt/phaze-vpn/web-portal/static/downloads/
+    sshpass -e ssh -o StrictHostKeyChecking=accept-new root@15.204.11.19 "ln -sf /opt/phaze-vpn/web-portal/static/downloads/$OUTPUT_DEB /opt/phaze-vpn/web-portal/static/downloads/phazevpn-client-latest.deb"
     echo "✅ Live on phazevpn.com"
 else
     echo "⚠️  SSHPASS not set. Upload skipped."

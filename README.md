@@ -16,7 +16,7 @@ Mobile apps in PhazeVPN project:
 - Android app (`clients/mobile/android-app/`)
 - iOS app (`clients/mobile/ios-app/`)
 
-#### 2. **PhazeOS** (`chazeos/phazeos-from-scratch/`)
+#### 2. **PhazeOS** (`phazeos/phazeos-from-scratch/`)
 - Custom Linux distribution built from scratch
 - Kernel: Linux 6.7.4 with complete driver support
 - Desktop: LabWC (Wayland compositor)
@@ -29,7 +29,7 @@ Mobile apps in PhazeVPN project:
 - Integrated with PhazeVPN
 
 #### 4. **Web Portal** (`website/go-web-portal`)
-- Python Flask application
+- Go (Gin) application
 - User management and authentication
 - VPN configuration generation
 - Admin dashboard
@@ -41,7 +41,7 @@ Mobile apps in PhazeVPN project:
 
 ### Infrastructure
 
-- **VPS**: 15.204.11.19 (phazevpn.com)
+- **VPS**: phazevpn.com
 - **Services**: VPN server, web portal, email
 - **Deployment scripts**: Automated deployment to VPS
 
@@ -72,14 +72,18 @@ Mobile apps in PhazeVPN project:
 
 ```
 secure-vpn/
-├── phazevpn-protocol-go/    # VPN protocol (Go)
-├── phazeos-from-scratch/     # Custom OS build
-├── phazebrowser-gecko/       # Privacy browser
-├── web-portal/               # Python web app
-├── phazevpn-web-go/         # Go web server
-├── android-app/              # Android client
-├── ios-app/                  # iOS client
-└── phazeos-scripts/          # System scripts
+├── phazevpn/                      # VPN protocol and clients (Go)
+│   └── clients/mobile/
+│       ├── android-app/           # Android client
+│       └── ios-app/               # iOS client
+├── phazeos/
+│   └── phazeos-from-scratch/      # Custom OS build
+├── phazebrowser/
+│   └── phazebrowser-gecko/        # Privacy browser (Firefox-based)
+├── website/
+│   ├── go-web-portal/             # Go (Gin) web portal
+│   └── phazevpn-web-go/           # Go web server
+└── oldfiles/                      # Legacy / archived scripts
 ```
 
 ## 🚀 Current Status
@@ -89,7 +93,7 @@ secure-vpn/
 - ✅ Security features (leak protection)
 - ✅ Custom kernel with full driver support
 - ✅ PhazeOS Live ISO (683MB)
-- ✅ Web portal (Python)
+- ✅ Go web portal
 - ✅ Go web server
 - ✅ PhazeBrowser customization
 
@@ -114,15 +118,14 @@ go build -o phazevpn-server cmd/server/main.go
 
 ### Web Portal
 ```bash
-cd web-portal
-pip install -r requirements.txt
-python app.py
+cd website/go-web-portal
+go build -o phazevpn-web .
+./phazevpn-web
 ```
 
 ## 📝 Notes for AI Analysis
 
-- **Split codebase**: Some components on NTFS (`/media/jack/Liunux/secure-vpn/`), build artifacts on ext4
-- **VPS deployment**: Production services running on 15.204.11.19
+- **VPS deployment**: Production services running on phazevpn.com
 - **Build challenges**: NTFS filesystem caused segfaults during compilation, resolved by moving to ext4
 - **Recent work**: Kernel rebuild with ISO9660 support, ISO creation successful
 

@@ -41,7 +41,7 @@ A complete privacy-focused VPN solution with custom OS, browser, and infrastruct
 
 ### Infrastructure
 
-- **VPS**: 15.204.11.19 (phazevpn.com)
+- **VPS**: phazevpn.com
 - **Services**: VPN server, web portal, email
 - **Deployment scripts**: Automated deployment to VPS
 
@@ -122,7 +122,7 @@ python app.py
 ## 📝 Notes for AI Analysis
 
 - **Split codebase**: Some components on NTFS (`/media/jack/Liunux/secure-vpn/`), build artifacts on ext4
-- **VPS deployment**: Production services running on 15.204.11.19
+- **VPS deployment**: Production services running on phazevpn.com
 - **Build challenges**: NTFS filesystem caused segfaults during compilation, resolved by moving to ext4
 - **Recent work**: Kernel rebuild with ISO9660 support, ISO creation successful
 
